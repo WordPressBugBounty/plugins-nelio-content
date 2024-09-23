@@ -1,0 +1,1 @@
+<?php return array('dependencies' => array('nelio-content-components', 'nelio-content-data', 'nelio-content-social-message-editor', 'nelio-content-social-timeline', 'wp-components', 'wp-data', 'wp-dom-ready', 'wp-element', 'wp-i18n'), 'version' => '7cc8d19c3ea3e0e1d86e');
