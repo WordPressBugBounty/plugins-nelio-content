@@ -85,8 +85,8 @@ class Nelio_Content_Reference_Post_Type_Register {
 						'menu_name'          => _x( 'References', 'text', 'nelio-content' ),
 						'all_items'          => _x( 'References', 'text', 'nelio-content' ),
 						'add_new'            => _x( 'Add Reference', 'command', 'nelio-content' ),
-						'add_new_item'       => _x( 'Add Reference', 'text', 'nelio-content' ),
-						'edit_item'          => _x( 'Edit Reference', 'text', 'nelio-content' ),
+						'add_new_item'       => _x( 'Add Reference', 'command', 'nelio-content' ),
+						'edit_item'          => _x( 'Edit Reference', 'command', 'nelio-content' ),
 						'new_item'           => _x( 'New Reference', 'text', 'nelio-content' ),
 						'search_items'       => _x( 'Search References', 'command', 'nelio-content' ),
 						'not_found'          => _x( 'No references found', 'text', 'nelio-content' ),
@@ -195,4 +195,3 @@ class Nelio_Content_Reference_Post_Type_Register {
 	}//end set_user_capabilities()
 
 }//end class
-

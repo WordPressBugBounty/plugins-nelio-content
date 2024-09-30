@@ -16,55 +16,44 @@ defined( 'ABSPATH' ) || exit;
 class Nelio_Content_Roadmap_Page extends Nelio_Content_Abstract_Page {
 
 	public function __construct() {
-
 		parent::__construct(
 			'nelio-content',
 			'nelio-content-roadmap',
 			_x( 'Roadmap', 'text', 'nelio-content' ),
-			nc_can_current_user_manage_plugin()
+			nc_can_current_user_use_plugin()
 		);
 
 	}//end __construct()
 
 	// @Overrides
 	// phpcs:ignore
-	protected function add_page_specific_hooks() {
-		remove_all_filters( 'admin_notices' );
-	}//end add_page_specific_hooks()
+	public function add_page() {
+
+		parent::add_page();
+
+		global $submenu;
+		if ( isset( $submenu['nelio-content'] ) ) {
+			$count = count( $submenu['nelio-content'] );
+			for ( $i = 0; $i < $count; ++$i ) {
+				if ( 'nelio-content-roadmap' === $submenu['nelio-content'][ $i ][2] ) {
+					$submenu['nelio-content'][ $i ][2] = 'https://trello.com/b/xzRPgkP2'; // phpcs:ignore
+					break;
+				}//end if
+			}//end for
+		}//end if
+
+	}//end add_page()
 
 	// @Implements
 	// phpcs:ignore
 	public function enqueue_assets() {
-
-		$screen = get_current_screen();
-		if ( 'nelio-content_page_nelio-content-roadmap' !== $screen->id ) {
-			return;
-		}//end if
-
-		wp_enqueue_style(
-			'nelio-content-roadmap-page',
-			nelio_content()->plugin_url . '/assets/dist/css/roadmap-page.css',
-			array(),
-			nc_get_script_version( 'roadmap-page' )
-		);
-		nc_enqueue_script_with_auto_deps( 'nelio-content-roadmap-page', 'roadmap-page', true );
-
+		// Nothing to be done.
 	}//end enqueue_assets()
 
 	// @Overwrites
 	// phpcs:ignore
 	public function display() {
-		?>
-		<div class="wrap">
-
-			<h2 class="screen-reader-text">
-				<?php echo esc_html_x( 'Nelio Content - Roadmap', 'text', 'nelio-content' ); ?>
-			</h2>
-
-			<iframe id="nc-trello-iframe" src="https://trello.com/b/xzRPgkP2.html"></iframe>
-
-		</div><!-- .wrap -->
-		<?php
+		// Nothing to be done.
 	}//end display()
 
 }//end class

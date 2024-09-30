@@ -176,7 +176,7 @@ class Nelio_Content_Edit_Post_Page {
 		return in_array( $post_type, nelio_content_get_post_types( 'editor' ), true );
 	}//end is_managed_post_type()
 
-	private function enqueue_edit_post_style() {
+	public function enqueue_edit_post_style() {
 		wp_enqueue_style( 'nelio-content-edit-post' );
 
 		// Gutenberg.
@@ -195,7 +195,7 @@ class Nelio_Content_Edit_Post_Page {
 		);
 	}//end enqueue_edit_post_style()
 
-	private function get_init_args() {
+	public function get_init_args() {
 		$post_id     = $this->get_current_post_id();
 		$settings    = Nelio_Content_Settings::instance();
 		$post_helper = Nelio_Content_Post_Helper::instance();

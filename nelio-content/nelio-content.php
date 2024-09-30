@@ -5,7 +5,7 @@
  * Plugin Name:       Nelio Content
  * Plugin URI:        https://neliosoftware.com/content/
  * Description:       Auto-post, schedule, and share your posts on Twitter, Facebook, LinkedIn, Instagram, and other social networks. Save time with useful automations.
- * Version:           3.6.0
+ * Version:           3.6.1
  *
  * Author:            Nelio Software
  * Author URI:        https://neliosoftware.com

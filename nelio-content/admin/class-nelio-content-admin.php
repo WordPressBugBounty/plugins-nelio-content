@@ -65,6 +65,29 @@ class Nelio_Content_Admin {
 			25
 		);
 
+		$settings   = Nelio_Content_Settings::instance();
+		$post_types = $settings->get( 'calendar_post_types', array() );
+
+		foreach ( $post_types as $post_type ) {
+			if ( 'post' === $post_type ) {
+				add_posts_page(
+					_x( 'Calendar', 'text', 'nelio-content' ),
+					_x( 'Calendar', 'text', 'nelio-content' ),
+					$capability,
+					'nelio-content'
+				);
+			} else {
+				add_submenu_page(
+					'edit.php?post_type=' . $post_type,
+					_x( 'Calendar', 'text', 'nelio-content' ),
+					_x( 'Calendar', 'text', 'nelio-content' ),
+					$capability,
+					'nelio-content',
+					null,
+				);
+			}//end if
+		}//end foreach
+
 	}//end create_menu()
 
 	public function add_calendar_in_admin_bar() {

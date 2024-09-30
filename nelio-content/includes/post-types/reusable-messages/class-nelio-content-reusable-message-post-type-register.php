@@ -84,8 +84,8 @@ class Nelio_Content_Reusable_Message_Post_Type_Register {
 						'menu_name'          => _x( 'Reusable Messages', 'text', 'nelio-content' ),
 						'all_items'          => _x( 'Reusable Messages', 'text', 'nelio-content' ),
 						'add_new'            => _x( 'Add Reusable Message', 'command', 'nelio-content' ),
-						'add_new_item'       => _x( 'Add Reusable Message', 'text', 'nelio-content' ),
-						'edit_item'          => _x( 'Edit Reusable Message', 'text', 'nelio-content' ),
+						'add_new_item'       => _x( 'Add Reusable Message', 'command', 'nelio-content' ),
+						'edit_item'          => _x( 'Edit Reusable Message', 'command', 'nelio-content' ),
 						'new_item'           => _x( 'New Reusable Message', 'text', 'nelio-content' ),
 						'search_items'       => _x( 'Search Reusable Messages', 'command', 'nelio-content' ),
 						'not_found'          => _x( 'No reusable messages found', 'text', 'nelio-content' ),
@@ -150,4 +150,3 @@ class Nelio_Content_Reusable_Message_Post_Type_Register {
 	}//end set_user_capabilities()
 
 }//end class
-

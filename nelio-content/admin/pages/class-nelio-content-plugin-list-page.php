@@ -106,6 +106,7 @@ class Nelio_Content_Plugin_List_Page {
 		}//end if
 
 		$settings = array(
+			'isPremiumActive' => is_plugin_active( 'nelio-content-premium/nelio-content-premium.php' ),
 			'isSubscribed'    => nc_is_subscribed(),
 			'cleanNonce'      => wp_create_nonce( 'nelio_content_clean_plugin_data_' . get_current_user_id() ),
 			'deactivationUrl' => $this->get_deactivation_url(),

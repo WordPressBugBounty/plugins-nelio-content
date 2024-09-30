@@ -4,7 +4,7 @@ Donate Link: https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medi
 Tags: social media scheduling, editorial calendar, auto publish, content marketing, social media
 Requires at least: 6.3
 Tested up to: 6.6
-Stable tag: 3.6.0
+Stable tag: 3.6.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -210,6 +210,14 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 3.6.1 (September 26, 2024) =
+* Fix endpoint to download Nelio Content Premium.
+* Fix link to roadmap.
+* Fix Social Timeline in Elementor.
+* Add function to print editorial calendar.
+* Add calendar submenus to managed post types.
+* Prevent future action requests from running if feature is disabled.
 
 = 3.6.0 (September 19, 2024) =
 * Add **Content Board** view to manage WordPress content (premium feature).
@@ -536,5 +544,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.6.0 (September 19, 2024) =
+= 3.6.1 (September 26, 2024) =
 Content Board, Medium Support, Future Actions, and more.

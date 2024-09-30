@@ -281,19 +281,22 @@ class Nelio_Content_Install {
 			return;
 		}//end if
 
+		$calendar_post_types = empty( $options['calendar_post_types'] ) ? array( 'post' ) : $options['calendar_post_types'];
+
 		$options = get_option( 'nelio-content_settings' );
 		$options = wp_parse_args(
 			$options,
 			array(
-				'analytics_post_types'      => empty( $options['use_analytics'] ) ? array() : $options['calendar_post_types'],
-				'comment_post_types'        => $options['calendar_post_types'],
-				'content_board_post_types'  => $options['calendar_post_types'],
-				'editorial_references'      => $options['calendar_post_types'],
-				'efi_post_types'            => empty( $options['use_external_featured_image'] ) ? array() : $options['calendar_post_types'],
-				'notification_post_types'   => empty( $options['use_notifications'] ) ? array() : $options['calendar_post_types'],
-				'quality_check_types'       => $options['calendar_post_types'],
-				'social_post_types'         => $options['calendar_post_types'],
-				'task_post_types'           => $options['calendar_post_types'],
+				'analytics_post_types'      => empty( $options['use_analytics'] ) ? array() : $calendar_post_types,
+				'calendar_post_types'       => $calendar_post_types,
+				'comment_post_types'        => $calendar_post_types,
+				'content_board_post_types'  => $calendar_post_types,
+				'editorial_references'      => $calendar_post_types,
+				'efi_post_types'            => empty( $options['use_external_featured_image'] ) ? array() : $calendar_post_types,
+				'notification_post_types'   => empty( $options['use_notifications'] ) ? array() : $calendar_post_types,
+				'quality_check_types'       => $calendar_post_types,
+				'social_post_types'         => $calendar_post_types,
+				'task_post_types'           => $calendar_post_types,
 				'use_comment_notifications' => ! empty( $options['use_notifications'] ),
 				'use_feeds'                 => ! empty( get_option( 'nc_feeds', array() ) ),
 				'use_task_notifications'    => ! empty( $options['use_notifications'] ),

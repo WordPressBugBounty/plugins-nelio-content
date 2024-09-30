@@ -108,17 +108,17 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		$data = array(
-			'method'    => 'GET',
+			'method'    => 'POST',
 			'timeout'   => apply_filters( 'nelio_content_request_timeout', 30 ),
 			'sslverify' => ! nc_does_api_use_proxy(),
 			'headers'   => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
-				'accept'        => 'application/json',
-				'content-type'  => 'application/json',
+				'accept'       => 'application/json',
+				'content-type' => 'application/json',
 			),
+			'body'      => wp_json_encode( array( 'sites' => array( nc_get_site_id() ) ) ),
 		);
 
-		$url      = nc_get_api_url( '/premium/' . nc_get_site_id() . '/update', 'wp' );
+		$url      = nc_get_api_url( '/premium/update', 'wp' );
 		$response = wp_remote_request( $url, $data );
 
 		if (

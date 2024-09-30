@@ -84,8 +84,8 @@ class Nelio_Content_Task_Preset_Post_Type_Register {
 						'menu_name'          => _x( 'Task Presets', 'text', 'nelio-content' ),
 						'all_items'          => _x( 'Task Presets', 'text', 'nelio-content' ),
 						'add_new'            => _x( 'Add Task Preset', 'command', 'nelio-content' ),
-						'add_new_item'       => _x( 'Add Task Preset', 'text', 'nelio-content' ),
-						'edit_item'          => _x( 'Edit Task Preset', 'text', 'nelio-content' ),
+						'add_new_item'       => _x( 'Add Task Preset', 'command', 'nelio-content' ),
+						'edit_item'          => _x( 'Edit Task Preset', 'command', 'nelio-content' ),
 						'new_item'           => _x( 'New Task Preset', 'text', 'nelio-content' ),
 						'search_items'       => _x( 'Search Task Presets', 'command', 'nelio-content' ),
 						'not_found'          => _x( 'No tasks presets found', 'text', 'nelio-content' ),
@@ -150,4 +150,3 @@ class Nelio_Content_Task_Preset_Post_Type_Register {
 	}//end set_user_capabilities()
 
 }//end class
-

@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 require_once dirname( __FILE__ ) . '/divi.php';
+require_once dirname( __FILE__ ) . '/elementor.php';
 require_once dirname( __FILE__ ) . '/mailpoet.php';
 require_once dirname( __FILE__ ) . '/pagefrog.php';
 require_once dirname( __FILE__ ) . '/the-events-calendar.php';
