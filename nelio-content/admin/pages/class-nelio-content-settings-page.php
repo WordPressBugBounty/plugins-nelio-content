@@ -42,6 +42,7 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 		}//end if
 
 		$settings = Nelio_Content_Settings::instance();
+		wp_enqueue_script( $settings->get_generic_script_name() );
 		wp_enqueue_style( $settings->get_generic_script_name() );
 		wp_enqueue_style(
 			'nelio-content-settings-page',

@@ -4,7 +4,7 @@ Donate Link: https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medi
 Tags: social media scheduling, editorial calendar, auto publish, content marketing, social media
 Requires at least: 6.3
 Tested up to: 6.6
-Stable tag: 3.6.1
+Stable tag: 3.6.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -210,6 +210,17 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 3.6.2 (October 22, 2024) =
+* Add notification bubble on timeline generation.
+* Add featured images in content board posts.
+* Remove status column from content board.
+* Improve performance in calendar and content board views by loading future actions when needed.
+* Fix date in future actions.
+* Fix future action sorting.
+* Fix max length of Bluesky messages.
+* Fix taxonomy selectors in post quick editor.
+* Fix help icons in settings screen.
 
 = 3.6.1 (September 26, 2024) =
 * Fix endpoint to download Nelio Content Premium.
@@ -544,5 +555,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.6.1 (September 26, 2024) =
-Content Board, Medium Support, Future Actions, and more.
+= 3.6.2 (October 22, 2024) =
+Bug fixes and improvements.

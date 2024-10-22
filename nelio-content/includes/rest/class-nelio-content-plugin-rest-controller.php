@@ -115,7 +115,12 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 				'accept'       => 'application/json',
 				'content-type' => 'application/json',
 			),
-			'body'      => wp_json_encode( array( 'sites' => array( nc_get_site_id() ) ) ),
+			'body'      => wp_json_encode(
+				array(
+					'sites'   => array( nc_get_site_id() ),
+					'version' => nelio_content()->plugin_version,
+				)
+			),
 		);
 
 		$url      = nc_get_api_url( '/premium/update', 'wp' );
