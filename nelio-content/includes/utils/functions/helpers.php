@@ -80,7 +80,6 @@ function nc_can_current_user_manage_plugin() {
  * @since 2.0.0
  */
 function nc_can_current_user_use_plugin() {
-
 	if ( ! function_exists( 'current_user_can' ) ) {
 		return false;
 	}//end if
@@ -104,6 +103,11 @@ function nc_can_current_user_use_plugin() {
 		return false;
 	}//end if
 
+	static $can_edit_managed_post_type;
+	if ( is_bool( $can_edit_managed_post_type ) ) {
+		return $can_edit_managed_post_type;
+	}//end if
+
 	$post_types = nelio_content_get_post_types( 'calendar' );
 	foreach ( $post_types as $name ) {
 		$type = get_post_type_object( $name );
@@ -111,10 +115,12 @@ function nc_can_current_user_use_plugin() {
 			continue;
 		}//end if
 		if ( current_user_can( $type->cap->edit_posts ) ) {
+			$can_edit_managed_post_type = true;
 			return true;
 		}//end if
 	}//end foreach
 
+	$can_edit_managed_post_type = false;
 	return false;
 }//end nc_can_current_user_use_plugin()
 

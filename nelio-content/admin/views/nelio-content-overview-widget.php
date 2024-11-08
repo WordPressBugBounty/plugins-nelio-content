@@ -185,7 +185,7 @@ function render_post( \WP_Post $p ) {
 			esc_url( get_permalink( $p ) ),
 			esc_html( $title )
 		);
-	} elseif ( current_user_can( 'edit_post', $p ) ) {
+	} elseif ( current_user_can( 'edit_post', $p->ID ) ) {
 		printf(
 			'<a href="%s">%s</a>',
 			esc_url( get_edit_post_link( $p ) ),
