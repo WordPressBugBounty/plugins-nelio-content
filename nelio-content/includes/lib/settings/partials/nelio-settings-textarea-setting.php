@@ -25,9 +25,8 @@
 	id="<?php echo esc_attr( $id ); ?>"
 	cols="40" rows="4"
 	placeholder="<?php echo esc_attr( $placeholder ); ?>"
-	name="<?php echo esc_attr( $name ); ?>" />
-	<?php echo $value; // phpcs:ignore ?>
-</textarea>
+	name="<?php echo esc_attr( $name ); ?>"
+><?php echo $value; // phpcs:ignore ?></textarea>
 <?php if ( ! empty( $desc ) ) { ?>
 	<div class="setting-help" style="display:none;">
 		<p class="description"><?php // phpcs:ignore

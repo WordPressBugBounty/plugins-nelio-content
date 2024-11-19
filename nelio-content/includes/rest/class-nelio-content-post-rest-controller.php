@@ -188,6 +188,11 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 							'type'              => 'URL',
 							'validate_callback' => nc_is_array( 'nc_is_url' ),
 						),
+						'series'     => array(
+							'required'          => false,
+							'type'              => 'array<record<id, part>>',
+							'validate_callback' => array( $this, 'sanitize_series' ),
+						),
 					),
 				),
 			)
@@ -262,6 +267,11 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 							'required'          => true,
 							'type'              => 'URL',
 							'validate_callback' => nc_is_array( 'nc_is_url' ),
+						),
+						'series'     => array(
+							'required'          => false,
+							'type'              => 'array<record<id, part>>',
+							'validate_callback' => array( $this, 'sanitize_series' ),
 						),
 					),
 				),
@@ -475,6 +485,21 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		);
 	}//end sanitize_taxonomies()
 
+	public function sanitize_series( $series ) {
+		return array_map(
+			function( $values ) {
+				$fix = function( $series_item ) {
+					return array(
+						'id'   => isset( $series_item['id'] ) ? absint( $series_item['id'] ) : 0,
+						'part' => ! empty( $series_item['part'] ) ? absint( $series_item['part'] ) : null,
+					);
+				};
+				return array_values( array_filter( array_map( $fix, $values ) ) );
+			},
+			$series
+		);
+	}//end sanitize_series()
+
 	/**
 	 * Returns the requested post.
 	 *
@@ -588,6 +613,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		$taxonomies = $request->get_param( 'taxonomies' );
 		$taxonomies = ! empty( $taxonomies ) ? $taxonomies : array();
 		$references = $request->get_param( 'references' );
+		$series     = $request->get_param( 'series' );
 
 		/**
 		 * Modifies the title that will be used in the given post.
@@ -637,6 +663,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		$post_helper->update_post_references( $post_id, $references, array() );
+		$post_helper->update_series( $post_id, $series );
 
 		$post = get_post( $post_id ); // phpcs:ignore
 		if ( ! $post || is_wp_error( $post ) ) {
@@ -674,6 +701,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		$taxonomies = $request->get_param( 'taxonomies' );
 		$taxonomies = ! empty( $taxonomies ) ? $taxonomies : array();
 		$references = $request->get_param( 'references' );
+		$series     = $request->get_param( 'series' );
 
 		/**
 		 * Modifies the title that will be used in the given post.
@@ -728,6 +756,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		$post_helper->update_post_references( $post_id, $references, array() );
+		$post_helper->update_series( $post_id, $series );
 
 		$this->trigger_save_post_action( $post_id, false );
 

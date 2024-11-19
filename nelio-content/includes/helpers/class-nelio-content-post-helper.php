@@ -311,6 +311,39 @@ class Nelio_Content_Post_Helper {
 		}//end foreach
 	}//end update_post_references()
 
+	public function update_network_image_ids( $post_id, $network_image_ids ) {
+		if ( empty( $network_image_ids ) ) {
+			delete_post_meta( $post_id, '_nc_network_image_ids' );
+		} else {
+			update_post_meta( $post_id, '_nc_network_image_ids', $network_image_ids );
+		}//end if
+	}//end update_network_image_ids()
+
+	public function update_series( $post_id, $series, $keep_parts = false ) {
+		$settings      = Nelio_Content_Settings::instance();
+		$taxonomy_slug = $settings->get( 'series_taxonomy_slug', 'series' );
+
+		$old_series_terms          = $this->get_series( $post_id );
+		$old_series_term_ids       = wp_list_pluck( $old_series_terms, 'id' );
+		$series_term_ids           = wp_list_pluck( $series, 'id' );
+		$series_term_ids_to_delete = array_diff( $old_series_term_ids, $series_term_ids );
+
+		foreach ( $series_term_ids_to_delete as $series_term_id ) {
+			delete_post_meta( $post_id, "_nc_series_{$series_term_id}_part" );
+		}//end foreach
+
+		wp_set_object_terms( $post_id, $series_term_ids, $taxonomy_slug );
+		foreach ( $series as $series_item ) {
+			if ( isset( $series_item['part'] ) ) {
+				update_post_meta( $post_id, "_nc_series_{$series_item['id']}_part", $series_item['part'] );
+			} else {
+				if ( ! $keep_parts ) {
+					delete_post_meta( $post_id, "_nc_series_{$series_item['id']}_part" );
+				}//end if
+			}//end if
+		}//end foreach
+	}//end update_series()
+
 	/**
 	 * Sets users to follow specified post.
 	 *
@@ -358,8 +391,9 @@ class Nelio_Content_Post_Helper {
 		}//end if
 
 		require_once ABSPATH . '/wp-admin/includes/post.php';
-		$analytics = Nelio_Content_Analytics_Helper::instance();
-		$result    = array(
+		$analytics          = Nelio_Content_Analytics_Helper::instance();
+		$post_status_object = get_post_status_object( $post->post_status );
+		$result             = array(
 			'id'                 => $post->ID,
 			'author'             => absint( $post->post_author ),
 			'authorName'         => $this->get_the_author( $post ),
@@ -373,12 +407,16 @@ class Nelio_Content_Post_Helper {
 			'imageId'            => $this->get_post_thumbnail_id( $post ),
 			'imageSrc'           => $this->get_post_thumbnail( $post, false ),
 			'images'             => $this->get_images( $post ),
+			'networkImageIds'    => $this->get_network_image_ids( $post->ID ),
+			'networkImages'      => $this->get_network_images( $post ),
 			'permalink'          => $this->get_permalink( $post ),
 			'permalinks'         => $this->get_network_permalinks( $post ),
 			'permalinkQueryArgs' => $this->get_permalink_query_args( $post->ID ),
 			'permalinkTemplate'  => get_sample_permalink( $post->ID, $this->get_the_title( $post ), '' )[0],
+			'series'             => $this->get_series( $post->ID ),
 			'statistics'         => $analytics->get_post_stats( $post->ID ),
 			'status'             => $post->post_status,
+			'statusName'         => ! empty( $post_status_object ) ? $post_status_object->label : $post->post_status,
 			'taxonomies'         => $this->get_taxonomies( $post ),
 			'thumbnailSrc'       => $this->get_featured_thumb( $post ),
 			'title'              => $this->get_the_title( $post ),
@@ -425,6 +463,7 @@ class Nelio_Content_Post_Helper {
 				'isAutoShareEnabled' => $this->is_auto_share_enabled( $post->ID ),
 				'networkImages'      => $this->get_network_images( $post ),
 				'references'         => $this->get_external_references( $post ),
+				'series'             => $this->get_series( $post->ID ),
 				'timezone'           => nc_get_timezone(),
 			)
 		);
@@ -896,6 +935,33 @@ class Nelio_Content_Post_Helper {
 
 	}//end get_images()
 
+	private static function get_network_image_ids( $post_id ) {
+		return get_post_meta( $post_id, '_nc_network_image_ids', true );
+	}//end get_network_image_ids()
+
+	public function get_series( $post_id ) {
+		$settings      = Nelio_Content_Settings::instance();
+		$taxonomy_slug = $settings->get( 'series_taxonomy_slug', 'series' );
+		$series        = wp_get_object_terms( $post_id, $taxonomy_slug );
+		if ( empty( $series ) || is_wp_error( $series ) ) {
+			return array();
+		}//end if
+
+		return array_map(
+			function( $series_item ) use ( $post_id ) {
+				$part   = get_post_meta( $post_id, "_nc_series_{$series_item->term_id}_part", true );
+				$result = array(
+					'id' => $series_item->term_id,
+				);
+				if ( ! empty( $part ) ) {
+					$result['part'] = intval( $part );
+				}//end if
+				return $result;
+			},
+			$series,
+		);
+	}//end get_series()
+
 	private function get_url_from_image_tag( $img ) {
 		/**
 		 * HTML attributes that might contain the actual URL in an image tag.
@@ -1043,10 +1109,12 @@ class Nelio_Content_Post_Helper {
 		return $sources;
 	}//end fix_automation_sources()
 
-	private function get_network_images( $post ) {
-		$post_id = $post->ID;
-		$images  = array_map(
-			function( $network ) use ( $post_id ) {
+	public static function get_network_images( $post ) {
+		$post_id           = $post->ID;
+		$network_image_ids = self::get_network_image_ids( $post_id );
+		$images            = array_map(
+			function( $network ) use ( $post_id, $network_image_ids ) {
+				$image = ! empty( $network_image_ids[ $network ] ) ? wp_get_attachment_url( $network_image_ids[ $network ] ) : false;
 				/**
 				 * Sets the exact image that should be used when sharing the post on a certain network.
 				 *
@@ -1058,7 +1126,7 @@ class Nelio_Content_Post_Helper {
 				 *
 				 * @since 1.4.5
 				 */
-				return apply_filters( "nelio_content_{$network}_featured_image", false, $post_id );
+				return apply_filters( "nelio_content_{$network}_featured_image", $image ?? false, $post_id );
 			},
 			self::$networks
 		);

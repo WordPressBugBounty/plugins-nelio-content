@@ -71,6 +71,15 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 	protected $option_name;
 
 	/**
+	 * The default value.
+	 *
+	 * @since  3.7.0
+	 * @access protected
+	 * @var    mixed
+	 */
+	protected $default_value = null;
+
+	/**
 	 * Creates a new instance of this class.
 	 *
 	 * @param string $name The name that identifies this setting.
@@ -125,6 +134,11 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 		);
 
 	}//end register()
+
+	// @Implements
+	public function set_default_value( $value ) { // phpcs:ignore
+		$this->default_value = $value;
+	}//end set_default_value()
 
 	/**
 	 * This function generates a label for this field.

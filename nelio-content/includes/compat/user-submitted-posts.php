@@ -26,6 +26,9 @@ add_action(
 			'usp_new_post',
 			function ( $post ) {
 				add_sync_hooks();
+				/**
+				* This filter is documented in includes/utils/class-nelio-content-post-saving.php
+				*/
 				do_action( 'nelio_content_save_post', $post['id'], true );
 			}
 		);

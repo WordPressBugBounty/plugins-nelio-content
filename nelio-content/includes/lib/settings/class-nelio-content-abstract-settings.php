@@ -477,6 +477,10 @@ abstract class Nelio_Content_Abstract_Settings {
 					$value = $this->get( $setting->get_name() );
 					$setting->set_value( $value );
 
+					if ( isset( $field['default'] ) ) {
+						$setting->set_default_value( $field['default'] );
+					}//end if
+
 					$setting->register(
 						$field['label'],
 						$this->get_settings_page_name(),

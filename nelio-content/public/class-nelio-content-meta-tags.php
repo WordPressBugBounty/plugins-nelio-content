@@ -54,11 +54,12 @@ class Nelio_Content_Meta_Tags {
 			'og:image:height' => $image ? $image['height'] : false,
 		);
 
-		// See https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup link.
+		// See https://developer.x.com/en/docs/x-for-websites/cards/overview/markup link.
 		$twitter = array(
 			'twitter:card'    => 'summary_large_image',
 			'twitter:creator' => false,
 			'twitter:site'    => false,
+			'twitter:image'   => $image ? $image['url'] : false,
 		);
 
 		$metas = array_merge( $open_graph, $twitter );

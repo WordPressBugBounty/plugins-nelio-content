@@ -4,7 +4,7 @@ Donate Link: https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medi
 Tags: social media scheduling, editorial calendar, auto publish, content marketing, social media
 Requires at least: 6.3
 Tested up to: 6.7
-Stable tag: 3.6.3
+Stable tag: 3.7.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -112,6 +112,9 @@ Designed for teams, [Nelio Content Premium](https://neliosoftware.com/content/?u
 * Receive email notifications for status changes and comments.
 * Create reusable task presets for posts.
 * Add editorial comments and references in the calendar.
+* Group your posts into multiple collections or series.
+* Automatically display series information on posts that are a part of a series.
+* Schedule automatic changes to your posts, pages, and other content types.
 * Create social messages for multiple networks simultaneously within the calendar.
 * Re-share old posts in social media with ease.
 * Automatically reschedule tasks when a post is rescheduled.
@@ -123,6 +126,7 @@ Advanced tools for automatic content promotion:
 * Automatically generate timelines to promote posts after publication.
 * Reshare automatically top old content on social networks.
 * Create multiple social automation templates with #hashtags, @handles, and emojis.
+* Select different versions of the same image to share in each social network, each with a different size.
 * Customize publication and resharing frecuency.
 * Configure multiple automation group settings for content-sharing.
 
@@ -210,6 +214,15 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 3.7.0 (November 19, 2024) =
+* Add new feature: post series (premium).
+* Allow changing the publication status settings in Medium profiles.
+* Display custom network images in message preview.
+* Pause message publication on temporary deactivation of Nelio Content.
+* Fix duplicity of post metas regarding followers of a post.
+* Fix error detecting when a post is ready after creating a new post.
+* Fix loading of editor scripts in a post type when only post notifications where active.
 
 = 3.6.3 (November 8, 2024) =
 * Fix usage of `current_user_can` to use an ID instead of `WP_Post`.
@@ -561,5 +574,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.6.3 (November 8, 2024) =
-Bug fixes and improvements.
+= 3.7.0 (November 19, 2024) =
+New features, bug fixes, and improvements.

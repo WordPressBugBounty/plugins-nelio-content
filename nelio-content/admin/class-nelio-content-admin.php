@@ -212,6 +212,7 @@ class Nelio_Content_Admin {
 			'pluginUrl'               => untrailingslashit( nelio_content()->plugin_url ),
 			'premiumStatus'           => $this->get_premium_status(),
 			'subscriptionPlan'        => nc_get_subscription() ? nc_get_subscription() : 'none',
+			'seriesTaxonomySlug'      => $settings->get( 'series_taxonomy_slug', 'series' ),
 		);
 
 		$site_settings = array(
@@ -349,6 +350,7 @@ EOS;
 			'notifications',
 			'quality-checks',
 			'references',
+			'series',
 			'social',
 			'tasks',
 		);

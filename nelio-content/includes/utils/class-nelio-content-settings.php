@@ -102,6 +102,11 @@ class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 						'label'  => _x( 'Task Presets', 'text', 'nelio-content' ),
 						'custom' => true,
 					),
+					array(
+						'name'   => 'series',
+						'label'  => _x( 'Series', 'text', 'nelio-content' ),
+						'fields' => include nelio_content()->plugin_path . '/includes/data/series-settings.php',
+					),
 				),
 			),
 

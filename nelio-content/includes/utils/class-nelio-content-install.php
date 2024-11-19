@@ -49,6 +49,8 @@ class Nelio_Content_Install {
 		add_action( 'init', array( $this, 'allow_ncshare_tags' ) );
 		add_action( 'admin_init', array( $this, 'maybe_update' ), 5 );
 
+		add_action( 'nelio_content_installed', array( $this, 'notify_to_cloud' ), 10, 2 );
+
 		add_action( 'nelio_content_installed', array( $this, 'update_to_nc2' ), 10, 2 );
 		add_action( 'nelio_content_updated', array( $this, 'update_to_nc2' ), 10, 2 );
 
@@ -229,6 +231,33 @@ class Nelio_Content_Install {
 
 	}//end set_proper_permissions()
 
+	public function notify_to_cloud() {
+		if ( ! nc_get_site_id() ) {
+			return false;
+		}//end if
+
+		$data = array(
+			'method'  => 'PUT',
+			'timeout' => apply_filters( 'nelio_content_request_timeout', 30 ),
+			'headers' => array(
+				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'accept'        => 'application/json',
+				'content-type'  => 'application/json',
+			),
+			'body'    => wp_json_encode(
+				array(
+					'url'              => home_url(),
+					'timezone'         => nc_get_timezone(),
+					'language'         => nc_get_language(),
+					'isPluginInactive' => false,
+				)
+			),
+		);
+
+		$url = nc_get_api_url( '/site/' . nc_get_site_id(), 'wp' );
+		wp_remote_request( $url, $data );
+	}//end notify_to_cloud()
+
 	// phpcs:ignore
 	private $did_migrate_to_nc2 = false;
 	public function update_to_nc2( $_, $prev_version ) {
@@ -281,10 +310,9 @@ class Nelio_Content_Install {
 			return;
 		}//end if
 
+		$options             = get_option( 'nelio-content_settings' );
 		$calendar_post_types = empty( $options['calendar_post_types'] ) ? array( 'post' ) : $options['calendar_post_types'];
-
-		$options = get_option( 'nelio-content_settings' );
-		$options = wp_parse_args(
+		$options             = wp_parse_args(
 			$options,
 			array(
 				'analytics_post_types'      => empty( $options['use_analytics'] ) ? array() : $calendar_post_types,

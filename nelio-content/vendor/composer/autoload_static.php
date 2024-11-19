@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc4667141597962db219919d45e4f57d8
+class ComposerStaticInit6ec0828fbfae71dd14a1b1674e2b00c3
 {
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
@@ -77,6 +77,8 @@ class ComposerStaticInitc4667141597962db219919d45e4f57d8
         'Nelio_Content_Reusable_Message_REST_Controller' => __DIR__ . '/../..' . '/includes/post-types/reusable-messages/class-nelio-content-reusable-message-rest-controller.php',
         'Nelio_Content_Roadmap_Page' => __DIR__ . '/../..' . '/admin/pages/class-nelio-content-roadmap-page.php',
         'Nelio_Content_Select_Setting' => __DIR__ . '/../..' . '/includes/lib/settings/class-nelio-content-select-setting.php',
+        'Nelio_Content_Series_Metadata_Setting' => __DIR__ . '/../..' . '/admin/settings/class-nelio-content-series-metadata-setting.php',
+        'Nelio_Content_Series_Post_List_Setting' => __DIR__ . '/../..' . '/admin/settings/class-nelio-content-series-post-list-setting.php',
         'Nelio_Content_Setting' => __DIR__ . '/../..' . '/includes/lib/settings/interface-nelio-content-setting.php',
         'Nelio_Content_Settings' => __DIR__ . '/../..' . '/includes/utils/class-nelio-content-settings.php',
         'Nelio_Content_Settings_Page' => __DIR__ . '/../..' . '/admin/pages/class-nelio-content-settings-page.php',
@@ -91,7 +93,7 @@ class ComposerStaticInitc4667141597962db219919d45e4f57d8
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInitc4667141597962db219919d45e4f57d8::$classMap;
+            $loader->classMap = ComposerStaticInit6ec0828fbfae71dd14a1b1674e2b00c3::$classMap;
 
         }, null, ClassLoader::class);
     }

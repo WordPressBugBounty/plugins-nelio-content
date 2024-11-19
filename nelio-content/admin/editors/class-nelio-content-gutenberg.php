@@ -67,6 +67,8 @@ class Nelio_Content_Gutenberg {
 		$post_helper->update_automation_sources( $post->ID, $values['automationSources'] );
 		$post_helper->update_post_highlights( $post->ID, $values['highlights'] );
 		$post_helper->update_permalink_query_args( $post->ID, $values['permalinkQueryArgs'] );
+		$post_helper->update_network_image_ids( $post->ID, $values['networkImageIds'] );
+		$post_helper->update_series( $post->ID, $values['series'] );
 	}//end save()
 
 	private function load_values( $post_id ) {
@@ -95,6 +97,7 @@ class Nelio_Content_Gutenberg {
 			'efiAlt'              => $efi_alt,
 			'highlights'          => $post_helper->get_post_highlights( $post_id ),
 			'permalinkQueryArgs'  => $post_helper->get_permalink_query_args( $post_id ),
+			'series'              => $post_helper->get_series( $post_id ),
 		);
 	}//end load_values()
 

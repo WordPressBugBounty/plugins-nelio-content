@@ -220,6 +220,26 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 			)
 		);
 
+		register_rest_route(
+			nelio_content()->rest_namespace,
+			'/plugin/deactivate',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'deactivate_plugin' ),
+					'permission_callback' => array( $this, 'check_if_user_can_deactivate_plugin' ),
+					'args'                => array(
+						'_nonce' => array(
+							'required'          => true,
+							'type'              => 'string',
+							'validate_callback' => flow( 'trim', 'nc_is_not_empty' ),
+							'sanitize_callback' => flow( 'sanitize_text_field', 'trim' ),
+						),
+					),
+				),
+			)
+		);
+
 	}//end register_routes()
 
 	public function check_if_user_can_deactivate_plugin() {
@@ -248,6 +268,17 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 
 		$is_paused = $request['paused'];
 
+		$body = array(
+			'url'                        => home_url(),
+			'timezone'                   => nc_get_timezone(),
+			'language'                   => nc_get_language(),
+			'isMessagePublicationPaused' => $is_paused,
+		);
+
+		if ( ! $is_paused ) {
+			$body['isPluginInactive'] = false;
+		}//end if
+
 		// Note. Use error_logs for logging this function or you won't see anything.
 		$data = array(
 			'method'  => 'PUT',
@@ -257,14 +288,7 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
-			'body'    => wp_json_encode(
-				array(
-					'url'                        => home_url(),
-					'timezone'                   => nc_get_timezone(),
-					'language'                   => nc_get_language(),
-					'isMessagePublicationPaused' => $is_paused,
-				)
-			),
+			'body'    => wp_json_encode( $body ),
 		);
 
 		$url    = nc_get_api_url( '/site/' . nc_get_site_id(), 'wp' );
@@ -370,6 +394,51 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 		return new WP_REST_Response( $has_profiles, 200 );
 
 	}//end update_profiles()
+
+	/**
+	 * Deactivates the plugin. It tells our cloud to pause the calendar.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response The response
+	 */
+	public function deactivate_plugin( $request ) {
+
+		$nonce = $request['_nonce'];
+		if ( ! wp_verify_nonce( $nonce, 'nelio_content_clean_plugin_data_' . get_current_user_id() ) ) {
+			return new WP_Error( 'invalid-nonce' );
+		}//end if
+
+		$data = array(
+			'method'  => 'PUT',
+			'timeout' => apply_filters( 'nelio_content_request_timeout', 30 ),
+			'headers' => array(
+				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'accept'        => 'application/json',
+				'content-type'  => 'application/json',
+			),
+			'body'    => wp_json_encode(
+				array(
+					'url'              => home_url(),
+					'timezone'         => nc_get_timezone(),
+					'language'         => nc_get_language(),
+					'isPluginInactive' => true,
+				)
+			),
+		);
+
+		$url    = nc_get_api_url( '/site/' . nc_get_site_id(), 'wp' );
+		$result = wp_remote_request( $url, $data );
+
+		// If the response is an error, leave.
+		$error = nc_extract_error_from_response( $result );
+		if ( ! empty( $error ) ) {
+			return $error;
+		}//end if
+
+		return new WP_REST_Response( true, 200 );
+
+	}//end deactivate_plugin()
 
 	/**
 	 * Cleans the plugin. If a reason is provided, it tells our cloud what happened.

@@ -76,6 +76,8 @@ return array(
     'Nelio_Content_Reusable_Message_REST_Controller' => $baseDir . '/includes/post-types/reusable-messages/class-nelio-content-reusable-message-rest-controller.php',
     'Nelio_Content_Roadmap_Page' => $baseDir . '/admin/pages/class-nelio-content-roadmap-page.php',
     'Nelio_Content_Select_Setting' => $baseDir . '/includes/lib/settings/class-nelio-content-select-setting.php',
+    'Nelio_Content_Series_Metadata_Setting' => $baseDir . '/admin/settings/class-nelio-content-series-metadata-setting.php',
+    'Nelio_Content_Series_Post_List_Setting' => $baseDir . '/admin/settings/class-nelio-content-series-post-list-setting.php',
     'Nelio_Content_Setting' => $baseDir . '/includes/lib/settings/interface-nelio-content-setting.php',
     'Nelio_Content_Settings' => $baseDir . '/includes/utils/class-nelio-content-settings.php',
     'Nelio_Content_Settings_Page' => $baseDir . '/admin/pages/class-nelio-content-settings-page.php',

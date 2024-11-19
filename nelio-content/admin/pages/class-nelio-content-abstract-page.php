@@ -74,7 +74,7 @@ abstract class Nelio_Content_Abstract_Page {
 			$this->title,
 			$capability,
 			$this->slug,
-			$this->get_render_function()
+			$this->get_render_function(),
 		);
 
 	}//end add_page()

@@ -33,6 +33,16 @@ interface Nelio_Content_Setting {
 	public function set_value( $value );
 
 	/**
+	 * Sets the default value of this setting to the given value.
+	 *
+	 * @param object $value The default value of this setting.
+	 *
+	 * @since  3.7.0
+	 * @access public
+	 */
+	public function set_default_value( $value );
+
+	/**
 	 * Adds this setting as a Nelio_Content setting.
 	 *
 	 * @param string $label        The label of the field.

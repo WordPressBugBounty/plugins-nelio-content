@@ -251,18 +251,8 @@ function nc_add_post_meta_once( $post_id, $meta_key, $meta_value ) {
  */
 function nc_update_post_meta_array( $post_id, $meta_key, $meta_values ) {
 
-	$previous_values = get_post_meta( $post_id, $meta_key, false );
-
-	$values_to_delete = array_diff( $previous_values, $meta_values );
-	$values_to_save   = array_diff( $meta_values, $previous_values );
-
-	foreach ( $values_to_delete as $value ) {
-		if ( ! delete_post_meta( $post_id, $meta_key, $value ) ) {
-			return false;
-		}//end if
-	}//end foreach
-
-	foreach ( $values_to_save as $value ) {
+	delete_metadata( 'post', $post_id, $meta_key );
+	foreach ( $meta_values as $value ) {
 		if ( ! add_post_meta( $post_id, $meta_key, $value, false ) ) {
 			return false;
 		}//end if
@@ -437,6 +427,15 @@ function nc_url_to_postid( $url ) {
 	// phpcs:ignore
 	return url_to_postid( $url );
 }//end nc_url_to_postid()
+
+function nc_term_exists( $term, $taxonomy = '', $parent = null ) {
+	if ( function_exists( 'wpcom_vip_term_exists' ) ) {
+		return wpcom_vip_term_exists( $term, $taxonomy, $parent );
+	}//end if
+
+	// phpcs:ignore
+	return term_exists( $term, $taxonomy, $parent );
+}//end nc_term_exists()
 
 /**
  * Returns the list of automation groups.
@@ -654,7 +653,7 @@ function nelio_content_get_post_types( string $context ): array {
 			$context = 'social';
 			break;
 		case 'editor':
-			$context = 'efi,social,comments,future-actions,references,tasks';
+			$context = 'efi,social,comments,future-actions,notifications,references,series,tasks';
 			break;
 	}//end switch
 
@@ -678,6 +677,9 @@ function nelio_content_get_post_types( string $context ): array {
 
 			case 'references':
 				return $s->get( 'reference_post_types' );
+
+			case 'series':
+				return $s->get( 'series_post_types' );
 
 			case 'tasks':
 				return $s->get( 'task_post_types' );

@@ -79,7 +79,7 @@ class Nelio_Content_Text_Area_Setting extends Nelio_Content_Abstract_Setting {
 		$more        = $this->more;
 		$value       = $this->value;
 		$placeholder = $this->placeholder;
-		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-text-area-setting.php';
+		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-textarea-setting.php';
 
 	}//end display()
 

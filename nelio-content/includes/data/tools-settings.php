@@ -91,6 +91,23 @@ return array(
 
 	array(
 		'type'     => 'custom',
+		'name'     => 'series_post_types',
+		'label'    => nc_make_settings_title( esc_html_x( 'Series', 'text', 'nelio-content' ), 'book' ),
+		'instance' => new Nelio_Content_Post_Type_Setting(
+			array(
+				'name' => 'series_post_types',
+				'help' => _x(
+					'Group your posts into collections or series. This is perfect for magazines, newspapers, short-story authors, educators, comic creators, or anyone who produces multiple posts on a similar subject.',
+					'user',
+					'nelio-content'
+				),
+			)
+		),
+		'default'  => array( 'post' ),
+	),
+
+	array(
+		'type'     => 'custom',
 		'name'     => 'reference_post_types',
 		'label'    => nc_make_settings_title( esc_html_x( 'Editorial References', 'text', 'nelio-content' ), 'admin-links' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(
