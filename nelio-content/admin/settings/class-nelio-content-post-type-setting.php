@@ -41,7 +41,7 @@ class Nelio_Content_Post_Type_Setting extends Nelio_Content_Abstract_React_Setti
 	protected function get_field_attributes() {
 		return array_merge(
 			$this->props,
-			array( 'postTypes' => $this->get_post_types() ),
+			array( 'postTypes' => $this->get_post_types() )
 		);
 	}//end get_field_attributes()
 

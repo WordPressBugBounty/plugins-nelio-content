@@ -44,7 +44,7 @@ class Nelio_Content_Help_Page extends Nelio_Content_Abstract_Page {
 							'utm_campaign' => 'support',
 							'utm_content'  => 'overview-help',
 						),
-						'https://neliosoftware.com/content/help/',
+						'https://neliosoftware.com/content/help/'
 					);
 					break;
 				}//end if

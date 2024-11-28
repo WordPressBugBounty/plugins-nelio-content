@@ -83,7 +83,7 @@ class Nelio_Content_Admin {
 					_x( 'Calendar', 'text', 'nelio-content' ),
 					$capability,
 					'nelio-content',
-					null,
+					null
 				);
 			}//end if
 		}//end foreach
@@ -266,7 +266,7 @@ EOS;
 				wp_json_encode( $site_settings ),
 				wp_json_encode( $user_settings ),
 				wp_json_encode( $this->get_task_presets() ),
-				wp_json_encode( get_option( 'nc_feeds', array() ) ),
+				wp_json_encode( get_option( 'nc_feeds', array() ) )
 			)
 		);
 

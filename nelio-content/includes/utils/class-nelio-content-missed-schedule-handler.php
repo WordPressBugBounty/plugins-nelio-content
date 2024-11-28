@@ -37,7 +37,7 @@ class Nelio_Content_Missed_Schedule_Handler {
 
 	public function init() {
 
-		add_action( 'plugins_loaded', array( $this, 'add_hooks_if_handler_is_enabled' ) );
+		add_action( 'init', array( $this, 'add_hooks_if_handler_is_enabled' ) );
 
 	}//end init()
 

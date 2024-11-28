@@ -958,7 +958,7 @@ class Nelio_Content_Post_Helper {
 				}//end if
 				return $result;
 			},
-			$series,
+			$series
 		);
 	}//end get_series()
 

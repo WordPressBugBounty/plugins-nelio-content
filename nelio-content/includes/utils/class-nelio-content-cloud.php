@@ -36,8 +36,7 @@ class Nelio_Content_Cloud {
 
 		add_action( 'nelio_content_save_post', array( $this, 'maybe_sync_post' ) );
 		add_action( 'nelio_content_update_post_in_cloud', array( $this, 'maybe_sync_post' ) );
-		add_action( 'plugins_loaded', array( $this, 'add_hooks_for_updating_post_in_cloud_on_publish' ) );
-
+		add_action( 'init', array( $this, 'add_hooks_for_updating_post_in_cloud_on_publish' ) );
 		add_action( 'init', array( $this, 'maybe_add_profile_status_checker' ) );
 
 	}//end init()

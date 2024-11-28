@@ -44,7 +44,7 @@ class Nelio_Content_Plugin_List_Page {
 					'utm_campaign' => 'free',
 					'utm_content'  => 'upgrade-to-premium',
 				),
-				'https://neliosoftware.com/content/pricing/',
+				'https://neliosoftware.com/content/pricing/'
 			);
 
 			$actions['subscribe'] = sprintf(

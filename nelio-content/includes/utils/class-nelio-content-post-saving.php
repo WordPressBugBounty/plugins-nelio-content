@@ -27,8 +27,8 @@ class Nelio_Content_Post_Saving {
 	}//end instance()
 
 	public function init() {
-		add_action( 'plugins_loaded', array( $this, 'add_hooks_to_trigger_custom_save_post_action' ) );
-		add_action( 'plugins_loaded', array( $this, 'maybe_add_hooks_to_notify_post_followers' ) );
+		add_action( 'init', array( $this, 'add_hooks_to_trigger_custom_save_post_action' ) );
+		add_action( 'init', array( $this, 'maybe_add_hooks_to_notify_post_followers' ) );
 		add_action( 'nelio_content_save_post', array( $this, 'add_default_post_followers' ), 1, 2 );
 	}//end init()
 

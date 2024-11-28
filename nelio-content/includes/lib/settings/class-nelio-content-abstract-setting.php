@@ -130,7 +130,7 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 			array( $this, 'display' ),
 			$page,
 			$section,
-			empty( $label ) ? array( 'class' => 'nelio-content-reduce-top-margin' ) : array(),
+			empty( $label ) ? array( 'class' => 'nelio-content-reduce-top-margin' ) : array()
 		);
 
 	}//end register()

@@ -31,7 +31,7 @@ class Nelio_Content_Notifications {
 
 	public function init() {
 
-		add_action( 'plugins_loaded', array( $this, 'add_hooks_if_notifications_are_enabled' ) );
+		add_action( 'init', array( $this, 'add_hooks_if_notifications_are_enabled' ) );
 		add_action( 'delete_user', array( $this, 'delete_follower' ) );
 
 	}//end init()

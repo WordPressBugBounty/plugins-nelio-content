@@ -96,7 +96,7 @@ abstract class Nelio_Content_Abstract_Settings {
 	 */
 	public function init() {
 
-		add_action( 'plugins_loaded', array( $this, 'set_tabs' ), 1 );
+		add_action( 'init', array( $this, 'set_tabs' ), 1 );
 
 		add_action( 'admin_init', array( $this, 'register' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_assets' ) );
@@ -163,12 +163,12 @@ abstract class Nelio_Content_Abstract_Settings {
 	 * @since  1.0.0
 	 * @access public
 	 *
-	 * @throws Exception If settings are called before `plugins_loaded`.
+	 * @throws Exception If settings are called before `init`.
 	 */
 	public function get( $name, $value = false ) {
 
 		if ( ! $this->are_ready() ) {
-			throw new Exception( _x( 'Nelio Content settings should be used after plugins_loaded.', 'error', 'nelio-content' ) );
+			throw new Exception( 'Nelio Content settings should be used after init.' );
 		}//end if
 
 		$settings = get_option( $this->get_name(), array() );
@@ -311,7 +311,6 @@ abstract class Nelio_Content_Abstract_Settings {
 			);
 
 			$field = wp_parse_args( $field, $defaults );
-
 			switch ( $field['type'] ) {
 
 				case 'section':

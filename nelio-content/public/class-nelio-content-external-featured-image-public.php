@@ -76,16 +76,14 @@ class Nelio_Content_External_Featured_Image_Public {
 	 * @access public
 	 */
 	public function init() {
-
 		if ( ! nc_get_site_id() ) {
 			return;
 		}//end if
-
-		add_action( 'plugins_loaded', array( $this, 'add_hooks' ) );
+		add_action( 'init', array( $this, 'add_hooks' ), 1 );
 	}//end init()
 
 	/**
-	 * Registers the requried hooks for inserting featured images in the
+	 * Registers the required hooks for inserting featured images in the
 	 * front-end, if the feature is enabled.
 	 *
 	 * @since  2.0.1
@@ -98,9 +96,6 @@ class Nelio_Content_External_Featured_Image_Public {
 			return;
 		}//end if
 
-		// Disable old hooks.
-		add_action( 'init', array( $this, 'disable_original_nelioefi_hooks' ), 1 );
-
 		// Featured Image Hooks.
 		add_filter( 'get_post_metadata', array( $this, 'maybe_simulate_post_thumbnail_attachment' ), 10, 3 );
 		add_filter( 'wp_get_attachment_image_src', array( $this, 'maybe_return_efi_url' ), 10, 3 );
@@ -110,21 +105,6 @@ class Nelio_Content_External_Featured_Image_Public {
 		add_action( 'wp_head', array( $this, 'leave_wp_head_section' ), 99999 );
 
 	}//end add_hooks()
-
-	/**
-	 * This function deactivates all public hooks created by the original Nelio
-	 * External Featured Image plugin.
-	 *
-	 * @since  1.1.1
-	 * @access public
-	 */
-	public function disable_original_nelioefi_hooks() {
-
-		remove_action( 'init', 'nelioefi_add_hooks_for_faking_featured_image_if_necessary' );
-		remove_filter( 'post_thumbnail_html', 'nelioefi_replace_thumbnail', 10, 5 );
-		remove_filter( 'genesis_pre_get_image', 'nelioefi_genesis_thumbnail', 10, 3 );
-
-	}//end disable_original_nelioefi_hooks()
 
 	/**
 	 * Posts with an external featured image don't have a thumbnail. This

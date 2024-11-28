@@ -4,7 +4,7 @@ Donate Link: https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medi
 Tags: social media scheduling, editorial calendar, auto publish, content marketing, social media
 Requires at least: 6.3
 Tested up to: 6.7
-Stable tag: 3.7.0
+Stable tag: 3.7.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -214,6 +214,14 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 3.7.1 (November 28, 2024) =
+* Add option to ask for help when deactivating the plugin because it’s not working.
+* Allow deletion of future actions in the calendar.
+* Tweak “isDirty” detection in post quick editor to improve its UX.
+* Fix to refactor hooks to prevent loading i18n translations too early.
+* Fix deactivation dialog layout.
+* Fix to allow the deletion of all premium items using the post quick editor.
 
 = 3.7.0 (November 19, 2024) =
 * Add new feature: post series (premium).
@@ -574,5 +582,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.7.0 (November 19, 2024) =
+= 3.7.1 (November 28, 2024) =
 New features, bug fixes, and improvements.
