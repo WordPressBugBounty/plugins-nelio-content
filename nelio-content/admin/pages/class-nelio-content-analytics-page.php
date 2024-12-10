@@ -23,7 +23,6 @@ class Nelio_Content_Analytics_Page extends Nelio_Content_Abstract_Page {
 			_x( 'Analytics', 'text', 'nelio-content' ),
 			nc_can_current_user_use_plugin()
 		);
-
 	}//end __construct()
 
 	// @Overrides
@@ -42,7 +41,6 @@ class Nelio_Content_Analytics_Page extends Nelio_Content_Abstract_Page {
 		}//end if
 
 		parent::init();
-
 	}//end init()
 
 	// @Implements
@@ -61,7 +59,5 @@ class Nelio_Content_Analytics_Page extends Nelio_Content_Abstract_Page {
 			'nelio-content-analytics-page',
 			'NelioContent.initPage( "nelio-content-analytics-page" );'
 		);
-
 	}//end enqueue_assets()
-
 }//end class

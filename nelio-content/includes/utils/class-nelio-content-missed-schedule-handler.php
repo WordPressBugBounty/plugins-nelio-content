@@ -32,13 +32,11 @@ class Nelio_Content_Missed_Schedule_Handler {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
 
 		add_action( 'init', array( $this, 'add_hooks_if_handler_is_enabled' ) );
-
 	}//end init()
 
 	public function add_hooks_if_handler_is_enabled() {
@@ -52,7 +50,6 @@ class Nelio_Content_Missed_Schedule_Handler {
 		add_action( 'shutdown', array( $this, 'maybe_send_handler_run_request' ) );
 		add_action( 'wp_ajax_' . self::ACTION, array( $this, 'maybe_handle_missed_posts' ) );
 		add_action( 'wp_ajax_nopriv_' . self::ACTION, array( $this, 'maybe_handle_missed_posts' ) );
-
 	}//end add_hooks_if_handler_is_enabled()
 
 	/**
@@ -84,7 +81,7 @@ class Nelio_Content_Missed_Schedule_Handler {
 			self::ACTION,
 			null,
 			array(),
-			null,
+			null, // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			true
 		);
 
@@ -223,5 +220,4 @@ class Nelio_Content_Missed_Schedule_Handler {
 
 		array_map( 'wp_publish_post', $scheduled_ids );
 	}//end publish_missed_posts()
-
 }//end class

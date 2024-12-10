@@ -26,7 +26,6 @@ class Nelio_Content_Plugin_List_Page {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'plugin_action_links_' . nelio_content()->plugin_file, array( $this, 'customize_plugin_actions' ) );
 		add_action( 'admin_init', array( $this, 'maybe_show_premium_notice' ) );
-
 	}//end init()
 
 	public function customize_plugin_actions( $actions ) {
@@ -63,7 +62,6 @@ class Nelio_Content_Plugin_List_Page {
 		}//end if
 
 		return $actions;
-
 	}//end customize_plugin_actions()
 
 	public function maybe_show_premium_notice() {
@@ -84,7 +82,7 @@ class Nelio_Content_Plugin_List_Page {
 
 		add_action(
 			'admin_notices',
-			function() use ( $html_message ) {
+			function () use ( $html_message ) {
 				global $pagenow;
 				if ( 'plugins.php' !== $pagenow ) {
 					return;
@@ -127,7 +125,6 @@ class Nelio_Content_Plugin_List_Page {
 				wp_json_encode( $settings ) // phpcs:ignore
 			)
 		);
-
 	}//end enqueue_assets()
 
 	private function get_deactivation_url() {
@@ -144,7 +141,5 @@ class Nelio_Content_Plugin_List_Page {
 			),
 			admin_url( 'plugins.php' )
 		);
-
 	}//end get_deactivation_url()
-
 }//end class

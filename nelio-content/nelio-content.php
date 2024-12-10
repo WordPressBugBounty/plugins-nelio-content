@@ -2,10 +2,10 @@
 /**
  * The plugin bootstrap file.
  *
- * Plugin Name:       Nelio Content
+ * Plugin Name:       Nelio Content - Editorial Calendar & Social Media Scheduling
  * Plugin URI:        https://neliosoftware.com/content/
  * Description:       Auto-post, schedule, and share your posts on Twitter, Facebook, LinkedIn, Instagram, and other social networks. Save time with useful automations.
- * Version:           3.7.1
+ * Version:           3.7.2
  *
  * Author:            Nelio Software
  * Author URI:        https://neliosoftware.com
@@ -34,7 +34,7 @@ function nelio_content() {
 /**
  * Main class.
  */
-class Nelio_Content {
+class Nelio_Content { // phpcs:ignore
 
 	private static $instance = null;
 
@@ -57,7 +57,6 @@ class Nelio_Content {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	private function load_dependencies() {
@@ -76,7 +75,6 @@ class Nelio_Content {
 		require_once $this->plugin_path . '/includes/utils/functions/helpers.php';
 		require_once $this->plugin_path . '/includes/utils/functions/subscription.php';
 		require_once $this->plugin_path . '/includes/utils/functions/validators.php';
-
 	}//end load_dependencies()
 
 	private function install() {
@@ -134,13 +132,11 @@ class Nelio_Content {
 
 		$aux = Nelio_Content_External_Featured_Image_Public::instance();
 		$aux->init();
-
 	}//end init()
 
 	public function is_ready() {
 
 		return ! nc_is_staging() && ! empty( nc_get_site_id() );
-
 	}//end is_ready()
 
 	private function init_common_helpers() {
@@ -171,7 +167,6 @@ class Nelio_Content {
 
 		$aux = Nelio_Content_Ics_Calendar::instance();
 		$aux->init();
-
 	}//end init_common_helpers()
 
 	private function init_rest_controllers() {
@@ -211,7 +206,6 @@ class Nelio_Content {
 
 		$aux = Nelio_Content_Task_Presets_REST_Controller::instance();
 		$aux->init();
-
 	}//end init_rest_controllers()
 
 	private function register_post_types() {
@@ -228,13 +222,11 @@ class Nelio_Content {
 	private function init_compat_fixes() {
 
 		require_once nelio_content()->plugin_path . '/includes/compat/index.php';
-
 	}//end init_compat_fixes()
 
 	public function load_i18n_strings() {
 
 		load_plugin_textdomain( 'nelio-content' );
-
 	}//end load_i18n_strings()
 
 	public function plugin_data_init() {
@@ -245,7 +237,6 @@ class Nelio_Content {
 		$this->plugin_version        = $data[1];
 		$this->plugin_slug           = plugin_basename( __FILE__, '.php' );
 		$this->plugin_name_sanitized = basename( __FILE__, '.php' );
-
 	}//end plugin_data_init()
 
 	public function add_staging_warning() {
@@ -271,7 +262,6 @@ class Nelio_Content {
 		echo '</p></div></td></tr>';
 		echo '<script>(function(){document.getElementById("nelio-content-staging-warning").previousElementSibling.classList.add("update");})();</script>';
 	}//end add_staging_warning()
-
 }//end class
 
 // Start plugin.

@@ -185,5 +185,4 @@ class Nelio_Content_Task_Preset {
 		}//end if
 		return self::$task_schema;
 	}//end task_schema()
-
 }//end class

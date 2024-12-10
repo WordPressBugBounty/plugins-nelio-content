@@ -15,5 +15,4 @@ class BooleanSchema extends Schema {
 
 		return true === $value;
 	}//end parse_value()
-
 }//end class

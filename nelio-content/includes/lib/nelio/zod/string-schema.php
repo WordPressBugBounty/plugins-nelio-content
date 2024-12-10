@@ -44,7 +44,7 @@ class StringSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected a string, but %s found.',
-					gettype( $value )
+					esc_html( gettype( $value ) )
 				)
 			);
 		}//end if
@@ -61,8 +61,8 @@ class StringSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected a string with length %1$s, but string is %2$s characters long.',
-					$this->min,
-					mb_strlen( $value )
+					esc_html( $this->min ),
+					esc_html( mb_strlen( $value ) )
 				)
 			);
 		}//end if
@@ -71,8 +71,8 @@ class StringSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected a string with length greater than or equal to %1$s, but string is %2$s characters long.',
-					$this->min,
-					mb_strlen( $value )
+					esc_html( $this->min ),
+					esc_html( mb_strlen( $value ) )
 				)
 			);
 		}//end if
@@ -81,8 +81,8 @@ class StringSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected a string with length less than or equal to %1$s, but string is %2$s characters long.',
-					$this->max,
-					mb_strlen( $value )
+					esc_html( $this->max ),
+					esc_html( mb_strlen( $value ) )
 				)
 			);
 		}//end if
@@ -91,12 +91,11 @@ class StringSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'String doesn\'t match regex "%s"',
-					$this->regex
+					esc_html( $this->regex )
 				)
 			);
 		}//end if
 
 		return $value;
 	}//end parse_value()
-
 }//end class

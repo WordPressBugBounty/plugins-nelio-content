@@ -39,7 +39,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -51,7 +50,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-
 	}//end init()
 
 	/**
@@ -280,6 +278,29 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		register_rest_route(
 			nelio_content()->rest_namespace,
+			'/post/(?P<id>[\d]+)/items',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_post_items' ),
+					'permission_callback' => array( $this, 'check_if_user_can_edit_post' ),
+					'args'                => array(
+						'id'     => array(
+							'required'          => true,
+							'type'              => 'number',
+							'validate_callback' => 'nc_can_be_natural_number',
+							'sanitize_callback' => 'absint',
+						),
+						'values' => array(
+							'required' => false,
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			nelio_content()->rest_namespace,
 			'/post/(?P<id>[\d]+)/references',
 			array(
 				array(
@@ -402,7 +423,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	public function check_if_user_can_create_post( $request ) {
@@ -413,7 +433,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		$post_type = get_post_type_object( $request['type'] );
 		return current_user_can( $post_type->cap->create_posts );
-
 	}//end check_if_user_can_create_post()
 
 	public function is_valid_post_type( $type ) {
@@ -475,8 +494,8 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 	public function sanitize_taxonomies( $taxonomies ) {
 		return array_map(
-			function( $values ) {
-				$id = function( $term ) {
+			function ( $values ) {
+				$id = function ( $term ) {
 					return isset( $term['id'] ) ? absint( $term['id'] ) : 0;
 				};
 				return array_values( array_filter( array_map( $id, $values ) ) );
@@ -487,8 +506,8 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 	public function sanitize_series( $series ) {
 		return array_map(
-			function( $values ) {
-				$fix = function( $series_item ) {
+			function ( $values ) {
+				$fix = function ( $series_item ) {
 					return array(
 						'id'   => isset( $series_item['id'] ) ? absint( $series_item['id'] ) : 0,
 						'part' => ! empty( $series_item['part'] ) ? absint( $series_item['part'] ) : null,
@@ -526,7 +545,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		return isset( $request['aws'] ) && $request['aws']
 			? new WP_REST_Response( $post_helper->post_to_aws_json( $post->ID ), 200 )
 			: new WP_REST_Response( $post_helper->post_to_json( $post->ID ), 200 );
-
 	}//end get_post()
 
 	/**
@@ -590,7 +608,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		}//end while
 
 		return new WP_REST_Response( $result, 200 );
-
 	}//end get_posts_in_date_range()
 
 	/**
@@ -678,7 +695,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 			'references' => $post_helper->get_references( $post_id, 'suggested' ),
 		);
 		return new WP_REST_Response( $response, 200 );
-
 	}//end create_post()
 
 	/**
@@ -773,11 +789,34 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 			'references' => $post_helper->get_references( $post_id, 'suggested' ),
 		);
 		return new WP_REST_Response( $response, 200 );
-
 	}//end update_post()
 
+
+
 	/**
-	 * Updates a post.
+	 * Updates post items.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response The response
+	 */
+	public function update_post_items( $request ) {
+
+		$post_id = $request['id'];
+		$values  = $request->get_param( 'values' );
+
+		$post = $this->maybe_get_post( $post_id );
+		if ( is_wp_error( $post ) ) {
+			return $post;
+		}//end if
+
+		Nelio_Content_Gutenberg::instance()->save( $values, $post );
+
+		return new WP_REST_Response( true, 200 );
+	}//end update_post_items()
+
+	/**
+	 * Updates a post status.
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
@@ -844,7 +883,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		return new WP_REST_Response( $post_helper->post_to_json( $post ), 200 );
-
 	}//end update_post_status()
 
 	/**
@@ -872,7 +910,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		$data = $this->search_wp_posts( $query, $args );
 		return new WP_REST_Response( $data, 200 );
-
 	}//end search_posts()
 
 	/**
@@ -913,7 +950,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		$post        = get_post( $post_id ); // phpcs:ignore
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		return new WP_REST_Response( $post_helper->post_to_json( $post ), 200 );
-
 	}//end reschedule_post()
 
 	/**
@@ -952,7 +988,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		return new WP_REST_Response( $post_helper->post_to_json( $post ), 200 );
-
 	}//end unschedule_post()
 
 	/**
@@ -977,7 +1012,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		$this->trigger_save_post_action( $post_id, false );
 
 		return new WP_REST_Response( true, 200 );
-
 	}//end trash_post()
 
 	private function trigger_save_post_action( $post_id, $creating ) {
@@ -1049,7 +1083,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		);
 
 		return $data;
-
 	}//end search_wp_posts()
 
 	private function search_wp_post_by_id_or_url( $id_or_url, $post_types ) {
@@ -1078,7 +1111,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		return array( $post_helper->post_to_json( $post ) );
-
 	}//end search_wp_post_by_id_or_url()
 
 	/**
@@ -1108,7 +1140,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return $where;
-
 	}//end add_title_filter_to_wp_query()
 
 	private function maybe_get_post( $post_id ) {
@@ -1133,7 +1164,5 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return $post;
-
 	}//end maybe_get_post()
-
 }//end class

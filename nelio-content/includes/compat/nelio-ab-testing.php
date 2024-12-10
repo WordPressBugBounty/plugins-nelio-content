@@ -33,7 +33,7 @@ function include_nab_tests( $events ) {
 	$results = $wpdb->get_results( $sql_query ); // phpcs:ignore
 
 	$found_exps = array_map(
-		function( $data ) {
+		function ( $data ) {
 			$id = absint( $data->ID );
 			return nab_get_experiment( $id );
 		},
@@ -88,4 +88,3 @@ function get_end_date( $exp ) {
 
 	return 'future';
 }//end get_end_date()
-

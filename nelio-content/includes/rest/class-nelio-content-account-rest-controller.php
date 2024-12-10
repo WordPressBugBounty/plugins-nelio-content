@@ -39,7 +39,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -51,7 +50,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-
 	}//end init()
 
 	/**
@@ -211,7 +209,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	/**
@@ -247,7 +244,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		nc_update_subscription( $account['plan'], $account['limits'] );
 
 		return new WP_REST_Response( $account, 200 );
-
 	}//end get_site_data()
 
 	/**
@@ -310,7 +306,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		$this->notify_site_created();
 
 		return new WP_REST_Response( $account, 200 );
-
 	}//end create_free_site()
 
 	/**
@@ -397,7 +392,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return new WP_REST_Response( $account, 200 );
-
 	}//end use_license_in_site()
 
 	/**
@@ -430,7 +424,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return new WP_REST_Response( true, 200 );
-
 	}//end remove_license_from_site()
 
 	/**
@@ -481,7 +474,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		nc_update_subscription( $account['plan'], $account['limits'] );
 
 		return new WP_REST_Response( $account, 200 );
-
 	}//end upgrade_subscription()
 
 	/**
@@ -533,7 +525,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		update_option( 'nc_site_id', $site_info['id'] );
 
 		return new WP_REST_Response( $account, 200 );
-
 	}//end cancel_subscription()
 
 	/**
@@ -585,7 +576,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		update_option( 'nc_site_id', $site_info['id'] );
 
 		return new WP_REST_Response( $account, 200 );
-
 	}//end uncancel_subscription()
 
 	/**
@@ -624,7 +614,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 
 		// Map other sites to the appropriate object form.
 		$sites = array_map(
-			function( $site ) {
+			function ( $site ) {
 				return array(
 					'id'            => $site['id'],
 					'url'           => $site['url'],
@@ -645,7 +635,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		// Merge them all and return.
 		array_unshift( $sites, $this_site );
 		return new WP_REST_Response( $sites, 200 );
-
 	}//end get_sites_using_subscription()
 
 
@@ -679,7 +668,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		// Regenerate the invoices result and send it to the JS.
 		$invoices = json_decode( $response['body'], true );
 		$invoices = array_map(
-			function( $invoice ) {
+			function ( $invoice ) {
 				$invoice['chargeDate'] = gmdate( get_option( 'date_format' ), strtotime( $invoice['chargeDate'] ) );
 				return $invoice;
 			},
@@ -687,7 +676,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		return new WP_REST_Response( $invoices, 200 );
-
 	}//end get_invoices_from_subscription()
 
 	/**
@@ -721,7 +709,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		// Regenerate the products result and send it to the JS.
 		$products = json_decode( $response['body'], true );
 		$products = array_map(
-			function( $product ) {
+			function ( $product ) {
 				$from = get( $product, 'upgradeableFrom' );
 				if ( ! is_array( $from ) ) {
 					$from = empty( $from ) ? array() : array( $from );
@@ -742,7 +730,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		return new WP_REST_Response( $products, 200 );
-
 	}//end get_products()
 
 	/**
@@ -811,7 +798,6 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 			'subscription'        => $subscription_id,
 			'urlToManagePayments' => nc_get_api_url( '/fastspring/' . $subscription_id . '/url', 'browser' ),
 		);
-
 	}//end create_account_object()
 
 	private function notify_site_created() {
@@ -824,7 +810,5 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		 * @since 2.0.0
 		 */
 		do_action( 'nelio_content_site_created' );
-
 	}//end notify_site_created()
-
 }//end class

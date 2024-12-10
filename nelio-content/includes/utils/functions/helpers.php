@@ -182,7 +182,6 @@ function nc_register_script_with_auto_deps( $handle, $file_name, $footer ) {
 	if ( in_array( 'wp-i18n', $asset['dependencies'], true ) ) {
 		wp_set_script_translations( $handle, 'nelio-content' );
 	}//end if
-
 }//end nc_register_script_with_auto_deps()
 
 /**
@@ -215,7 +214,6 @@ function nc_enqueue_script_with_auto_deps( $handle, $file_name, $footer ) {
 
 	nc_register_script_with_auto_deps( $handle, $file_name, $footer );
 	wp_enqueue_script( $handle );
-
 }//end nc_enqueue_script_with_auto_deps()
 
 /**
@@ -234,7 +232,6 @@ function nc_add_post_meta_once( $post_id, $meta_key, $meta_value ) {
 
 	delete_post_meta( $post_id, $meta_key, $meta_value );
 	return add_post_meta( $post_id, $meta_key, $meta_value );
-
 }//end nc_add_post_meta_once()
 
 /**
@@ -259,7 +256,6 @@ function nc_update_post_meta_array( $post_id, $meta_key, $meta_values ) {
 	}//end foreach
 
 	return true;
-
 }//end nc_update_post_meta_array()
 
 /**
@@ -293,7 +289,6 @@ function nc_get_timezone() {
 	}//end if
 
 	return $result;
-
 }//end nc_get_timezone()
 
 /**
@@ -317,7 +312,6 @@ function nc_get_language() {
 	}//end if
 
 	return $lang;
-
 }//end nc_get_language()
 
 /**
@@ -347,7 +341,6 @@ function nc_is_staging() {
 	}//end foreach
 
 	return false;
-
 }//end nc_is_staging()
 
 /**
@@ -364,7 +357,6 @@ function nc_uuid() {
 	$data[8] = chr( ord( $data[8] ) & 0x3f | 0x80 );
 
 	return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split( bin2hex( $data ), 4 ) );
-
 }//end nc_uuid()
 
 /**
@@ -428,7 +420,7 @@ function nc_url_to_postid( $url ) {
 	return url_to_postid( $url );
 }//end nc_url_to_postid()
 
-function nc_term_exists( $term, $taxonomy = '', $parent = null ) {
+function nc_term_exists( $term, $taxonomy = '', $parent = null ) { // phpcs:ignore
 	if ( function_exists( 'wpcom_vip_term_exists' ) ) {
 		return wpcom_vip_term_exists( $term, $taxonomy, $parent );
 	}//end if
@@ -477,7 +469,7 @@ function nc_get_automation_groups() {
 		return 'universal' === $group['id'];
 	};
 
-	$is_regular = function( $group ) {
+	$is_regular = function ( $group ) {
 		return 'universal' !== $group['id'];
 	};
 
@@ -504,7 +496,7 @@ function nelio_content_get_post_statuses( $post_type ) {
 	$statuses = array(
 		array(
 			'slug'   => 'trash',
-			'name'   => __( 'Trash' ),
+			'name'   => __( 'Trash' ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain
 			'icon'   => 'trash',
 			'colors' => array(
 				'main'       => '#c44',
@@ -513,7 +505,7 @@ function nelio_content_get_post_statuses( $post_type ) {
 		),
 		array(
 			'slug'   => 'draft',
-			'name'   => __( 'Draft' ),
+			'name'   => __( 'Draft' ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain
 			'icon'   => 'edit',
 			'colors' => array(
 				'main'       => '#c44',
@@ -522,7 +514,7 @@ function nelio_content_get_post_statuses( $post_type ) {
 		),
 		array(
 			'slug'   => 'pending',
-			'name'   => __( 'Pending' ),
+			'name'   => __( 'Pending' ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain
 			'icon'   => 'visibility',
 			'colors' => array(
 				'main'       => '#f9d510',
@@ -531,7 +523,7 @@ function nelio_content_get_post_statuses( $post_type ) {
 		),
 		array(
 			'slug'   => 'future',
-			'name'   => __( 'Scheduled' ),
+			'name'   => __( 'Scheduled' ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain
 			'icon'   => 'clock',
 			'colors' => array(
 				'main'       => '#447d37',
@@ -540,7 +532,7 @@ function nelio_content_get_post_statuses( $post_type ) {
 		),
 		array(
 			'slug'   => 'publish',
-			'name'   => __( 'Published' ),
+			'name'   => __( 'Published' ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain
 			'colors' => array(
 				'main'       => '#447d37',
 				'background' => '#e5f0e7',
@@ -548,12 +540,12 @@ function nelio_content_get_post_statuses( $post_type ) {
 		),
 	);
 
-	if ( current_user_can( 'administrator' ) ) {
+	if ( current_user_can( 'administrator' ) ) { // phpcs:ignore
 		array_push(
 			$statuses,
 			array(
 				'slug'   => 'private',
-				'name'   => __( 'Private' ),
+				'name'   => __( 'Private' ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain
 				'icon'   => 'hidden',
 				'colors' => array(
 					'main'       => '#447d37',
@@ -657,7 +649,7 @@ function nelio_content_get_post_types( string $context ): array {
 			break;
 	}//end switch
 
-	$get_types = function( $c ) {
+	$get_types = function ( $c ) {
 		$s = Nelio_Content_Settings::instance();
 		switch ( $c ) {
 			case 'analytics':
@@ -678,6 +670,9 @@ function nelio_content_get_post_types( string $context ): array {
 			case 'references':
 				return $s->get( 'reference_post_types' );
 
+			case 'rewrite':
+				return $s->get( 'rewrite_post_types' );
+
 			case 'series':
 				return $s->get( 'series_post_types' );
 
@@ -695,7 +690,7 @@ function nelio_content_get_post_types( string $context ): array {
 		}//end switch
 	};
 
-	$flatten = function( $ass ) {
+	$flatten = function ( $ass ) {
 		$r = array();
 		foreach ( $ass as $as ) {
 			$r = array_merge( $r, $as );

@@ -11,7 +11,7 @@ namespace Nelio_Content\Helpers;
  *
  * @return mixed The value at path or default if not found.
  */
-function get( $element, $path, $default = null ) {
+function get( $element, $path, $default = null ) { // phpcs:ignore
 	if ( is_string( $path ) ) {
 		$path = explode( '.', $path );
 		$path = empty( $path ) ? array() : $path;
@@ -19,7 +19,7 @@ function get( $element, $path, $default = null ) {
 
 	$result = array_reduce(
 		$path,
-		function( $e, $k ) {
+		function ( $e, $k ) {
 			if ( is_array( $e ) ) {
 				return isset( $e[ $k ] ) ? $e[ $k ] : null;
 			} elseif ( is_object( $e ) ) {
@@ -43,7 +43,7 @@ function get( $element, $path, $default = null ) {
  *
  * @return array The value at path or default if not found.
  */
-function get_array( $element, $path, array $default = array() ) {
+function get_array( $element, $path, array $default = array() ) { // phpcs:ignore
 	$result = get( $element, $path, $default );
 	return is_array( $result ) ? $result : $default;
 }//end get_array()
@@ -57,7 +57,7 @@ function get_array( $element, $path, array $default = array() ) {
  *
  * @return float The value at path or default if not found.
  */
-function get_float( $element, $path, float $default = 0.0 ) {
+function get_float( $element, $path, float $default = 0.0 ) { // phpcs:ignore
 	$result = get( $element, $path, $default );
 	return is_float( $result ) ? $result : $default;
 }//end get_float()
@@ -71,7 +71,7 @@ function get_float( $element, $path, float $default = 0.0 ) {
  *
  * @return int The value at path or default if not found.
  */
-function get_int( $element, $path, int $default = 0 ) {
+function get_int( $element, $path, int $default = 0 ) { // phpcs:ignore
 	$result = get( $element, $path, $default );
 	return is_int( $result ) ? $result : $default;
 }//end get_int()
@@ -85,7 +85,7 @@ function get_int( $element, $path, int $default = 0 ) {
  *
  * @return object The value at path or default if not found.
  */
-function get_object( $element, $path, $default = null ) {
+function get_object( $element, $path, $default = null ) { // phpcs:ignore
 	$default = is_null( $default ) ? new \stdClass() : $default;
 	$result  = get( $element, $path, $default );
 	return is_object( $result ) ? $result : $default;
@@ -100,7 +100,7 @@ function get_object( $element, $path, $default = null ) {
  *
  * @return string The value at path or default if not found.
  */
-function get_string( $element, $path, string $default = '' ) {
+function get_string( $element, $path, string $default = '' ) { // phpcs:ignore
 	$result = get( $element, $path, $default );
 	return is_string( $result ) ? $result : $default;
 }//end get_string()
@@ -112,7 +112,7 @@ function get_string( $element, $path, string $default = '' ) {
  *
  * @return array The new flattened array.
  */
-function flatten( array $array ): array {
+function flatten( array $array ): array { // phpcs:ignore
 	$result = array();
 	foreach ( $array as $a ) {
 		$result = array_merge( $result, $a );
@@ -130,7 +130,7 @@ function flatten( array $array ): array {
  *
  * @return array The new array of filtered values.
  */
-function without( array $array, ...$items ): array {
+function without( array $array, ...$items ): array { // phpcs:ignore
 	$result = array_reduce(
 		$items,
 		fn( $r, $i ) => array_filter( $r, fn( $c ) => $c !== $i ),

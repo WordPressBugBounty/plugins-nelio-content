@@ -88,7 +88,6 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 		$this->min           = $args['min'];
 		$this->max           = $args['max'];
 		$this->step          = $args['step'];
-
 	}//end __construct()
 
 	/**
@@ -118,7 +117,6 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 		$max           = $this->max;
 		$step          = $this->step;
 		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-range-setting.php';
-
 	}//end display()
 
 	// @Implements
@@ -130,7 +128,5 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 			$input[ $this->name ] = intval( $input[ $this->name ] );
 		}//end if
 		return $input;
-
 	}//end sanitize()
-
 }//end class

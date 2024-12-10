@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 add_action(
 	'usp_insert_before',
-	function() {
+	function () {
 		if ( ! is_sync_post_enabled() ) {
 			return;
 		}//end if
@@ -67,7 +67,7 @@ function get_sync_post_hooks() {
 	$hooks[] = 'nelio_content_save_post';
 
 	$cloud    = \Nelio_Content_Cloud::instance();
-	$callback = function() use ( &$cloud ) {
+	$callback = function () use ( &$cloud ) {
 		return array( $cloud, 'maybe_sync_post' );
 	};
 	return array_map(

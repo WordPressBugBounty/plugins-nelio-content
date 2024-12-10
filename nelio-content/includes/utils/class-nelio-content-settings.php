@@ -28,7 +28,6 @@ class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 	protected function __construct() {
 
 		parent::__construct( 'nelio-content', 'nelio-content-settings' );
-
 	}//end __construct()
 
 	/**
@@ -45,7 +44,6 @@ class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 			self::$instance = new self();
 		}//end if
 		return self::$instance;
-
 	}//end instance()
 
 	/** . @Implements */
@@ -125,7 +123,5 @@ class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 		);
 
 		$this->do_set_tabs( $tabs );
-
 	}//end set_tabs()
-
 }//end class

@@ -23,7 +23,6 @@ class Nelio_Content_Overview_Widget {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
@@ -94,5 +93,4 @@ class Nelio_Content_Overview_Widget {
 		</style>
 		<?php
 	}//end add_overview_widget_style()
-
 }//end class

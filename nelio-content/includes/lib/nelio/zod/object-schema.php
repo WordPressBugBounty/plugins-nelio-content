@@ -37,7 +37,7 @@ class ObjectSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected an object, but %s found.',
-					gettype( $value )
+					esc_html( gettype( $value ) )
 				)
 			);
 		}//end if
@@ -47,10 +47,9 @@ class ObjectSchema extends Schema {
 			try {
 				$result[ $prop ] = $schema->parse( isset( $value[ $prop ] ) ? $value[ $prop ] : null );
 			} catch ( \Exception $e ) {
-				throw new \Exception( $this->add_path( $e->getMessage(), "{$prop}" ) );
+				throw new \Exception( esc_html( $this->add_path( $e->getMessage(), "{$prop}" ) ) );
 			}//end try
 		}//end foreach
 		return array_filter( $result, fn( $p ) => ! is_null( $p ) );
 	}//end parse_value()
-
 }//end class

@@ -80,7 +80,6 @@ class Nelio_Content_Text_Area_Setting extends Nelio_Content_Abstract_Setting {
 		$value       = $this->value;
 		$placeholder = $this->placeholder;
 		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-textarea-setting.php';
-
 	}//end display()
 
 	// @Implements
@@ -94,7 +93,6 @@ class Nelio_Content_Text_Area_Setting extends Nelio_Content_Abstract_Setting {
 		$input[ $this->name ] = $value;
 
 		return $input;
-
 	}//end sanitize()
 
 	/**
@@ -111,5 +109,4 @@ class Nelio_Content_Text_Area_Setting extends Nelio_Content_Abstract_Setting {
 	private function sanitize_text( $value ) {
 		return sanitize_textarea_field( wp_unslash( $value ) );
 	}//end sanitize_text()
-
 }//end class

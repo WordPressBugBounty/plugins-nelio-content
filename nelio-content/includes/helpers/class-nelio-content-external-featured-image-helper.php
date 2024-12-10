@@ -26,7 +26,6 @@ class Nelio_Content_External_Featured_Image_Helper {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -53,7 +52,6 @@ class Nelio_Content_External_Featured_Image_Helper {
 		} else {
 			update_post_meta( $post_id, '_nelioefi_alt', $alt );
 		}//end if
-
 	}//end set_nelio_featured_image()
 
 	/**
@@ -83,7 +81,6 @@ class Nelio_Content_External_Featured_Image_Helper {
 		}//end if
 
 		return $this->get_auto_featured_image( $post_id, $auto_feat_image );
-
 	}//end get_nelio_featured_image()
 
 	/**
@@ -105,7 +102,6 @@ class Nelio_Content_External_Featured_Image_Helper {
 		}//end if
 
 		return $efi_url;
-
 	}//end get_external_featured_image()
 
 	/**
@@ -126,7 +122,6 @@ class Nelio_Content_External_Featured_Image_Helper {
 		}//end if
 
 		return get_post_meta( $post_id, '_nelioefi_alt', true );
-
 	}//end get_external_featured_alt()
 
 	/**
@@ -158,7 +153,6 @@ class Nelio_Content_External_Featured_Image_Helper {
 		} else {
 			return false;
 		}//end if
-
 	}//end get_auto_featured_image()
 
 	/**
@@ -234,7 +228,5 @@ class Nelio_Content_External_Featured_Image_Helper {
 
 		update_post_meta( $post_id, '_nc_auto_efi', $result );
 		return $result;
-
 	}//end extract_featured_images_for_autoset()
-
 }//end class

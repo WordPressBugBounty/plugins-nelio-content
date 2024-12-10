@@ -85,7 +85,6 @@ abstract class Nelio_Content_Abstract_Settings {
 		$this->tabs           = array();
 		$this->name           = $name;
 		$this->page           = $page;
-
 	}//end __construct()
 
 	/**
@@ -100,7 +99,6 @@ abstract class Nelio_Content_Abstract_Settings {
 
 		add_action( 'admin_init', array( $this, 'register' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_assets' ) );
-
 	}//end init()
 
 	/**
@@ -144,7 +142,6 @@ abstract class Nelio_Content_Abstract_Settings {
 
 			$tab['link'] = $tab['pages'][0]['link'];
 		}//end foreach
-
 	}//end do_set_tabs()
 
 	/**
@@ -182,7 +179,6 @@ abstract class Nelio_Content_Abstract_Settings {
 		} else {
 			return $value;
 		}//end if
-
 	}//end get()
 
 	/**
@@ -227,7 +223,6 @@ abstract class Nelio_Content_Abstract_Settings {
 		if ( $field && isset( $field['default'] ) ) {
 			$this->default_values[ $name ] = $field['default'];
 		}//end if
-
 	}//end maybe_set_default_value()
 
 	/**
@@ -255,7 +250,6 @@ abstract class Nelio_Content_Abstract_Settings {
 	public function get_generic_script_name() {
 
 		return $this->name . '-abstract-settings';
-
 	}//end get_generic_script_name()
 
 	/**
@@ -280,7 +274,6 @@ abstract class Nelio_Content_Abstract_Settings {
 			nelio_content()->plugin_version,
 			true
 		);
-
 	}//end register_assets()
 
 	/**
@@ -503,7 +496,6 @@ abstract class Nelio_Content_Abstract_Settings {
 			array( $this, 'close_subpage_content' ),
 			$this->get_settings_page_name()
 		);
-
 	}//end register_subpage()
 
 	/**
@@ -534,7 +526,6 @@ abstract class Nelio_Content_Abstract_Settings {
 			esc_attr( "nelio-settings__{$subpage['name']}__subpage-content" ),
 			esc_attr( $current_subpage !== $subpage['name'] ? 'display:none' : '' )
 		);
-
 	}//end open_subpage_content()
 
 	/**
@@ -611,5 +602,4 @@ abstract class Nelio_Content_Abstract_Settings {
 
 		return $is_subpage_found ? $subpage : $first_subpage;
 	}//end get_current_subpage()
-
 }//end class

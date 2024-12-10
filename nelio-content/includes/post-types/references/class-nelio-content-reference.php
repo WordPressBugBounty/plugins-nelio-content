@@ -142,7 +142,6 @@ class Nelio_Content_Reference {
 
 		// Initialize variables.
 		$this->build();
-
 	}//end __construct()
 
 	/**
@@ -172,7 +171,6 @@ class Nelio_Content_Reference {
 			$this->publication_date = mysql2date( 'Y-m-d', $this->post->post_date );
 
 		}//end if
-
 	}//end build()
 
 	/**
@@ -187,7 +185,6 @@ class Nelio_Content_Reference {
 	public function is_external() {
 
 		return 'nc_reference' === $this->post->post_type;
-
 	}//end is_external()
 
 	/**
@@ -201,7 +198,6 @@ class Nelio_Content_Reference {
 	public function get_title() {
 
 		return $this->post->post_title;
-
 	}//end get_title()
 
 	/**
@@ -223,7 +219,6 @@ class Nelio_Content_Reference {
 				wp_update_post( $this->post );
 			}//end if
 		}//end if
-
 	}//end set_title()
 
 	/**
@@ -237,7 +232,6 @@ class Nelio_Content_Reference {
 	public function get_url() {
 
 		return $this->url;
-
 	}//end get_url()
 
 	/**
@@ -257,7 +251,6 @@ class Nelio_Content_Reference {
 			update_post_meta( $this->ID, '_nc_url', $url );
 		}//end if
 		$this->maybe_update_status();
-
 	}//end set_url()
 
 	/**
@@ -271,7 +264,6 @@ class Nelio_Content_Reference {
 	public function get_author_name() {
 
 		return $this->author_name;
-
 	}//end get_author_name()
 
 	/**
@@ -293,7 +285,6 @@ class Nelio_Content_Reference {
 			}//end if
 			$this->maybe_update_status();
 		}//end if
-
 	}//end set_author_name()
 
 	/**
@@ -307,7 +298,6 @@ class Nelio_Content_Reference {
 	public function get_author_email() {
 
 		return $this->author_email;
-
 	}//end get_author_email()
 
 	/**
@@ -329,7 +319,6 @@ class Nelio_Content_Reference {
 			}//end if
 			$this->maybe_update_status();
 		}//end if
-
 	}//end set_author_email()
 
 	/**
@@ -343,7 +332,6 @@ class Nelio_Content_Reference {
 	public function get_author_twitter() {
 
 		return $this->author_twitter;
-
 	}//end get_author_twitter()
 
 	/**
@@ -367,7 +355,6 @@ class Nelio_Content_Reference {
 			update_post_meta( $this->ID, '_nc_author_twitter', $author_twitter );
 		}//end if
 		$this->maybe_update_status();
-
 	}//end set_author_twitter()
 
 	/**
@@ -381,7 +368,6 @@ class Nelio_Content_Reference {
 	public function get_publication_date() {
 
 		return $this->publication_date;
-
 	}//end get_publication_date()
 
 	/**
@@ -403,7 +389,6 @@ class Nelio_Content_Reference {
 			}//end if
 			$this->maybe_update_status();
 		}//end if
-
 	}//end set_publication_date()
 
 	/**
@@ -424,7 +409,6 @@ class Nelio_Content_Reference {
 		} else {
 			return 'complete';
 		}//end if
-
 	}//end get_status()
 
 	/**
@@ -443,7 +427,6 @@ class Nelio_Content_Reference {
 
 		$this->suggestion_advisor = $advisor;
 		$this->suggestion_date    = $date;
-
 	}//end mark_as_suggested()
 
 	/**
@@ -501,7 +484,6 @@ class Nelio_Content_Reference {
 			return false;
 
 		}//end if
-
 	}//end maybe_update_status()
 
 	/**
@@ -538,7 +520,6 @@ class Nelio_Content_Reference {
 		}//end if
 
 		return $result;
-
 	}//end json_encode()
 
 	private function atify( $value ) {
@@ -547,5 +528,4 @@ class Nelio_Content_Reference {
 		}//end if
 		return $value;
 	}//end atify()
-
 }//end class

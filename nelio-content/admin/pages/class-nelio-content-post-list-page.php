@@ -39,7 +39,6 @@ class Nelio_Content_Post_List_Page {
 
 		add_filter( 'post_row_actions', array( $this, 'customize_row_actions' ), 10, 2 );
 		add_filter( 'page_row_actions', array( $this, 'customize_row_actions' ), 10, 2 );
-
 	}//end init()
 
 	public function maybe_enqueue_social_assets() {
@@ -84,7 +83,6 @@ class Nelio_Content_Post_List_Page {
 			nc_get_script_version( 'post-list-page' )
 		);
 		nc_enqueue_script_with_auto_deps( 'nelio-content-post-list-page', 'post-list-page', true );
-
 	}//end maybe_enqueue_social_assets()
 
 	public function add_page_column_for_auto_share( $columns ) {
@@ -152,7 +150,7 @@ class Nelio_Content_Post_List_Page {
 		}//end if
 	}//end add_value_in_column_for_auto_share()
 
-	public function add_class_with_auto_share_info( $classes, $class, $post_id ) {
+	public function add_class_with_auto_share_info( $classes, $_, $post_id ) {
 
 		if ( ! is_admin() ) {
 			return $classes;
@@ -165,7 +163,6 @@ class Nelio_Content_Post_List_Page {
 		}//end if
 
 		return $classes;
-
 	}//end add_class_with_auto_share_info()
 
 	public function maybe_add_quick_or_bulk_edit_for_auto_share( $column, $post_type ) {
@@ -190,7 +187,6 @@ class Nelio_Content_Post_List_Page {
 			$this->get_auto_share_end_select() // phpcs:ignore
 		);
 		echo '</div></fieldset>';
-
 	}//end maybe_add_quick_or_bulk_edit_for_auto_share()
 
 	public function update_auto_share_on_quick_or_bulk_edit( $post_id, $post ) {
@@ -230,7 +226,6 @@ class Nelio_Content_Post_List_Page {
 		$aux = Nelio_Content_Post_Helper::instance();
 		$aux->enable_auto_share( $post_id, $auto_share );
 		$aux->update_auto_share_end_mode( $post_id, $end_mode );
-
 	}//end update_auto_share_on_quick_or_bulk_edit()
 
 	public function customize_row_actions( $actions, $post ) {
@@ -297,7 +292,5 @@ class Nelio_Content_Post_List_Page {
 		}//end if
 
 		return true;
-
 	}//end is_current_screen_social_post_list()
-
 }//end class

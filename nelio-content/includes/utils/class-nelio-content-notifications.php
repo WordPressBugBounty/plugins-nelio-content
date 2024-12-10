@@ -26,14 +26,12 @@ class Nelio_Content_Notifications {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
 
 		add_action( 'init', array( $this, 'add_hooks_if_notifications_are_enabled' ) );
 		add_action( 'delete_user', array( $this, 'delete_follower' ) );
-
 	}//end init()
 
 	public function add_hooks_if_notifications_are_enabled() {
@@ -53,7 +51,6 @@ class Nelio_Content_Notifications {
 			add_action( 'nelio_content_after_create_editorial_task', array( $this, 'maybe_send_task_creation_notification' ) );
 			add_action( 'nelio_content_after_update_editorial_task', array( $this, 'maybe_send_task_update_notification' ) );
 		}//end if
-
 	}//end add_hooks_if_notifications_are_enabled()
 
 	public function maybe_notify_post_followers( $post_id, $followers, $old_status, $old_followers ) {
@@ -93,7 +90,6 @@ class Nelio_Content_Notifications {
 			$this->send_email( $email, $new_followers, $post );
 			return;
 		}//end if
-
 	}//end maybe_notify_post_followers()
 
 	public function maybe_send_comment_creation_notification( $comment ) {
@@ -127,7 +123,6 @@ class Nelio_Content_Notifications {
 
 		$email = $this->get_comment_in_post_email_data( $post, $comment );
 		$this->send_email( $email, $recipients, $comment );
-
 	}//end maybe_send_comment_creation_notification()
 
 	public function maybe_send_task_creation_notification( $task ) {
@@ -165,7 +160,6 @@ class Nelio_Content_Notifications {
 
 		$email = $this->get_task_creation_email_data( $task, $post );
 		$this->send_email( $email, $recipients, $task );
-
 	}//end maybe_send_task_creation_notification()
 
 	public function maybe_send_task_update_notification( $task ) {
@@ -203,7 +197,6 @@ class Nelio_Content_Notifications {
 
 		$email = $this->get_task_updated_email_data( $task, $post );
 		$this->send_email( $email, $recipients, $task );
-
 	}//end maybe_send_task_update_notification()
 
 	public function delete_follower( $id ) {
@@ -220,7 +213,6 @@ class Nelio_Content_Notifications {
 				'meta_value' => $id,                   // phpcs:ignore
 			)
 		);
-
 	}//end delete_follower()
 
 	private function send_email( $email, $recipients, $item ) {
@@ -276,7 +268,6 @@ class Nelio_Content_Notifications {
 
 		// phpcs:ignore
 		return wp_mail( $recipients, $subject, $message, $message_headers );
-
 	}//end send_email()
 
 	private function get_email_addresses( $user_ids ) {
@@ -295,7 +286,7 @@ class Nelio_Content_Notifications {
 		}//end if
 
 		$emails = array_map(
-			function( $user_id ) {
+			function ( $user_id ) {
 				if ( ! is_user_member_of_blog( $user_id ) ) {
 					return false;
 				}//end if
@@ -311,7 +302,6 @@ class Nelio_Content_Notifications {
 		);
 
 		return array_values( array_unique( array_filter( $emails ) ) );
-
 	}//end get_email_addresses()
 
 	private function get_post_status_change_email_data( $post, $old_status ) {
@@ -518,7 +508,6 @@ class Nelio_Content_Notifications {
 			'subject' => $subject,
 			'message' => $message,
 		);
-
 	}//end get_post_status_change_email_data()
 
 	private function get_post_following_email_data( $post ) {
@@ -592,7 +581,6 @@ class Nelio_Content_Notifications {
 			'subject' => $subject,
 			'message' => $message,
 		);
-
 	}//end get_post_following_email_data()
 
 	private function get_comment_in_post_email_data( $post, $comment ) {
@@ -642,7 +630,6 @@ class Nelio_Content_Notifications {
 			'subject' => $subject,
 			'message' => $message,
 		);
-
 	}//end get_comment_in_post_email_data()
 
 	private function get_task_creation_email_data( $task, $post ) {
@@ -699,7 +686,6 @@ class Nelio_Content_Notifications {
 			'subject' => $subject,
 			'message' => $message,
 		);
-
 	}//end get_task_creation_email_data()
 
 	private function get_task_updated_email_data( $task, $post ) {
@@ -773,7 +759,6 @@ class Nelio_Content_Notifications {
 			'subject' => $subject,
 			'message' => $message,
 		);
-
 	}//end get_task_updated_email_data()
 
 	private function get_task_information( $task ) {
@@ -809,7 +794,6 @@ class Nelio_Content_Notifications {
 		}//end if
 
 		return $info;
-
 	}//end get_task_information()
 
 	private function get_email_footer( $post = false ) {
@@ -855,7 +839,6 @@ class Nelio_Content_Notifications {
 		$footer .= $blog_name . ' | ' . $blog_url . ' | ' . $admin_url . "\r\n";
 
 		return $footer;
-
 	}//end get_email_footer()
 
 	private function get_scheduled_datetime( $post ) {
@@ -867,7 +850,6 @@ class Nelio_Content_Notifications {
 
 		/* translators: 1: post scheduled date, 2: post scheduled time */
 		return sprintf( _x( '%1$s at %2$s', 'text', 'nelio-content' ), $date, $time );
-
 	}//end get_scheduled_datetime()
 
 	private function get_post_status_label( $status ) {
@@ -910,5 +892,4 @@ class Nelio_Content_Notifications {
 
 		return empty( $post_type ) || in_array( $post_type, $post_types, true );
 	}//end are_task_notifications_enabled()
-
 }//end class

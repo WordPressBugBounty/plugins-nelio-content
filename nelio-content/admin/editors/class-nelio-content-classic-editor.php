@@ -24,7 +24,6 @@ class Nelio_Content_Classic_Editor {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
@@ -34,7 +33,6 @@ class Nelio_Content_Classic_Editor {
 		add_action( 'save_post', array( $this, 'save_classic_meta_boxes_values' ), 10, 2 );
 
 		add_action( 'redirect_post_location', array( $this, 'maybe_add_query_arg_for_timeline_auto_generation' ), 99 );
-
 	}//end init()
 
 	public function add_meta_boxes() {
@@ -80,7 +78,6 @@ class Nelio_Content_Classic_Editor {
 				$this->add_meta_box( $id, $meta_box['title'], $post_type );
 			}//end foreach
 		}//end foreach
-
 	}//end add_meta_boxes()
 
 	public function add_post_analysis_meta_box() {
@@ -127,7 +124,6 @@ class Nelio_Content_Classic_Editor {
 		}//end if
 
 		return $location;
-
 	}//end maybe_add_query_arg_for_timeline_auto_generation()
 
 	private function add_meta_box( $id, $title, $post_type ) {
@@ -147,5 +143,4 @@ class Nelio_Content_Classic_Editor {
 		/** This filter is documented in admin/pages/class-nelio-content-edit-post-page.php */
 		return apply_filters( 'nelio_content_is_quality_analysis_fully_integrated', true );
 	}//end is_quality_analysis_fully_integrated()
-
 }//end class

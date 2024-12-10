@@ -80,7 +80,6 @@ class Nelio_Content_Select_Setting extends Nelio_Content_Abstract_Setting {
 		$desc    = $this->desc;
 		$more    = $this->more;
 		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-select-setting.php';
-
 	}//end display()
 
 	// @Implements
@@ -99,7 +98,5 @@ class Nelio_Content_Select_Setting extends Nelio_Content_Abstract_Setting {
 			$input[ $this->name ] = $this->value;
 		}//end if
 		return $input;
-
 	}//end sanitize()
-
 }//end class

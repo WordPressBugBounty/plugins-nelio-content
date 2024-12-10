@@ -46,7 +46,6 @@ class Nelio_Content_Public {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -72,5 +71,4 @@ class Nelio_Content_Public {
 		$content = preg_replace( '/<.?ncshare[^>]*>/', '', $content );
 		return $content;
 	}//end remove_share_blocks()
-
 }//end class

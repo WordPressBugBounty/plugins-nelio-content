@@ -43,7 +43,5 @@ class Nelio_Content_Cloud_Notification_Emails_Setting extends Nelio_Content_Abst
 
 		unset( $input[ $this->name ] );
 		return $input;
-
 	}//end sanitize()
-
 }//end class

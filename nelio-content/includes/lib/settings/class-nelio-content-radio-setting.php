@@ -55,7 +55,6 @@ class Nelio_Content_Radio_Setting extends Nelio_Content_Abstract_Setting {
 
 		parent::__construct( $name, $desc, $more );
 		$this->options = $options;
-
 	}//end __construct()
 
 	/**
@@ -81,7 +80,6 @@ class Nelio_Content_Radio_Setting extends Nelio_Content_Abstract_Setting {
 		$desc    = $this->desc;
 		$more    = $this->more;
 		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-radio-setting.php';
-
 	}//end display()
 
 	// @Implements
@@ -100,5 +98,4 @@ class Nelio_Content_Radio_Setting extends Nelio_Content_Abstract_Setting {
 		}//end if
 		return $input;
 	}//end sanitize()
-
 }//end class

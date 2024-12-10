@@ -51,10 +51,13 @@ function render_widget() {
 }//end render_widget()
 
 function render_title() {
-	$icon = file_get_contents( nelio_content()->plugin_path . '/assets/dist/images/logo.svg' );
-	$icon = str_replace( 'fill="inherit"', 'fill="currentcolor"', $icon );
-	$icon = str_replace( 'width="20"', '', $icon );
-	$icon = str_replace( 'height="20"', '', $icon );
+	require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+	$filesystem = new \WP_Filesystem_Direct( true );
+	$icon       = $filesystem->get_contents( nelio_content()->plugin_path . '/assets/dist/images/logo.svg' );
+	$icon       = str_replace( 'fill="inherit"', 'fill="currentcolor"', $icon );
+	$icon       = str_replace( 'width="20"', '', $icon );
+	$icon       = str_replace( 'height="20"', '', $icon );
 	printf(
 		'<div class="nelio-content-header"><div class="nelio-content-header__icon">%s</div><div class="nelio-content-header__version"><p>%s</p><p>%s</p></div></div>',
 		$icon, // phpcs:ignore
@@ -213,7 +216,7 @@ function get_news( $mode ) {
 		}//end if
 		$news = $rss->get_items( 0, 3 );
 		$news = array_map(
-			function( $n ) {
+			function ( $n ) {
 				return array(
 					'title'   => $n->get_title(),
 					'link'    => $n->get_permalink(),

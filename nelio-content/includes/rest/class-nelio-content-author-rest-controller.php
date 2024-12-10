@@ -39,7 +39,6 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -51,7 +50,6 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-
 	}//end init()
 
 	/**
@@ -109,7 +107,6 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	/**
@@ -136,7 +133,6 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return new WP_REST_Response( $this->json( $author ), 200 );
-
 	}//end get_author()
 
 	/**
@@ -154,7 +150,14 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 
 		// Search query.
 		$args = array(
-			'capability' => array( 'edit_posts' ),
+			/**
+			 * Filters the authors capabilities.
+			 *
+			 * @param array $capabilities Array of capabilities
+			 *
+			 * @since 3.7.2
+			 */
+			'capability' => apply_filters( 'nelio_content_author_capabilities', array( 'edit_posts' ) ),
 			'number'     => $per_page,
 			'order'      => 'ASC',
 			'orderby'    => 'display_name',
@@ -168,7 +171,7 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 
 		$wp_query = new WP_User_Query( $args );
 		$authors  = array_map(
-			function( $user ) {
+			function ( $user ) {
 				return $this->json( $user->data );
 			},
 			$wp_query->get_results()
@@ -190,13 +193,12 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 		);
 
 		return new WP_REST_Response( $result, 200 );
-
 	}//end search_authors()
 
 	private function add_priority_authors( $authors ) {
 
 		$priority_authors = array_map(
-			function( $user_id ) {
+			function ( $user_id ) {
 				return $this->json( get_userdata( $user_id ) );
 			},
 			$this->get_priority_authors()
@@ -206,7 +208,6 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 			array_filter( $priority_authors ),
 			$authors
 		);
-
 	}//end add_priority_authors()
 
 	private function get_priority_authors() {
@@ -239,7 +240,6 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 				)
 			),
 		);
-
 	}//end json()
 
 	private function mask_email( $email ) {
@@ -266,7 +266,5 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return "$mailname@$domain$extension";
-
 	}//end mask_email()
-
 }//end class

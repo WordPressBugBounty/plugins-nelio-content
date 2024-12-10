@@ -40,7 +40,7 @@ class ArraySchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected an array, but %s found.',
-					gettype( $value )
+					esc_html( gettype( $value ) )
 				)
 			);
 		}//end if
@@ -53,7 +53,7 @@ class ArraySchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected an array of %1$s elements, but array has %2$s elements.',
-					$this->min,
+					esc_html( $this->min ),
 					count( $value )
 				)
 			);
@@ -63,7 +63,7 @@ class ArraySchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected an array with at least %1$s elements, but array has %2$s elements.',
-					$this->min,
+					esc_html( $this->min ),
 					count( $value )
 				)
 			);
@@ -73,7 +73,7 @@ class ArraySchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected an array with up to %1$s elements, but array has %2$s elements.',
-					$this->max,
+					esc_html( $this->max ),
 					count( $value )
 				)
 			);
@@ -84,10 +84,9 @@ class ArraySchema extends Schema {
 			try {
 				$result[] = $this->schema->parse( $item );
 			} catch ( \Exception $e ) {
-				throw new \Exception( $this->add_path( $e->getMessage(), "{$index}" ) );
+				throw new \Exception( esc_html( $this->add_path( $e->getMessage(), "{$index}" ) ) );
 			}//end try
 		}//end foreach
 		return $result;
 	}//end parse_value()
-
 }//end class

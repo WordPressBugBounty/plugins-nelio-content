@@ -47,13 +47,11 @@ class Nelio_Content_Ics_Calendar {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
 
 		add_action( 'init', array( $this, 'do_init' ) );
-
 	}//end init()
 
 	public function do_init() {
@@ -65,7 +63,6 @@ class Nelio_Content_Ics_Calendar {
 
 		add_action( 'wp_ajax_nelio_content_calendar_ics_subscription', array( $this, 'handle_ics_subscription' ) );
 		add_action( 'wp_ajax_nopriv_nelio_content_calendar_ics_subscription', array( $this, 'handle_ics_subscription' ) );
-
 	}//end do_init()
 
 	/**
@@ -206,7 +203,6 @@ class Nelio_Content_Ics_Calendar {
 		}//end foreach
 
 		die();
-
 	}//end handle_ics_subscription()
 
 	/**
@@ -235,7 +231,6 @@ class Nelio_Content_Ics_Calendar {
 		$additional              = 3600 * 24 * 7 * ( $week - 1 );
 		$formatted_start_of_week = gmdate( $format, $date + $additional );
 		return $formatted_start_of_week;
-
 	}//end get_beginning_of_week()
 
 	/**
@@ -263,7 +258,6 @@ class Nelio_Content_Ics_Calendar {
 		$additional            = 3600 * 24 * 7 * ( $week - 1 );
 		$formatted_end_of_week = gmdate( $format, $date + $additional );
 		return $formatted_end_of_week;
-
 	}//end get_ending_of_week()
 
 	/**
@@ -278,7 +272,7 @@ class Nelio_Content_Ics_Calendar {
 
 		$len = mb_strlen( $line );
 		if ( $len <= 73 ) {
-			echo $line . "\r\n"; // phpcs:ignore WordPress.XSS.EscapeOutput
+			echo $line . "\r\n"; // phpcs:ignore
 			return;
 		}//end if
 
@@ -294,11 +288,10 @@ class Nelio_Content_Ics_Calendar {
 				$chunks[] = $chunk . "\r\n ";
 			} else {
 				$chunks[] = $chunk . "\r\n";
-				echo implode( '', $chunks ); // phpcs:ignore WordPress.XSS.EscapeOutput
+				echo implode( '', $chunks ); // phpcs:ignore
 				return;
 			}//end if
 		}//end while
-
 	}//end print_ics_line_folding()
 
 	/**
@@ -318,7 +311,6 @@ class Nelio_Content_Ics_Calendar {
 		$text = str_replace( ';', '\:', $text );
 		$text = str_replace( '\\', '\\\\', $text );
 		return $text;
-
 	}//end do_ics_escaping()
 
 	/**
@@ -376,7 +368,6 @@ class Nelio_Content_Ics_Calendar {
 		}//end while
 
 		return $posts;
-
 	}//end get_calendar_posts_for_week()
 
 	/**
@@ -402,7 +393,6 @@ class Nelio_Content_Ics_Calendar {
 		$where       = $where . $wpdb->prepare( " AND ($wpdb->posts.post_date_gmt >= %s AND $wpdb->posts.post_date_gmt < %s)", $beginning_date, $ending_date );
 
 		return $where;
-
 	}//end posts_where_week_range()
 
 	/**
@@ -559,7 +549,6 @@ class Nelio_Content_Ics_Calendar {
 		}//end foreach
 
 		return $information_fields;
-
 	}//end get_post_information_fields()
 
 	private function get_friendly_post_status( $post_id ) {
@@ -567,5 +556,4 @@ class Nelio_Content_Ics_Calendar {
 		$post_status = get_post_status( $post_id );
 		return isset( $statuses[ $post_status ] ) ? $statuses[ $post_status ] : $post_status;
 	}//end get_friendly_post_status()
-
 }//end class

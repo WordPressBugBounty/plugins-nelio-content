@@ -26,7 +26,6 @@ class Nelio_Content_Meta_Tags {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
@@ -88,7 +87,7 @@ class Nelio_Content_Meta_Tags {
 
 		$metas = array_filter(
 			$metas,
-			function( $meta ) {
+			function ( $meta ) {
 				return false !== $meta;
 			}
 		);
@@ -139,7 +138,7 @@ class Nelio_Content_Meta_Tags {
 	}//end get_og_title()
 
 	private function get_og_desc() {
-		$more = function() {
+		$more = function () {
 			return '…';
 		};
 		add_filter( 'excerpt_more', $more );
@@ -152,5 +151,4 @@ class Nelio_Content_Meta_Tags {
 		global $wp;
 		return home_url( add_query_arg( array(), $wp->request ) );
 	}//end get_og_url()
-
 }//end class

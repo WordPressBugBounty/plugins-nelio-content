@@ -23,7 +23,6 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 			_x( 'Settings', 'text', 'nelio-content' ),
 			nc_can_current_user_manage_plugin()
 		);
-
 	}//end __construct()
 
 	// @Overrides
@@ -109,7 +108,6 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 				wp_json_encode( $target_id )
 			)
 		);
-
 	}//end enqueue_supage_assets()
 
 	private function get_current_subpage() {
@@ -133,5 +131,4 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 		$subpage = $this->get_current_subpage();
 		return empty( $this->get_custom_subpage_script( $subpage ) );
 	}//end is_submit_button_enabled()
-
 }//end class

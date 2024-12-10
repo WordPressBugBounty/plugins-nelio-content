@@ -24,7 +24,6 @@ class Nelio_Content_Gutenberg {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
@@ -46,10 +45,9 @@ class Nelio_Content_Gutenberg {
 				'update_callback' => array( $this, 'save' ),
 			)
 		);
-
 	}//end register_custom_metas()
 
-	public function get_values( $object ) {
+	public function get_values( $object ) { // phpcs:ignore
 		return $this->load_values( $object['id'] );
 	}//end get_values()
 

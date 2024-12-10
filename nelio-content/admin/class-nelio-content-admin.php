@@ -29,7 +29,6 @@ class Nelio_Content_Admin {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
@@ -45,7 +44,6 @@ class Nelio_Content_Admin {
 		add_filter( 'option_page_capability_nelio-content_group', array( $this, 'get_settings_capability' ) );
 
 		add_action( 'admin_head', array( $this, 'add_workaround_styles' ) );
-
 	}//end init()
 
 	public function create_menu() {
@@ -87,7 +85,6 @@ class Nelio_Content_Admin {
 				);
 			}//end if
 		}//end foreach
-
 	}//end create_menu()
 
 	public function add_calendar_in_admin_bar() {
@@ -121,7 +118,6 @@ class Nelio_Content_Admin {
 		if ( is_multisite() ) {
 			switch_to_blog( $original_blog_id );
 		}//end if
-
 	}//end add_calendar_in_admin_bar()
 
 
@@ -165,7 +161,6 @@ class Nelio_Content_Admin {
 
 		$page = new Nelio_Content_Plugin_List_Page();
 		$page->init();
-
 	}//end init_pages()
 
 	public function register_assets() {
@@ -239,24 +234,24 @@ class Nelio_Content_Admin {
 			'premiumEditorPermissionsByType' => $this->get_premium_editor_permissions_by_type(),
 		);
 
-		$script = <<<EOS
-( function() {
-	ncdata = wp.data.select( "nelio-content/data" );
-	ncdata.getSocialProfiles();
-	ncdata = wp.data.dispatch( "nelio-content/data" );
-	ncdata.initPluginSettings( %1\$s );
-	ncdata.initSiteSettings( %2\$s );
-	ncdata.initUserSettings( %3\$s );
-	ncdata.markSocialPublicationAsPaused( !! NelioContent?.utils?.getValue( "isSocialPublicationPaused" ) );
-	ncdata.resetTaskPresets( %4\$s );
-	ncdata.receiveFeeds( %5\$s );
-	setInterval( function() {
-		wp.data.dispatch( "nelio-content/data" ).setUtcNow( new Date().toISOString() );
-	}, 30 * 60000 );
-	ncdata = wp.data.select( "nelio-content/data" );
-	ncdata.getAutomationGroups();
-} )()
-EOS;
+		$script = '
+		( function() {
+			ncdata = wp.data.select( "nelio-content/data" );
+			ncdata.getSocialProfiles();
+			ncdata = wp.data.dispatch( "nelio-content/data" );
+			ncdata.initPluginSettings( %1$s );
+			ncdata.initSiteSettings( %2$s );
+			ncdata.initUserSettings( %3$s );
+			ncdata.markSocialPublicationAsPaused( !! NelioContent?.utils?.getValue( "isSocialPublicationPaused" ) );
+			ncdata.resetTaskPresets( %4$s );
+			ncdata.receiveFeeds( %5$s );
+			setInterval( function() {
+				wp.data.dispatch( "nelio-content/data" ).setUtcNow( new Date().toISOString() );
+			}, 30 * 60000 );
+			ncdata = wp.data.select( "nelio-content/data" );
+			ncdata.getAutomationGroups();
+		} )();';
+
 
 		wp_add_inline_script(
 			'nelio-content-data',
@@ -269,7 +264,6 @@ EOS;
 				wp_json_encode( get_option( 'nc_feeds', array() ) )
 			)
 		);
-
 	}//end register_assets()
 
 	public function maybe_enqueue_media_scripts() {
@@ -277,7 +271,6 @@ EOS;
 		if ( wp_script_is( 'nelio-content-components' ) ) {
 			wp_enqueue_media();
 		}//end if
-
 	}//end maybe_enqueue_media_scripts()
 
 	public function maybe_enqueue_editor_dialog_styles() {
@@ -294,7 +287,6 @@ EOS;
 				);
 			}//end if
 		}//end foreach
-
 	}//end maybe_enqueue_editor_dialog_styles()
 
 	public function get_settings_capability() {
@@ -316,11 +308,10 @@ EOS;
 		}//end if
 
 		return 'data:image/svg+xml;base64,' . base64_encode( file_get_contents( $svg_icon_file ) ); // phpcs:ignore
-
 	}//end get_plugin_icon()
 
 	private function get_active_plugins() {
-		$clean_extension = function( $plugin ) {
+		$clean_extension = function ( $plugin ) {
 			return substr( $plugin, 0, -4 );
 		};
 
@@ -389,7 +380,6 @@ EOS;
 						'thumbnail'     => post_type_supports( $type->name, 'thumbnail' ),
 					),
 				);
-
 			},
 			$post_types
 		) ) ); // phpcs:ignore
@@ -408,7 +398,6 @@ EOS;
 		);
 
 		return key_by( $post_types, 'name' );
-
 	}//end get_post_types()
 
 	private function get_first_day_of_week() {
@@ -441,7 +430,7 @@ EOS;
 			'number'     => 2,
 		);
 
-		$remove_users_sorting = function( $results, $wp_user_query ) {
+		$remove_users_sorting = function ( $results, $wp_user_query ) {
 			$wp_user_query->query_orderby = '';
 			return $results;
 		};
@@ -451,7 +440,6 @@ EOS;
 		remove_filter( 'users_pre_query', $remove_users_sorting, 10, 2 );
 
 		return 1 < count( $authors );
-
 	}//end is_multi_author()
 
 	private function get_post_type_capabilities() {
@@ -572,5 +560,4 @@ EOS;
 		 */
 		return apply_filters( 'nelio_content_premium_status', $status );
 	}//end get_premium_status()
-
 }//end class

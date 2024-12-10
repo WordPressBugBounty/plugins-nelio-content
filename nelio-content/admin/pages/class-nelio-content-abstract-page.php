@@ -30,7 +30,6 @@ abstract class Nelio_Content_Abstract_Page {
 		$this->title       = $title;
 		$this->capability  = $capability;
 		$this->mode        = $mode;
-
 	}//end __construct()
 
 	public function init() {
@@ -52,13 +51,12 @@ abstract class Nelio_Content_Abstract_Page {
 
 		add_action(
 			'current_screen',
-			function() {
+			function () {
 				if ( $this->is_current_screen_this_page() ) {
 					$this->add_page_specific_hooks();
 				}//end if
 			}
 		);
-
 	}//end init()
 
 	public function add_page() {
@@ -76,7 +74,6 @@ abstract class Nelio_Content_Abstract_Page {
 			$this->slug,
 			$this->get_render_function()
 		);
-
 	}//end add_page()
 
 	public function display() {
@@ -97,7 +94,6 @@ abstract class Nelio_Content_Abstract_Page {
 		);
 
 		echo '</div>';
-
 	}//end display()
 
 	public function maybe_enqueue_assets() {
@@ -107,7 +103,6 @@ abstract class Nelio_Content_Abstract_Page {
 		}//end if
 
 		$this->enqueue_assets();
-
 	}//end maybe_enqueue_assets()
 
 	abstract protected function enqueue_assets();
@@ -124,10 +119,9 @@ abstract class Nelio_Content_Abstract_Page {
 				return array( $this, 'display' );
 
 		}//end switch
-
 	}//end get_render_function()
 
-	protected function remove_page_from_menu( $parent, $slug ) {
+	protected function remove_page_from_menu( $parent, $slug ) { // phpcs:ignore
 
 		global $submenu;
 		if ( ! isset( $submenu[ $parent ] ) ) {
@@ -136,11 +130,10 @@ abstract class Nelio_Content_Abstract_Page {
 
 		$submenu[ $parent ] = array_filter( // phpcs:ignore
 			$submenu[ $parent ],
-			function( $item ) use ( $slug ) {
+			function ( $item ) use ( $slug ) {
 				return $item[2] !== $slug;
 			}//end if
 		);
-
 	}//end remove_page_from_menu()
 
 	protected function is_current_screen_this_page() {
@@ -150,11 +143,9 @@ abstract class Nelio_Content_Abstract_Page {
 		$needle   = str_replace( 'edit.php?post_type=', 'edit-', $this->slug );
 
 		return strlen( $needle ) <= strlen( $haystack ) && 0 === substr_compare( $haystack, $needle, -strlen( $needle ) );
-
 	}//end is_current_screen_this_page()
 
 	protected function add_page_specific_hooks() {
 		// Nothing to be done.
 	}//end add_page_specific_hooks()
-
 }//end class

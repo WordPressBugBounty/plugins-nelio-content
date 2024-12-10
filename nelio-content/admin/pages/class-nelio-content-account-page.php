@@ -29,7 +29,6 @@ class Nelio_Content_Account_Page extends Nelio_Content_Abstract_Page {
 			$title,
 			nc_can_current_user_manage_account()
 		);
-
 	}//end __construct()
 
 	// @Overrides
@@ -63,7 +62,5 @@ class Nelio_Content_Account_Page extends Nelio_Content_Abstract_Page {
 				wp_json_encode( $settings ) // phpcs:ignore
 			)
 		);
-
 	}//end enqueue_assets()
-
 }//end class

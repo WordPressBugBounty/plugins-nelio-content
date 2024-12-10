@@ -27,7 +27,6 @@ class Nelio_Content_Cloud {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
@@ -38,7 +37,6 @@ class Nelio_Content_Cloud {
 		add_action( 'nelio_content_update_post_in_cloud', array( $this, 'maybe_sync_post' ) );
 		add_action( 'init', array( $this, 'add_hooks_for_updating_post_in_cloud_on_publish' ) );
 		add_action( 'init', array( $this, 'maybe_add_profile_status_checker' ) );
-
 	}//end init()
 
 	public function add_hooks_for_updating_site_in_cloud() {
@@ -49,7 +47,6 @@ class Nelio_Content_Cloud {
 		add_filter( 'pre_update_option_home', array( $this, 'on_site_option_updated' ), 10, 2 );
 
 		add_action( 'shutdown', array( $this, 'maybe_sync_site' ), 10, 2 );
-
 	}//end add_hooks_for_updating_site_in_cloud()
 
 	public function add_hooks_for_updating_post_in_cloud_on_publish() {
@@ -58,7 +55,6 @@ class Nelio_Content_Cloud {
 		foreach ( $post_types as $post_type ) {
 			add_action( "publish_{$post_type}", array( $this, 'maybe_sync_post' ) );
 		}//end foreach
-
 	}//end add_hooks_for_updating_post_in_cloud_on_publish()
 
 	public function maybe_sync_post( $post_id ) {
@@ -106,7 +102,6 @@ class Nelio_Content_Cloud {
 			delete_post_meta( $post_id, '_nc_cloud_sync_attempts' );
 			$post_helper->mark_post_as_synched( $post_id );
 		}//end if
-
 	}//end maybe_sync_post()
 
 	public function on_site_option_updated( $new_value, $old_value ) {
@@ -142,7 +137,6 @@ class Nelio_Content_Cloud {
 
 		$url = nc_get_api_url( '/site/' . nc_get_site_id(), 'wp' );
 		wp_remote_request( $url, $data );
-
 	}//end maybe_sync_site()
 
 	public function maybe_add_profile_status_checker() {
@@ -171,7 +165,6 @@ class Nelio_Content_Cloud {
 			wp_unschedule_event( $schedule, $event );
 			wp_schedule_event( time() + DAY_IN_SECONDS, $expected_recurrence, $event );
 		}//end if
-
 	}//end maybe_add_profile_status_checker()
 
 	public function check_profile_status() {
@@ -208,7 +201,7 @@ class Nelio_Content_Cloud {
 
 		$users  = array_values( array_unique( wp_list_pluck( $profiles, 'creatorId' ) ) );
 		$emails = array_map(
-			function( $user_id ) {
+			function ( $user_id ) {
 				$info = get_userdata( $user_id );
 				if ( ! is_user_member_of_blog( $user_id ) || empty( $info ) ) {
 					return false;
@@ -238,7 +231,6 @@ class Nelio_Content_Cloud {
 
 		// phpcs:ignore
 		wp_mail( $emails, $subject, $message );
-
 	}//end check_profile_status()
 
 	private function sync_post( $post_id, $post ) {
@@ -274,7 +266,5 @@ class Nelio_Content_Cloud {
 		}//end if
 
 		return true;
-
 	}//end sync_post()
-
 }//end class

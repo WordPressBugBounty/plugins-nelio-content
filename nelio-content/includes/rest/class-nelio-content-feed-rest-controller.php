@@ -38,7 +38,6 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -50,7 +49,6 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-
 	}//end init()
 
 	/**
@@ -136,7 +134,6 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	/**
@@ -239,7 +236,6 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 		update_option( 'nc_feeds', array_values( $feeds ) );
 
 		return new WP_REST_Response( true, 200 );
-
 	}//end remove_feed()
 
 	/**
@@ -288,7 +284,6 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 		);
 
 		return new WP_REST_Response( $result, 200 );
-
 	}//end get_feed_items()
 
 	private function prepare_authors( $authors ) {
@@ -320,5 +315,4 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 		}//end foreach
 		return false;
 	}//end get_feed()
-
 }//end class

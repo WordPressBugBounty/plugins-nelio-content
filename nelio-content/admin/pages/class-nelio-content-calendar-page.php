@@ -23,7 +23,6 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 			_x( 'Calendar', 'text', 'nelio-content' ),
 			nc_can_current_user_use_plugin()
 		);
-
 	}//end __construct()
 
 	// @Overrides
@@ -34,7 +33,6 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 
 		add_filter( 'admin_footer_text', '__return_empty_string', 99 );
 		add_filter( 'update_footer', '__return_empty_string', 99 );
-
 	}//end add_page_specific_hooks()
 
 	// @Implements
@@ -66,7 +64,6 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 				wp_json_encode( $settings ) // phpcs:ignore
 			)
 		);
-
 	}//end enqueue_assets()
 
 	private function get_ics_links() {
@@ -97,7 +94,6 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 			'all'  => $all_link,
 			'user' => $user_link,
 		);
-
 	}//end get_ics_links()
 
 	private function get_focus_day() {
@@ -120,7 +116,6 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 		}//end if
 
 		return $date;
-
 	}//end get_focus_day()
 
 	private function get_number_of_non_collapsable_messages() {
@@ -141,7 +136,7 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 		return array_values(
 			array_filter(
 				$calendars,
-				function( $cal ) {
+				function ( $cal ) {
 					return isset( $cal['url'] ) && ! empty( $cal['url'] ) && isset( $cal['name'] );
 				}
 			)

@@ -38,7 +38,6 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -50,7 +49,6 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-
 	}//end init()
 
 	/**
@@ -130,7 +128,6 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	/**
@@ -227,7 +224,6 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 		update_option( 'nc_external_calendars', array_values( $calendars ) );
 
 		return new WP_REST_Response( true, 200 );
-
 	}//end remove_external_calendar()
 
 	/**

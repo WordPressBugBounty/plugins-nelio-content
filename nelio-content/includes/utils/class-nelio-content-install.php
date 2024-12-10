@@ -32,7 +32,6 @@ class Nelio_Content_Install {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -71,7 +70,6 @@ class Nelio_Content_Install {
 
 		global $allowedposttags;
 		$allowedposttags['ncshare'] = array( 'class' => true ); // phpcs:ignore
-
 	}//end allow_ncshare_tags()
 
 	/**
@@ -96,7 +94,6 @@ class Nelio_Content_Install {
 		 * @since 1.0.0
 		 */
 		do_action( 'nelio_content_updated', $this_version, $last_version );
-
 	}//end maybe_update()
 
 	/**
@@ -132,7 +129,6 @@ class Nelio_Content_Install {
 		 * @since 1.0.0
 		 */
 		do_action( 'nelio_content_installed', $this_version, $last_version );
-
 	}//end install()
 
 	private function has_social_profiles() {
@@ -165,7 +161,6 @@ class Nelio_Content_Install {
 		}//end if
 
 		return count( $profiles ) > 0;
-
 	}//end has_social_profiles()
 
 	private function set_proper_permissions() {
@@ -228,7 +223,6 @@ class Nelio_Content_Install {
 				$role->add_cap( $cap );
 			}//end foreach
 		}//end if
-
 	}//end set_proper_permissions()
 
 	public function notify_to_cloud() {
@@ -345,7 +339,7 @@ class Nelio_Content_Install {
 				? $settings['calendar_post_types']
 				: array( 'post' );
 
-		$escape_array = function( $arr ) {
+		$escape_array = function ( $arr ) {
 			$values = array_map( 'esc_sql', $arr );
 			return "'" . implode( "', '", $values ) . "'";
 		};
@@ -375,7 +369,6 @@ class Nelio_Content_Install {
 			unset( $settings['auto_reshare_default_mode'] );
 			update_option( 'nelio-content_settings', $settings );
 		}//end if
-
 	}//end update_auto_sharing_fields()
 
 	private function init_universal_group() {
@@ -410,7 +403,7 @@ class Nelio_Content_Install {
 			)
 		);
 		$categories = array_map(
-			function( $id, $slug ) {
+			function ( $id, $slug ) {
 				return array(
 					'id'   => $id,
 					'slug' => $slug,

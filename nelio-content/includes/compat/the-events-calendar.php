@@ -53,4 +53,3 @@ function include_events( $events ) {
 	return array_merge( $events, $found_events );
 }//end include_events()
 add_filter( 'nelio_content_internal_events', 'include_events' );
-

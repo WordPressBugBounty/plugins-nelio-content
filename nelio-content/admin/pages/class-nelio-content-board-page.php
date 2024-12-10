@@ -23,7 +23,6 @@ class Nelio_Content_Board_Page extends Nelio_Content_Abstract_Page {
 			_x( 'Content Board', 'menu', 'nelio-content' ),
 			nc_can_current_user_use_plugin()
 		);
-
 	}//end __construct()
 
 	// @Overrides
@@ -36,7 +35,6 @@ class Nelio_Content_Board_Page extends Nelio_Content_Abstract_Page {
 		}//end if
 
 		parent::init();
-
 	}//end init()
 
 	// @Overrides
@@ -47,7 +45,6 @@ class Nelio_Content_Board_Page extends Nelio_Content_Abstract_Page {
 
 		add_filter( 'admin_footer_text', '__return_empty_string', 99 );
 		add_filter( 'update_footer', '__return_empty_string', 99 );
-
 	}//end add_page_specific_hooks()
 
 	// @Implements

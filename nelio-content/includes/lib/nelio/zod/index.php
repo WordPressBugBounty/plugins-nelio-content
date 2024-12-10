@@ -2,16 +2,16 @@
 
 namespace Nelio_Content\Zod;
 
-require_once dirname( __FILE__ ) . '/abstract-schema.php';
-require_once dirname( __FILE__ ) . '/array-schema.php';
-require_once dirname( __FILE__ ) . '/boolean-schema.php';
-require_once dirname( __FILE__ ) . '/enum-schema.php';
-require_once dirname( __FILE__ ) . '/literal-schema.php';
-require_once dirname( __FILE__ ) . '/number-schema.php';
-require_once dirname( __FILE__ ) . '/object-schema.php';
-require_once dirname( __FILE__ ) . '/record-schema.php';
-require_once dirname( __FILE__ ) . '/string-schema.php';
-require_once dirname( __FILE__ ) . '/union-schema.php';
+require_once __DIR__ . '/abstract-schema.php';
+require_once __DIR__ . '/array-schema.php';
+require_once __DIR__ . '/boolean-schema.php';
+require_once __DIR__ . '/enum-schema.php';
+require_once __DIR__ . '/literal-schema.php';
+require_once __DIR__ . '/number-schema.php';
+require_once __DIR__ . '/object-schema.php';
+require_once __DIR__ . '/record-schema.php';
+require_once __DIR__ . '/string-schema.php';
+require_once __DIR__ . '/union-schema.php';
 
 class Zod {
 	public static function array( Schema $schema ): ArraySchema {
@@ -49,5 +49,4 @@ class Zod {
 	public static function union( array $schemas ): UnionSchema {
 		return UnionSchema::make( $schemas );
 	}//end union()
-
 }//end class

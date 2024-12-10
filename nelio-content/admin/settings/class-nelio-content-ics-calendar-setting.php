@@ -49,7 +49,6 @@ class Nelio_Content_ICS_Calendar_Setting extends Nelio_Content_Abstract_Setting 
 			checked( $this->value, true, false ),
 			esc_html( $desc )
 		);
-
 	}//end display()
 
 	// @Implements
@@ -81,7 +80,5 @@ class Nelio_Content_ICS_Calendar_Setting extends Nelio_Content_Abstract_Setting 
 		$input[ $this->name ] = $checked;
 
 		return $input;
-
 	}//end sanitize()
-
 }//end class

@@ -17,4 +17,3 @@ function nc_compat_divi_enable_shortcodes_in_ajax( $actions ) {
 	return $actions;
 }//end nc_compat_divi_enable_shortcodes_in_ajax()
 add_filter( 'et_builder_load_actions', 'nc_compat_divi_enable_shortcodes_in_ajax' );
-

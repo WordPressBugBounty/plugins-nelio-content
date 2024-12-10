@@ -66,7 +66,6 @@ abstract class Nelio_Content_Abstract_React_Setting extends Nelio_Content_Abstra
 				wp_json_encode( $settings )
 			)
 		);
-
 	}//end enqueue_assets()
 
 	// @Implements
@@ -82,5 +81,4 @@ abstract class Nelio_Content_Abstract_React_Setting extends Nelio_Content_Abstra
 	protected function get_field_attributes() {
 		return array();
 	}//end get_field_attributes()
-
 }//end class

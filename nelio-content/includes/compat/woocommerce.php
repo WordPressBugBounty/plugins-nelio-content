@@ -16,7 +16,6 @@ function nc_woocommerce_hooks() {
 
 	add_filter( 'nelio_content_available_post_types_setting', 'nc_woocommerce_add_order_type' );
 	add_filter( 'nelio_content_post_statuses', 'nc_woocommerce_maybe_add_order_statuses', 10, 2 );
-
 }//end nc_woocommerce_hooks()
 add_action( 'woocommerce_init', 'nc_woocommerce_hooks' );
 

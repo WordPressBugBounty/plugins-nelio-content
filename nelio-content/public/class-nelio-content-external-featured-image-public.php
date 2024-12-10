@@ -48,7 +48,6 @@ class Nelio_Content_External_Featured_Image_Public {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -103,7 +102,6 @@ class Nelio_Content_External_Featured_Image_Public {
 
 		// Fix og:image meta tag.
 		add_action( 'wp_head', array( $this, 'leave_wp_head_section' ), 99999 );
-
 	}//end add_hooks()
 
 	/**
@@ -132,7 +130,7 @@ class Nelio_Content_External_Featured_Image_Public {
 	 * @since  1.1.1
 	 * @access public
 	 */
-	public function maybe_simulate_post_thumbnail_attachment( $null, $object_id, $meta_key ) {
+	public function maybe_simulate_post_thumbnail_attachment( $null, $object_id, $meta_key ) { // phpcs:ignore
 
 		// If we're accessing a meta other than the thumbnail, leave.
 		if ( '_thumbnail_id' !== $meta_key ) {
@@ -185,7 +183,6 @@ class Nelio_Content_External_Featured_Image_Public {
 		}//end foreach
 
 		return -$object_id;
-
 	}//end maybe_simulate_post_thumbnail_attachment()
 
 	/**
@@ -253,7 +250,6 @@ class Nelio_Content_External_Featured_Image_Public {
 		}//end if
 
 		return $image;
-
 	}//end maybe_return_efi_url()
 
 	/**
@@ -297,7 +293,6 @@ class Nelio_Content_External_Featured_Image_Public {
 		}//end if
 
 		return $html;
-
 	}//end maybe_add_efi_as_background()
 
 	/**
@@ -326,7 +321,6 @@ class Nelio_Content_External_Featured_Image_Public {
 		}//end if
 
 		return "style={$quote}background:url( {$image_url} ) no-repeat center center;-webkit-background-size:cover;-moz-background-size:cover;-o-background-size:cover;background-size: cover;{$quote}";
-
 	}//end generate_style_tag()
 
 	/**
@@ -394,7 +388,6 @@ class Nelio_Content_External_Featured_Image_Public {
 		// If the placeholder was successfully created, use it.
 		$this->placeholder_id = get_option( 'nc_efi_placeholder_id', false );
 		return $this->placeholder_id;
-
 	}//end get_placeholder_id()
 
 	/**
@@ -406,9 +399,7 @@ class Nelio_Content_External_Featured_Image_Public {
 	public function leave_wp_head_section() {
 
 		$this->in_wp_head = false;
-
 	}//end leave_wp_head_section()
-
 }//end class
 
 /**
@@ -420,7 +411,7 @@ class Nelio_Content_External_Featured_Image_Public {
  *
  * @since 2.0.1
  */
-function nc_get_external_featured_image( $post_id ) {
+function nc_get_external_featured_image( $post_id ) { // phpcs:ignore
 	$aux = Nelio_Content_External_Featured_Image_Helper::instance();
 	return $aux->get_external_featured_image( $post_id );
 }//end nc_get_external_featured_image()

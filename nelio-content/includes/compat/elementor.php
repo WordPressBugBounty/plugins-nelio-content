@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 add_action(
 	'admin_init',
-	function() {
+	function () {
 		if ( ! did_action( 'elementor/loaded' ) ) {
 			return;
 		}//end if
@@ -37,20 +37,23 @@ add_action(
 
 		add_action(
 			'elementor/editor/footer',
-			function() {
-				$icon = file_get_contents( nelio_content()->plugin_path . '/assets/dist/images/logo.svg' );
-				$icon = str_replace( 'fill="inherit"', 'fill="currentColor"', $icon );
-				$icon = str_replace( 'width="20"', 'width="15"', $icon );
-				$icon = str_replace( 'height="20"', 'width="15"', $icon );
+			function () {
+				require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+				require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+				$filesystem = new \WP_Filesystem_Direct( true );
+				$icon       = $filesystem->get_contents( nelio_content()->plugin_path . '/assets/dist/images/logo.svg' );
+				$icon       = str_replace( 'fill="inherit"', 'fill="currentColor"', $icon );
 				?>
-				<button id="elementor-panel-footer-nelio-content" class="elementor-panel-footer-tool tooltip-target" data-tooltip="<?php echo esc_attr_x( 'Nelio Content', 'text', 'nelio-content' ); ?>" original-title="">
-					<span id="elementor-panel-footer-nelio-content-label">
-					<?php
-						echo $icon; // phpcs:ignore
-					?>
-					</span>
-					<span class="elementor-screen-only"><?php echo esc_html_x( 'Nelio Content', 'text', 'nelio-content' ); ?></span>
-				</button>
+				<span id="elementor-panel-footer-nelio-content" class="MuiBox-root css-0" data-mui-internal-clone-element="true">
+					<button id="elementor-panel-footer-nelio-content-button" class="elementor-panel-footer-tool tooltip-target" data-tooltip-offset="15" data-tooltip="<?php echo esc_attr_x( 'Nelio Content', 'text', 'nelio-content' ); ?>" original-title="">
+						<span id="elementor-panel-footer-nelio-content-label">
+						<?php
+							echo $icon; // phpcs:ignore
+						?>
+						</span>
+						<span class="elementor-screen-only"><?php echo esc_html_x( 'Nelio Content', 'text', 'nelio-content' ); ?></span>
+					</button>
+				</span>
 
 				<aside id="elementor-nelio-content" aria-labelledby="elementor-nelio-content__header__title" style="display: none;">
 					<div id="elementor-nelio-content__inner">
@@ -87,7 +90,7 @@ add_action(
 		);
 		add_action(
 			'elementor/editor/before_enqueue_scripts',
-			function() {
+			function () {
 				$url   = nelio_content()->plugin_url;
 				$files = array( 'post-quick-editor', 'social-message-editor', 'task-editor', 'social-timeline' );
 				foreach ( $files as $file ) {
@@ -110,7 +113,7 @@ add_action(
 
 		add_action(
 			'elementor/editor/after_enqueue_scripts',
-			function() {
+			function () {
 				wp_enqueue_style( 'nelio-content-edit-post' );
 				wp_enqueue_style(
 					'nelio-content-elementor-editor',

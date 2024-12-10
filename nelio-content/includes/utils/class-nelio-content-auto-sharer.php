@@ -75,7 +75,6 @@ class Nelio_Content_Auto_Sharer {
 			$this->schedule_day( $last_scheduled_day, is_array( $posts ) ? $posts : array( $posts ) );
 		}//end foreach
 		update_option( 'nc_reshare_last_day', $last_scheduled_day );
-
 	}//end schedule_week()
 
 	/**
@@ -123,7 +122,6 @@ class Nelio_Content_Auto_Sharer {
 			nc_get_site_id()
 		);
 		wp_remote_request( $url, $data );
-
 	}//end schedule_day()
 
 	private function add_schedule_week_cron() {
@@ -273,12 +271,12 @@ class Nelio_Content_Auto_Sharer {
 		$groups = nc_get_automation_groups();
 		$groups = array_filter(
 			$groups,
-			function( $g ) {
+			function ( $g ) {
 				return (
 					! empty( $g['priority'] ) &&
 					array_reduce(
 						$g['profileSettings'],
-						function( $carry, $ps ) {
+						function ( $carry, $ps ) {
 							if ( $carry ) {
 								return $carry;
 							}//end if
@@ -307,7 +305,7 @@ class Nelio_Content_Auto_Sharer {
 		if ( ! empty( $term_map ) ) {
 			$taxs  = array_keys( $term_map );
 			$names = array_map(
-				function( $i ) {
+				function ( $i ) {
 					++$i;
 					return "tr{$i}";
 				},
@@ -320,7 +318,7 @@ class Nelio_Content_Auto_Sharer {
 		$query  = $this->join_term_tables( $term_map, $tax_tables, $query );
 		$today  = gmdate( 'Y-m-d', time() );
 		$wheres = array_map(
-			function( $group ) use ( $today, &$term_map, &$tax_tables ) {
+			function ( $group ) use ( $today, &$term_map, &$tax_tables ) {
 				$where = array();
 
 				$post_type = get( $group, 'postType' );
@@ -331,7 +329,7 @@ class Nelio_Content_Auto_Sharer {
 				$taxonomies = get( $group, 'taxonomies', array() );
 				if ( ! empty( $taxonomies ) ) {
 					$conds   = array_map(
-						function( $tax, $terms ) use ( &$term_map, &$tax_tables ) {
+						function ( $tax, $terms ) use ( &$term_map, &$tax_tables ) {
 							$terms = array_map(
 								function ( $term ) use ( $tax, &$term_map ) {
 									return get( $term_map, array( $tax, $term ), 0 );
@@ -374,7 +372,7 @@ class Nelio_Content_Auto_Sharer {
 	private function get_term_taxonomy_ids_from_groups( $groups ) {
 		$taxonomies = array_reduce(
 			$groups,
-			function( $result, $g ) {
+			function ( $result, $g ) {
 				$gt = get( $g, 'taxonomies', array() );
 				foreach ( $gt as $tax => $terms ) {
 					$terms          = array_values( array_filter( array_map( 'absint', $terms ) ) );

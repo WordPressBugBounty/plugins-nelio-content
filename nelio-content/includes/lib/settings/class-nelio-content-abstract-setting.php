@@ -96,7 +96,6 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 		$this->name = $name;
 		$this->desc = $desc;
 		$this->more = $more;
-
 	}//end __construct()
 
 	/**
@@ -132,7 +131,6 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 			$section,
 			empty( $label ) ? array( 'class' => 'nelio-content-reduce-top-margin' ) : array()
 		);
-
 	}//end register()
 
 	// @Implements
@@ -157,11 +155,9 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 
 		if ( ! empty( $this->desc ) ) {
 			$img    = nelio_content()->plugin_url . '/includes/lib/settings/assets/images/help.png';
-			$label .= '<img class="nelio-settings-help" style="float:right;margin-right:-15px;cursor:pointer;" src="' . $img . '" height="16" width="16" />';
+			$label .= '<img class="nelio-settings-help" style="float:right;margin-right:-15px;cursor:pointer;" src="' . $img . '" height="16" width="16" />'; //phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
 		}//end if
 
 		return $label;
-
 	}//end generate_label()
-
 }//end class

@@ -66,7 +66,6 @@ class Nelio_Content_Task_Presets_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	public function validate_task_presets( $presets ) {
@@ -102,5 +101,4 @@ class Nelio_Content_Task_Presets_REST_Controller extends WP_REST_Controller {
 
 		return new WP_REST_Response( array_map( fn( $p ) => $p->json(), $presets ), 200 );
 	}//end update_task_presets()
-
 }//end class

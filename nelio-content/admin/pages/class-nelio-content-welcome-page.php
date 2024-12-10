@@ -23,7 +23,6 @@ class Nelio_Content_Welcome_Page extends Nelio_Content_Abstract_Page {
 			_x( 'Welcome', 'text', 'nelio-content' ),
 			nc_can_current_user_manage_account()
 		);
-
 	}//end __construct()
 
 	// @Overrides
@@ -43,7 +42,5 @@ class Nelio_Content_Welcome_Page extends Nelio_Content_Abstract_Page {
 			nc_get_script_version( 'welcome-page' )
 		);
 		nc_enqueue_script_with_auto_deps( 'nelio-content-welcome-page', 'welcome-page', true );
-
 	}//end enqueue_assets()
-
 }//end class

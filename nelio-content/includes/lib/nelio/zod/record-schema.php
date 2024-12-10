@@ -23,7 +23,7 @@ class RecordSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected a record, but %s found.',
-					gettype( $value )
+					esc_html( gettype( $value ) )
 				)
 			);
 		}//end if
@@ -33,17 +33,16 @@ class RecordSchema extends Schema {
 			try {
 				$this->key_schema->parse( $key );
 			} catch ( \Exception $e ) {
-				throw new \Exception( $this->add_path( 'Invalid key:' . $e->getMessage(), "{$key}" ) );
+				throw new \Exception( esc_html( $this->add_path( 'Invalid key:' . $e->getMessage(), "{$key}" ) ) );
 			}//end try
 
 			try {
 				$result[ $key ] = $this->value_schema->parse( $val );
 			} catch ( \Exception $e ) {
-				throw new \Exception( $this->add_path( 'Invalid value:' . $e->getMessage(), "{$key}" ) );
+				throw new \Exception( esc_html( $this->add_path( 'Invalid value:' . $e->getMessage(), "{$key}" ) ) );
 			}//end try
 		}//end foreach
 
 		return array_filter( $result, fn( $p ) => ! is_null( $p ) );
 	}//end parse_value()
-
 }//end class

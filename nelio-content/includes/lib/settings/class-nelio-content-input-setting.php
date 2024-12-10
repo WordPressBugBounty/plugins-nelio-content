@@ -103,7 +103,6 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 		$type        = $this->type;
 		$placeholder = $this->placeholder;
 		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-input-setting.php';
-
 	}//end display()
 
 	// @Implements
@@ -132,7 +131,6 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 		$input[ $this->name ] = $value;
 
 		return $input;
-
 	}//end sanitize()
 
 	/**
@@ -177,5 +175,4 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 	private function sanitize_number( $value ) {
 		return intval( $value );
 	}//end sanitize_number()
-
 }//end class

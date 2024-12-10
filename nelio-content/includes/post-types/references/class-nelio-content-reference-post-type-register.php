@@ -41,7 +41,6 @@ class Nelio_Content_Reference_Post_Type_Register {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
@@ -50,7 +49,6 @@ class Nelio_Content_Reference_Post_Type_Register {
 		add_action( 'init', array( $this, 'register_post_statuses' ), 9 );
 
 		add_filter( 'user_has_cap', array( $this, 'set_user_capabilities' ), 10, 4 );
-
 	}//end init()
 
 	public function register_post_type() {
@@ -105,7 +103,6 @@ class Nelio_Content_Reference_Post_Type_Register {
 				)
 			)
 		);
-
 	}//end register_post_type()
 
 	public function register_post_statuses() {
@@ -149,14 +146,13 @@ class Nelio_Content_Reference_Post_Type_Register {
 			'label_count' => _nx_noop( 'Check Required <span class="count">(%s)</span>', 'Check Required <span class="count">(%s)</span>', 'text (reference)', 'nelio-content' ),
 		);
 		register_post_status( 'nc_check', $args );
-
 	}//end register_post_statuses()
 
 	public function set_user_capabilities( $capabilities, $_, $__, $user ) {
 
 		$capabilities = array_filter(
 			$capabilities,
-			function( $cap ) {
+			function ( $cap ) {
 				return false === strpos( $cap, 'nc_reference' );
 			},
 			ARRAY_FILTER_USE_KEY
@@ -193,5 +189,4 @@ class Nelio_Content_Reference_Post_Type_Register {
 
 		return $capabilities;
 	}//end set_user_capabilities()
-
 }//end class

@@ -22,7 +22,5 @@ class Nelio_Content_Series_Post_List_Setting extends Nelio_Content_Abstract_Reac
 
 		$input[ $this->name ] = $value;
 		return $input;
-
 	}//end sanitize()
-
 }//end class

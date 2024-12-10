@@ -36,7 +36,6 @@ class Nelio_Content_Internal_Events_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -48,7 +47,6 @@ class Nelio_Content_Internal_Events_REST_Controller extends WP_REST_Controller {
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-
 	}//end init()
 
 	/**
@@ -67,7 +65,6 @@ class Nelio_Content_Internal_Events_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	/**

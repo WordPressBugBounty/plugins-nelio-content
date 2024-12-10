@@ -34,7 +34,6 @@ class Nelio_Content_External_Featured_Image_Admin {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
@@ -50,7 +49,6 @@ class Nelio_Content_External_Featured_Image_Admin {
 		add_action( 'after_switch_theme', array( $this, 'maybe_regenerate_efi_placeholder_thumbnails' ) );
 
 		add_action( 'init', array( $this, 'add_settings_based_hooks' ) );
-
 	}//end init()
 
 	public function add_settings_based_hooks() {
@@ -100,7 +98,6 @@ class Nelio_Content_External_Featured_Image_Admin {
 		$aux             = get_option( $settings->get_name(), array() );
 		$aux['efi_mode'] = $efi_mode;
 		update_option( $settings->get_name(), $aux );
-
 	}//end set_efi_mode()
 
 	public function maybe_regenerate_efi_placeholder_thumbnails() {
@@ -119,7 +116,5 @@ class Nelio_Content_External_Featured_Image_Admin {
 		$filename    = get_attached_file( $attach_id );
 		$attach_data = wp_generate_attachment_metadata( $attach_id, $filename );
 		wp_update_attachment_metadata( $attach_id, $attach_data );
-
 	}//end maybe_regenerate_efi_placeholder_thumbnails()
-
 }//end class

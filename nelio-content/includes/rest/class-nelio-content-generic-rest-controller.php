@@ -38,7 +38,6 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -50,7 +49,6 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-
 	}//end init()
 
 	/**
@@ -239,7 +237,6 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	public function check_if_user_can_deactivate_plugin() {
@@ -304,7 +301,6 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 		$is_paused = $result->isMessagePublicationPaused; // phpcs:ignore
 
 		return new WP_REST_Response( $is_paused, 200 );
-
 	}//end pause_publication()
 
 	/**
@@ -392,7 +388,6 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 		$has_profiles = $request['profiles'];
 		update_option( 'nc_has_social_profiles', $has_profiles );
 		return new WP_REST_Response( $has_profiles, 200 );
-
 	}//end update_profiles()
 
 	/**
@@ -437,7 +432,6 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return new WP_REST_Response( true, 200 );
-
 	}//end deactivate_plugin()
 
 	/**
@@ -503,7 +497,5 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 		);
 
 		return new WP_REST_Response( true, 200 );
-
 	}//end clean_plugin()
-
 }//end class

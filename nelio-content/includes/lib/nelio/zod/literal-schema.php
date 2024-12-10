@@ -17,13 +17,12 @@ class LiteralSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected %1$s but %2$s found.',
-					$this->value,
-					$value
+					esc_html( $this->value ),
+					esc_html( $value )
 				)
 			);
 		}//end if
 
 		return $value;
 	}//end parse_value()
-
 }//end class

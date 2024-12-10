@@ -61,7 +61,6 @@ class Nelio_Content_Post_Type_Setting extends Nelio_Content_Abstract_React_Setti
 
 		$input[ $this->name ] = $value;
 		return $input;
-
 	}//end sanitize()
 
 	private function get_post_types() {
@@ -76,7 +75,7 @@ class Nelio_Content_Post_Type_Setting extends Nelio_Content_Abstract_React_Setti
 
 		$types = array_values( array_unique( array_merge( $default_types, $other_types ) ) );
 		$types = array_map(
-			function( $name ) {
+			function ( $name ) {
 				$type = get_post_type_object( $name );
 				return array(
 					'value' => $type->name,
@@ -97,7 +96,5 @@ class Nelio_Content_Post_Type_Setting extends Nelio_Content_Abstract_React_Setti
 		 * @since 2.2.3
 		 */
 		return apply_filters( 'nelio_content_available_post_types_setting', $types, $this->name );
-
 	}//end get_post_types()
-
 }//end class

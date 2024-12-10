@@ -31,7 +31,6 @@ function nc_get_subscription() {
 	}//end if
 
 	return $subscription;
-
 }//end nc_get_subscription()
 
 /**
@@ -45,7 +44,6 @@ function nc_is_subscribed() {
 
 	$subscription = nc_get_subscription();
 	return ! empty( $subscription );
-
 }//end nc_is_subscribed()
 
 /**
@@ -65,7 +63,6 @@ function nc_update_subscription( $plan, $limits ) {
 	}//end if
 
 	update_option( 'nc_site_limits', $limits );
-
 }//end nc_update_subscription()
 
 /**

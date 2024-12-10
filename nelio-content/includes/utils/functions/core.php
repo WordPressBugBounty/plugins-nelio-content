@@ -24,7 +24,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 function nc_get_site_id() {
 
 	return get_option( 'nc_site_id', false );
-
 }//end nc_get_site_id()
 
 /**
@@ -44,7 +43,6 @@ function nc_get_site_limits() {
 			'maxProfilesPerNetwork' => 1,
 		)
 	);
-
 }//end nc_get_site_limits()
 
 /**
@@ -65,7 +63,6 @@ function nc_get_reference( $id ) {
 	} else {
 		return false;
 	}//end if
-
 }//end nc_get_reference()
 
 /**
@@ -115,7 +112,6 @@ function nc_get_reference_by_url( $url ) {
 	}//end if
 
 	return $result;
-
 }//end nc_get_reference_by_url()
 
 /**
@@ -158,7 +154,6 @@ function nc_create_reference( $url ) {
 	}//end if
 
 	return $reference;
-
 }//end nc_create_reference()
 
 /**
@@ -199,7 +194,6 @@ function nc_get_post_reference( $post_id, $status = 'included' ) {
 			return array_map( 'absint', $arr );
 
 	}//end switch
-
 }//end nc_get_post_reference()
 
 /**
@@ -225,7 +219,6 @@ function nc_add_post_reference( $post_id, $reference_id ) {
 	// If the reference has been added to the post, it can't be "discarded".
 	delete_post_meta( $post_id, '_nc_discarded_reference', $reference_id );
 	nc_add_post_meta_once( $post_id, '_nc_included_reference', $reference_id );
-
 }//end nc_add_post_reference()
 
 /**
@@ -250,7 +243,6 @@ function nc_delete_post_reference( $post_id, $reference_id ) {
 
 	delete_post_meta( $post_id, '_nc_included_reference', $reference_id );
 	nc_remove_unused_reference( $reference_id );
-
 }//end nc_delete_post_reference()
 
 /**
@@ -285,7 +277,6 @@ function nc_suggest_post_reference( $post_id, $reference_id, $advisor ) {
 		'date'    => time(),
 	);
 	add_post_meta( $post_id, '_nc_suggested_reference_' . $reference_id . '_meta', $meta, true );
-
 }//end nc_suggest_post_reference()
 
 /**
@@ -315,7 +306,6 @@ function nc_discard_post_reference( $post_id, $reference_id ) {
 	nc_delete_post_reference( $post_id, $reference_id );
 	delete_post_meta( $post_id, '_nc_suggested_reference', $reference_id );
 	delete_post_meta( $post_id, '_nc_suggested_reference_' . $reference_id . '_meta' );
-
 }//end nc_discard_post_reference()
 
 /**
@@ -334,7 +324,6 @@ function nc_get_suggested_reference_meta( $post_id, $reference_id ) {
 	$result = get_post_meta( $post_id, '_nc_suggested_reference_' . $reference_id . '_meta', true );
 
 	return $result;
-
 }//end nc_get_suggested_reference_meta()
 
 /**
@@ -373,5 +362,4 @@ function nc_remove_unused_reference( $reference_id ) {
 	}//end if
 
 	wp_delete_post( $reference_id );
-
 }//end nc_remove_unused_reference()

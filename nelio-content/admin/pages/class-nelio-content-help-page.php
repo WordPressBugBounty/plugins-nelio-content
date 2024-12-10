@@ -23,7 +23,6 @@ class Nelio_Content_Help_Page extends Nelio_Content_Abstract_Page {
 			_x( 'Help', 'text', 'nelio-content' ),
 			nc_can_current_user_use_plugin()
 		);
-
 	}//end __construct()
 
 	// @Overrides
@@ -50,7 +49,6 @@ class Nelio_Content_Help_Page extends Nelio_Content_Abstract_Page {
 				}//end if
 			}//end for
 		}//end if
-
 	}//end add_page()
 
 	// @Implements
@@ -64,5 +62,4 @@ class Nelio_Content_Help_Page extends Nelio_Content_Abstract_Page {
 	public function display() {
 		// Nothing to be done.
 	}//end display()
-
 }//end class

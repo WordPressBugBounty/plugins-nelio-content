@@ -39,7 +39,6 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -51,7 +50,6 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-
 	}//end init()
 
 	/**
@@ -122,7 +120,6 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	/**
@@ -137,7 +134,6 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 		$url       = $request->get_param( 'url' );
 		$reference = nc_create_reference( $url );
 		return new WP_REST_Response( $reference->json_encode(), 200 );
-
 	}//end search_reference_by_url()
 
 	/**
@@ -180,7 +176,5 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 		$reference->set_publication_date( $date );
 
 		return new WP_REST_Response( $reference->json_encode(), 200 );
-
 	}//end update_reference()
-
 }//end class

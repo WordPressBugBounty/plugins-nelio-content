@@ -91,6 +91,23 @@ return array(
 
 	array(
 		'type'     => 'custom',
+		'name'     => 'rewrite_post_types',
+		'label'    => nc_make_settings_title( esc_html_x( 'Rewrite & Republish', 'text', 'nelio-content' ), 'update' ),
+		'instance' => new Nelio_Content_Post_Type_Setting(
+			array(
+				'name' => 'rewrite_post_types',
+				'help' => _x(
+					'Rewrite or update a published post without taking it offline, using a copy of its content. And when you’re done, schedule or publish these updates and your new content will be merged into the original post.',
+					'user',
+					'nelio-content'
+				),
+			)
+		),
+		'default'  => array( 'post', 'page' ),
+	),
+
+	array(
+		'type'     => 'custom',
 		'name'     => 'series_post_types',
 		'label'    => nc_make_settings_title( esc_html_x( 'Series', 'text', 'nelio-content' ), 'book' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(

@@ -46,7 +46,7 @@ class NumberSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected a number, but %s found.',
-					gettype( $value )
+					esc_html( gettype( $value ) )
 				)
 			);
 		}//end if
@@ -55,8 +55,8 @@ class NumberSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected a number greater than or equal to %1$s, but %2$s found.',
-					$this->min,
-					$value
+					esc_html( $this->min ),
+					esc_html( $value )
 				)
 			);
 		}//end if
@@ -65,13 +65,12 @@ class NumberSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Expected a number less than or equal to %1$s, but %2$s found.',
-					$this->max,
-					$value
+					esc_html( $this->max ),
+					esc_html( $value )
 				)
 			);
 		}//end if
 
 		return $value;
 	}//end parse_value()
-
 }//end class

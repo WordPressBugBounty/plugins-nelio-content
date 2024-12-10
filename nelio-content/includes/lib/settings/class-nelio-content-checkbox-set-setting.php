@@ -62,7 +62,6 @@ class Nelio_Content_Checkbox_Set_Setting extends Nelio_Content_Abstract_Setting 
 
 			$this->checkboxes[ $option['name'] ] = $checkbox;
 		}//end foreach
-
 	}//end __construct()
 
 	/**
@@ -82,7 +81,6 @@ class Nelio_Content_Checkbox_Set_Setting extends Nelio_Content_Abstract_Setting 
 			$checkbox = $this->checkboxes[ $name ];
 			$checkbox->set_value( $value );
 		}//end if
-
 	}//end set_value()
 
 	// @Implements
@@ -91,7 +89,6 @@ class Nelio_Content_Checkbox_Set_Setting extends Nelio_Content_Abstract_Setting 
 		foreach ( $this->checkboxes as $checkbox ) {
 			$checkbox->display();
 		}//end foreach
-
 	}//end display()
 
 	// @Implements
@@ -101,7 +98,6 @@ class Nelio_Content_Checkbox_Set_Setting extends Nelio_Content_Abstract_Setting 
 			$input = $checkbox->sanitize( $input );
 		}//end foreach
 		return $input;
-
 	}//end sanitize()
 
 	// @Overrides
@@ -111,8 +107,5 @@ class Nelio_Content_Checkbox_Set_Setting extends Nelio_Content_Abstract_Setting 
 		foreach ( $this->checkboxes as $checkbox ) {
 			$checkbox->set_option_name( $option_name );
 		}//end foreach
-
 	}//end register()
-
 }//end class
-

@@ -27,7 +27,6 @@ class Nelio_Content_Edit_Post_Page {
 		add_filter( 'mce_external_plugins', array( $this, 'maybe_add_mce_plugin' ) );
 		add_filter( 'mce_buttons', array( $this, 'add_mce_buttons' ) );
 		add_filter( 'tiny_mce_before_init', array( $this, 'add_mce_tags' ) );
-
 	}//end init()
 
 	public function register_assets() {
@@ -42,7 +41,6 @@ class Nelio_Content_Edit_Post_Page {
 		nc_register_script_with_auto_deps( 'nelio-content-edit-post', 'edit-post', true );
 		nc_register_script_with_auto_deps( 'nelio-content-gutenberg-editor', 'gutenberg-editor', true );
 		nc_register_script_with_auto_deps( 'nelio-content-classic-editor', 'classic-editor', true );
-
 	}//end register_assets()
 
 	public function maybe_enqueue_gutenberg_assets() {
@@ -53,12 +51,14 @@ class Nelio_Content_Edit_Post_Page {
 
 		$this->enqueue_edit_post_style();
 
-		wp_enqueue_style(
-			'nelio-content-gutenberg-editor',
-			nelio_content()->plugin_url . '/assets/dist/css/gutenberg-editor.css',
-			array( 'nelio-content-edit-post' ),
-			nc_get_script_version( 'gutenberg-editor' )
-		);
+		if ( file_exists( nelio_content()->plugin_path . '/assets/dist/css/gutenberg-editor.css' ) ) {
+			wp_enqueue_style(
+				'nelio-content-gutenberg-editor',
+				nelio_content()->plugin_url . '/assets/dist/css/gutenberg-editor.css',
+				array( 'nelio-content-edit-post' ),
+				nc_get_script_version( 'gutenberg-editor' )
+			);
+		}//end if
 
 		wp_enqueue_script( 'nelio-content-gutenberg-editor' );
 		wp_add_inline_script(
@@ -68,7 +68,6 @@ class Nelio_Content_Edit_Post_Page {
 				wp_json_encode( $this->get_init_args() )
 			)
 		);
-
 	}//end maybe_enqueue_gutenberg_assets()
 
 	public function maybe_enqueue_classic_editor_assets() {
@@ -91,7 +90,6 @@ class Nelio_Content_Edit_Post_Page {
 				wp_json_encode( $this->get_init_args() )
 			)
 		);
-
 	}//end maybe_enqueue_classic_editor_assets()
 
 	public function maybe_add_mce_translations() {
@@ -138,7 +136,7 @@ class Nelio_Content_Edit_Post_Page {
 	}//end add_mce_buttons()
 
 	public function add_mce_tags( $options ) {
-		$append = function( $arr, $key, $value, $sep = ',' ) {
+		$append = function ( $arr, $key, $value, $sep = ',' ) {
 			if ( ! isset( $arr[ $key ] ) || empty( $arr[ $key ] ) ) {
 				$arr[ $key ] = '';
 			} else {
@@ -282,5 +280,4 @@ class Nelio_Content_Edit_Post_Page {
 		$post_types   = is_array( $post_types ) ? $post_types : array();
 		return in_array( $current_type, $post_types, true );
 	}//end is_post_type_feature_enabled()
-
 }//end class

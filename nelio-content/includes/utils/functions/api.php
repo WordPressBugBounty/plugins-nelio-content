@@ -25,7 +25,6 @@ function nc_does_api_use_proxy() {
 	 * @since 2.0.0
 	 */
 	return apply_filters( 'nelio_content_use_nelio_proxy', false );
-
 }//end nc_does_api_use_proxy()
 
 /**
@@ -51,7 +50,6 @@ function nc_get_api_url( $method, $context ) {
 	} else {
 		return 'https://api.neliocontent.com/v2' . $method;
 	}//end if
-
 }//end nc_get_api_url()
 
 /**
@@ -159,7 +157,6 @@ function nc_generate_api_auth_token( $mode = 'regular' ) {
 	}//end if
 
 	return $token;
-
 }//end nc_generate_api_auth_token()
 
 
@@ -167,14 +164,14 @@ function nc_generate_api_auth_token( $mode = 'regular' ) {
  * Returns the reference whose ID is the given ID.
  *
  * @param string         $code    API error code.
- * @param string|boolean $default Optional. Default error message.
+ * @param string|boolean $default_value Optional. Default error message.
  *
  * @return string Error message associated to the given error code.
  *
  * @since  1.0.0
  * @access public
  */
-function nc_get_error_message( $code, $default = false ) {
+function nc_get_error_message( $code, $default_value = false ) {
 
 	switch ( $code ) {
 
@@ -182,10 +179,9 @@ function nc_get_error_message( $code, $default = false ) {
 			return _x( 'Invalid license code.', 'error', 'nelio-content' );
 
 		default:
-			return $default;
+			return $default_value;
 
 	}//end switch
-
 }//end nc_get_error_message()
 
 /**
@@ -228,7 +224,6 @@ function nc_is_response_valid( $response ) {
 	}//end if
 
 	return false;
-
 }//end nc_is_response_valid()
 
 /**
@@ -281,5 +276,4 @@ function nc_extract_error_from_response( $response ) {
 		'server-error',
 		$error_message
 	);
-
 }//end nc_extract_error_from_response()

@@ -10,12 +10,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-require_once dirname( __FILE__ ) . '/divi.php';
-require_once dirname( __FILE__ ) . '/elementor.php';
-require_once dirname( __FILE__ ) . '/mailpoet.php';
-require_once dirname( __FILE__ ) . '/pagefrog.php';
-require_once dirname( __FILE__ ) . '/the-events-calendar.php';
-require_once dirname( __FILE__ ) . '/nelio-ab-testing.php';
-require_once dirname( __FILE__ ) . '/user-submitted-posts.php';
-require_once dirname( __FILE__ ) . '/woocommerce.php';
-require_once dirname( __FILE__ ) . '/wpml.php';
+require_once __DIR__ . '/divi.php';
+require_once __DIR__ . '/elementor.php';
+require_once __DIR__ . '/mailpoet.php';
+require_once __DIR__ . '/pagefrog.php';
+require_once __DIR__ . '/the-events-calendar.php';
+require_once __DIR__ . '/nelio-ab-testing.php';
+require_once __DIR__ . '/user-submitted-posts.php';
+require_once __DIR__ . '/woocommerce.php';
+require_once __DIR__ . '/wpml.php';

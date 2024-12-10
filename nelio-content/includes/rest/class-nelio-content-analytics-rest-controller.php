@@ -38,7 +38,6 @@ class Nelio_Content_Analytics_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -50,7 +49,6 @@ class Nelio_Content_Analytics_REST_Controller extends WP_REST_Controller {
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-
 	}//end init()
 
 	/**
@@ -212,7 +210,6 @@ class Nelio_Content_Analytics_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	public function validate_analytics_connection( $request ) {
@@ -277,7 +274,6 @@ class Nelio_Content_Analytics_REST_Controller extends WP_REST_Controller {
 		$analytics = Nelio_Content_Analytics_Helper::instance();
 		$result    = $analytics->get_paginated_posts( $args );
 		return new WP_REST_Response( $result, 200 );
-
 	}//end get_top_posts()
 
 	private function get_top_posts_arg( $request, $name ) {
@@ -328,7 +324,6 @@ class Nelio_Content_Analytics_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return new WP_REST_Response( true, 200 );
-
 	}//end refresh_google_analytics_token()
 
 	/**
@@ -384,7 +379,6 @@ class Nelio_Content_Analytics_REST_Controller extends WP_REST_Controller {
 		wp_reset_postdata();
 
 		return new WP_REST_Response( $result, 200 );
-
 	}//end get_post_ids_to_update()
 
 	/**
@@ -399,5 +393,4 @@ class Nelio_Content_Analytics_REST_Controller extends WP_REST_Controller {
 		$result    = $analytics->update_statistics( $request['id'], 'now' );
 		return is_wp_error( $result ) ? $result : new WP_REST_Response( true, 200 );
 	}//end update_post_analytics()
-
 }//end class

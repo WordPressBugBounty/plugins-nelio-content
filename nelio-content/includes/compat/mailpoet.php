@@ -56,4 +56,3 @@ function include_newsletters( $events ) {
 	return array_merge( $events, $newsletters );
 }//end include_newsletters()
 add_filter( 'nelio_content_internal_events', 'include_newsletters' );
-

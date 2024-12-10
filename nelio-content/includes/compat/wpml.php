@@ -19,7 +19,6 @@ function nc_wpml_maybe_add_filters() {
 	}//end if
 
 	add_filter( 'nelio_content_post_permalink', 'nc_wpml_use_actual_post_link', 1, 2 );
-
 }//end nc_wpml_maybe_add_filters()
 add_action( 'init', 'nc_wpml_maybe_add_filters' );
 
@@ -50,6 +49,4 @@ function nc_wpml_use_actual_post_link( $permalink, $post_id ) {
 	$sitepress_settings['auto_adjust_ids'] = $old_value;
 
 	return $permalink;
-
 }//end nc_wpml_use_actual_post_link()
-

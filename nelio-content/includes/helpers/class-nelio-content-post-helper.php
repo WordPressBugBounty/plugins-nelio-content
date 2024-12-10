@@ -29,7 +29,6 @@ class Nelio_Content_Post_Helper {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -66,7 +65,7 @@ class Nelio_Content_Post_Helper {
 		}//end if
 
 		$references = array_map(
-			function( $ref_id ) use ( $post_id ) {
+			function ( $ref_id ) use ( $post_id ) {
 				$reference = new Nelio_Content_Reference( $ref_id );
 				$meta      = nc_get_suggested_reference_meta( $post_id, $ref_id );
 				if ( ! empty( $meta ) ) {
@@ -85,7 +84,6 @@ class Nelio_Content_Post_Helper {
 		);
 
 		return array_values( $references );
-
 	}//end get_references()
 
 	/**
@@ -125,7 +123,6 @@ class Nelio_Content_Post_Helper {
 				'facebook.com',
 			)
 		);
-
 	}//end get_non_reference_domains()
 
 	/**
@@ -146,7 +143,6 @@ class Nelio_Content_Post_Helper {
 			delete_post_meta( $post_id, '_nc_include_in_auto_share' );
 			update_post_meta( $post_id, '_nc_exclude_from_auto_share', true );
 		}//end if
-
 	}//end enable_auto_share()
 
 	/**
@@ -173,7 +169,6 @@ class Nelio_Content_Post_Helper {
 
 		$settings = Nelio_Content_Settings::instance();
 		return 'include-in-auto-share' === $settings->get( 'auto_share_default_mode' );
-
 	}//end is_auto_share_enabled()
 
 	/**
@@ -336,10 +331,8 @@ class Nelio_Content_Post_Helper {
 		foreach ( $series as $series_item ) {
 			if ( isset( $series_item['part'] ) ) {
 				update_post_meta( $post_id, "_nc_series_{$series_item['id']}_part", $series_item['part'] );
-			} else {
-				if ( ! $keep_parts ) {
+			} elseif ( ! $keep_parts ) {
 					delete_post_meta( $post_id, "_nc_series_{$series_item['id']}_part" );
-				}//end if
 			}//end if
 		}//end foreach
 	}//end update_series()
@@ -363,7 +356,6 @@ class Nelio_Content_Post_Helper {
 
 		$users = array_values( array_filter( array_unique( array_map( 'absint', $users ) ) ) );
 		return nc_update_post_meta_array( $post_id, '_nc_following_users', $users );
-
 	}//end save_post_followers()
 
 	/**
@@ -407,6 +399,7 @@ class Nelio_Content_Post_Helper {
 			'imageId'            => $this->get_post_thumbnail_id( $post ),
 			'imageSrc'           => $this->get_post_thumbnail( $post, false ),
 			'images'             => $this->get_images( $post ),
+			'isRewrite'          => $this->is_rewrite( $post ),
 			'networkImageIds'    => $this->get_network_image_ids( $post->ID ),
 			'networkImages'      => $this->get_network_images( $post ),
 			'permalink'          => $this->get_permalink( $post ),
@@ -426,7 +419,6 @@ class Nelio_Content_Post_Helper {
 		);
 
 		return $result;
-
 	}//end post_to_json()
 
 	/**
@@ -469,7 +461,6 @@ class Nelio_Content_Post_Helper {
 		);
 
 		return $result;
-
 	}//end post_to_aws_json()
 
 	/**
@@ -506,7 +497,6 @@ class Nelio_Content_Post_Helper {
 
 		$recent = get_transient( "nc_recent_sync_{$post_id}" );
 		return empty( $recent );
-
 	}//end has_relevant_changes()
 
 	/**
@@ -524,7 +514,6 @@ class Nelio_Content_Post_Helper {
 			update_post_meta( $post_id, '_nc_sync_hash', $hash );
 			set_transient( "nc_recent_sync_{$post_id}", true, 15 * MINUTE_IN_SECONDS );
 		}//end if
-
 	}//end mark_post_as_synched()
 
 	/**
@@ -553,7 +542,6 @@ class Nelio_Content_Post_Helper {
 		}//end if
 
 		return array_values( array_unique( array_map( 'absint', $follower_ids ) ) );
-
 	}//end get_post_followers()
 
 	/**
@@ -656,7 +644,7 @@ class Nelio_Content_Post_Helper {
 
 		unset( $post['content'] );
 		$post = array_map(
-			function( $value ) {
+			function ( $value ) {
 				if ( is_array( $value ) ) {
 					sort( $value );
 				}//end if
@@ -683,7 +671,6 @@ class Nelio_Content_Post_Helper {
 			'full_hash'        => md5( $encoded_post ),
 			'force_synch_hash' => md5( $encoded_attrs ),
 		);
-
 	}//end get_post_hash()
 
 	private function get_the_author( $post ) {
@@ -699,10 +686,9 @@ class Nelio_Content_Post_Helper {
 		 * @since 2.2.4
 		 */
 		return apply_filters( 'nelio_content_post_author_name', $name, $post );
-
 	}//end get_the_author()
 
-	private function get_post_thumbnail( $post, $default ) {
+	private function get_post_thumbnail( $post, $default ) { // phpcs:ignore
 
 		$featured_image = wp_get_attachment_url( $this->get_post_thumbnail_id( $post ) );
 
@@ -737,7 +723,6 @@ class Nelio_Content_Post_Helper {
 		}//end if
 
 		return empty( $featured_image ) ? $default : $featured_image;
-
 	}//end get_featured_thumb()
 
 	private function get_post_thumbnail_id( $post ) {
@@ -748,7 +733,6 @@ class Nelio_Content_Post_Helper {
 		}//end if
 
 		return absint( $post_thumbnail_id );
-
 	}//end get_post_thumbnail_id()
 
 	private function get_post_type_name( $post ) {
@@ -760,7 +744,6 @@ class Nelio_Content_Post_Helper {
 		}//end if
 
 		return $post_type_name;
-
 	}//end get_post_type_name()
 
 	private function get_the_title( $post ) {
@@ -776,7 +759,6 @@ class Nelio_Content_Post_Helper {
 		$title = apply_filters( 'nelio_content_post_title', apply_filters( 'the_title', $post->post_title, $post->ID ), $post->ID );
 
 		return html_entity_decode( wp_strip_all_tags( $title ), ENT_HTML5 );
-
 	}//end get_the_title()
 
 	private function get_the_excerpt( $post ) {
@@ -798,7 +780,6 @@ class Nelio_Content_Post_Helper {
 		$excerpt = apply_filters( 'nelio_content_post_excerpt', $excerpt, $post->ID );
 
 		return html_entity_decode( wp_strip_all_tags( $excerpt ), ENT_HTML5 );
-
 	}//end get_the_excerpt()
 
 	private function get_post_time( $post ) {
@@ -820,7 +801,6 @@ class Nelio_Content_Post_Helper {
 		}//end if
 
 		return $date;
-
 	}//end get_post_time()
 
 	private function get_edit_post_link( $post ) {
@@ -831,7 +811,6 @@ class Nelio_Content_Post_Helper {
 		}//end if
 
 		return $link;
-
 	}//end get_edit_post_link()
 
 	private function get_permalink( $post ) {
@@ -858,7 +837,6 @@ class Nelio_Content_Post_Helper {
 		$permalink = apply_filters( 'nelio_content_post_permalink', $permalink, $post->ID );
 
 		return $permalink;
-
 	}//end get_permalink()
 
 	private function is_external_reference( $url, $non_ref_domains ) {
@@ -876,7 +854,6 @@ class Nelio_Content_Post_Helper {
 		}//end foreach
 
 		return true;
-
 	}//end is_external_reference()
 
 	private function get_the_content( $post ) {
@@ -914,7 +891,6 @@ class Nelio_Content_Post_Helper {
 		do_action( 'after_the_nelio_content' );
 
 		return $content;
-
 	}//end get_the_content()
 
 	private function get_images( $post ) {
@@ -932,7 +908,6 @@ class Nelio_Content_Post_Helper {
 
 		shuffle( $result );
 		return array_slice( $result, 0, 10 );
-
 	}//end get_images()
 
 	private static function get_network_image_ids( $post_id ) {
@@ -948,7 +923,7 @@ class Nelio_Content_Post_Helper {
 		}//end if
 
 		return array_map(
-			function( $series_item ) use ( $post_id ) {
+			function ( $series_item ) use ( $post_id ) {
 				$part   = get_post_meta( $post_id, "_nc_series_{$series_item->term_id}_part", true );
 				$result = array(
 					'id' => $series_item->term_id,
@@ -980,7 +955,7 @@ class Nelio_Content_Post_Helper {
 		}//end if
 
 		$urls = array_map(
-			function( $url ) {
+			function ( $url ) {
 				return substr( $url, 1, strlen( $url ) - 2 );
 			},
 			$aux[2]
@@ -995,10 +970,20 @@ class Nelio_Content_Post_Helper {
 		return false;
 	}//end get_url_from_image_tag()
 
+	private function is_rewrite( $post ) {
+		/**
+		 * Filters if a given post is a rewrite of another post.
+		 *
+		 * @param boolean $is_rewrite Whether the given post is a rewrite.
+		 * @param WP_Post $post The post.
+		 */
+		return apply_filters( 'nelio_content_is_post_a_rewrite', false, $post );
+	}//end is_rewrite()
+
 	private function get_custom_fields( $post_id, $post_type ) {
 		$metas = $this->get_supported_custom_fields( $post_type );
 		$metas = array_map(
-			function( $meta ) use ( $post_id ) {
+			function ( $meta ) use ( $post_id ) {
 				return array(
 					'key'   => $meta['key'],
 					'name'  => $meta['name'],
@@ -1014,7 +999,7 @@ class Nelio_Content_Post_Helper {
 
 		$placeholders = $this->get_supported_custom_placeholders( $post_type );
 		$placeholders = array_map(
-			function( $placeholder ) use ( $post_id, $post_type ) {
+			function ( $placeholder ) use ( $post_id, $post_type ) {
 				return array(
 					'key'   => $placeholder['key'],
 					'name'  => $placeholder['name'],
@@ -1025,7 +1010,6 @@ class Nelio_Content_Post_Helper {
 		);
 
 		return key_by( $placeholders, 'key' );
-
 	}//end get_custom_placeholders()
 
 	private function get_external_references( $post ) {
@@ -1046,7 +1030,7 @@ class Nelio_Content_Post_Helper {
 		$external_references = array_values(
 			array_filter(
 				$references,
-				function( $reference ) use ( &$non_ref_domains ) {
+				function ( $reference ) use ( &$non_ref_domains ) {
 					return $this->is_external_reference( $reference['url'], $non_ref_domains );
 				}
 			)
@@ -1054,7 +1038,7 @@ class Nelio_Content_Post_Helper {
 
 		return array_values(
 			array_map(
-				function( $reference ) {
+				function ( $reference ) {
 					return array(
 						'url'     => $reference['url'],
 						'author'  => $reference['author'],
@@ -1087,7 +1071,7 @@ class Nelio_Content_Post_Helper {
 		 */
 		$filtered_defaults = apply_filters( 'nelio_content_default_automation_sources', $defaults, $type );
 
-		$fix = function( $vals, $defs ) {
+		$fix = function ( $vals, $defs ) {
 			$res = array();
 			foreach ( $defs as $key => $defval ) {
 				$res[ $key ] = isset( $vals[ $key ] ) ? $vals[ $key ] : $defval;
@@ -1113,7 +1097,7 @@ class Nelio_Content_Post_Helper {
 		$post_id           = $post->ID;
 		$network_image_ids = self::get_network_image_ids( $post_id );
 		$images            = array_map(
-			function( $network ) use ( $post_id, $network_image_ids ) {
+			function ( $network ) use ( $post_id, $network_image_ids ) {
 				$image = ! empty( $network_image_ids[ $network ] ) ? wp_get_attachment_url( $network_image_ids[ $network ] ) : false;
 				/**
 				 * Sets the exact image that should be used when sharing the post on a certain network.
@@ -1137,7 +1121,7 @@ class Nelio_Content_Post_Helper {
 		$post_id    = $post->ID;
 		$default    = $this->get_permalink( $post );
 		$permalinks = array_map(
-			function( $network ) use ( $default, $post_id ) {
+			function ( $network ) use ( $default, $post_id ) {
 				$permalink = $default;
 
 				/**
@@ -1171,7 +1155,7 @@ class Nelio_Content_Post_Helper {
 	private function get_taxonomies( $post ) {
 		$taxonomies = array_map( 'get_taxonomy', get_post_taxonomies( $post ) );
 		$taxonomies = array_map(
-			function( $tax ) {
+			function ( $tax ) {
 				return $tax->public && $tax->show_in_rest ? $tax->name : false;
 			},
 			$taxonomies
@@ -1179,9 +1163,9 @@ class Nelio_Content_Post_Helper {
 		$taxonomies = array_values( array_filter( $taxonomies ) );
 
 		$post_id   = $post->ID;
-		$get_terms = function( $tax ) use ( $post_id ) {
+		$get_terms = function ( $tax ) use ( $post_id ) {
 			return array_map(
-				function( $term ) {
+				function ( $term ) {
 					return array(
 						'id'   => $term->term_id,
 						'name' => $term->name,
@@ -1231,5 +1215,4 @@ class Nelio_Content_Post_Helper {
 			$post_type
 		);
 	}//end get_supported_custom_placeholders()
-
 }//end class

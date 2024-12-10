@@ -1,5 +1,5 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/array.php';
-require_once dirname( __FILE__ ) . '/collection.php';
-require_once dirname( __FILE__ ) . '/function.php';
+require_once __DIR__ . '/array.php';
+require_once __DIR__ . '/collection.php';
+require_once __DIR__ . '/function.php';

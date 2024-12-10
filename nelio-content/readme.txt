@@ -4,7 +4,7 @@ Donate Link: https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medi
 Tags: social media scheduling, editorial calendar, auto publish, content marketing, social media
 Requires at least: 6.3
 Tested up to: 6.7
-Stable tag: 3.7.1
+Stable tag: 3.7.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -108,11 +108,13 @@ Designed for teams, [Nelio Content Premium](https://neliosoftware.com/content/?u
 
 * Connect up to 15 social profiles.
 * Discuss posts with editorial comments.
+* Rewrite or update a published post without taking it offline, using a copy of its content.
 * Monitor and track team activities with editorial tasks.
 * Receive email notifications for status changes and comments.
 * Create reusable task presets for posts.
 * Add editorial comments and references in the calendar.
 * Group your posts into multiple collections or series.
+* Set custom tags on social messages for Medium.
 * Automatically display series information on posts that are a part of a series.
 * Schedule automatic changes to your posts, pages, and other content types.
 * Create social messages for multiple networks simultaneously within the calendar.
@@ -215,6 +217,15 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Changelog ==
 
+= 3.7.2 (December 10, 2024) =
+* Add rewrite and republish functionality.
+* Add field to set Medium tags when creating or editing a social message for Medium.
+* Add filter `nelio_content_author_capabilities`.
+* Fix sidebar spacing styles in Gutenberg.
+* Fix compatibility with Elementor.
+* Fix resizing bug in calendar and content board when using Safari.
+* Fix broken link in post status info sidebar that failed to open quality analysis panel.
+
 = 3.7.1 (November 28, 2024) =
 * Add option to ask for help when deactivating the plugin because it’s not working.
 * Allow deletion of future actions in the calendar.
@@ -222,6 +233,7 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 * Fix to refactor hooks to prevent loading i18n translations too early.
 * Fix deactivation dialog layout.
 * Fix to allow the deletion of all premium items using the post quick editor.
+* Refactor hooks to prevent loading i18n translations too early.
 
 = 3.7.0 (November 19, 2024) =
 * Add new feature: post series (premium).
@@ -582,5 +594,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.7.1 (November 28, 2024) =
-New features, bug fixes, and improvements.
+= 3.7.2 (December 10, 2024) =
+Bug fixes and improvements.

@@ -43,7 +43,6 @@ function nc_compat_pagefrog_fix_issues_with_post_page() {
 	}//end if
 
 	add_action( 'admin_head', 'nc_compat_pagefrog_fix_global_css', 999 );
-
 }//end nc_compat_pagefrog_fix_issues_with_post_page()
 add_action( 'current_screen', 'nc_compat_pagefrog_fix_issues_with_post_page' );
 
@@ -53,7 +52,8 @@ add_action( 'current_screen', 'nc_compat_pagefrog_fix_issues_with_post_page' );
  *
  * @since 1.0.5
  */
-function nc_compat_pagefrog_fix_global_css() { ?>
+function nc_compat_pagefrog_fix_global_css() {
+	?>
 
 	<style type="text/css">
 

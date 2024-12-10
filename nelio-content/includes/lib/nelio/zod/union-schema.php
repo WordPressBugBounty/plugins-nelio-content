@@ -30,12 +30,11 @@ class UnionSchema extends Schema {
 			throw new \Exception(
 				sprintf(
 					'Invalid value',
-					gettype( $value )
+					esc_html( gettype( $value ) )
 				)
 			);
 		}//end if
 
 		return $result['data'];
 	}//end parse_value()
-
 }//end class

@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Nelio_Content_Analytics_Helper {
 
 	// NOTE: remember to update “update_statistics” to actually pull new metrics from each social network.
-	// // phpcs:ignore
+	// phpcs:ignore
 	private static $engagement_metrics = [ 'total', 'twitter', 'facebook', 'pinterest', 'reddit' ];
 
 	protected static $instance;
@@ -30,7 +30,6 @@ class Nelio_Content_Analytics_Helper {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	public function init() {
@@ -69,7 +68,6 @@ class Nelio_Content_Analytics_Helper {
 			'display'  => esc_html_x( 'Every Four Hours (Nelio Content)', 'text', 'nelio-content' ),
 		);
 		return $schedules;
-
 	}//end add_cron_interval()
 
 	private function enable_analytics_cron_tasks() {
@@ -90,7 +88,6 @@ class Nelio_Content_Analytics_Helper {
 		if ( ! wp_next_scheduled( 'nelio_content_analytics_other_cron_hook' ) ) {
 			wp_schedule_event( $time + 7200, 'nc_four_hours', 'nelio_content_analytics_other_cron_hook' );
 		}//end if
-
 	}//end enable_analytics_cron_tasks()
 
 	private function disable_analytics_cron_tasks() {
@@ -106,7 +103,6 @@ class Nelio_Content_Analytics_Helper {
 
 		$timestamp = wp_next_scheduled( 'nelio_content_analytics_top_cron_hook' );
 		wp_unschedule_event( $timestamp, 'nelio_content_analytics_top_cron_hook' );
-
 	}//end disable_analytics_cron_tasks()
 
 	/**
@@ -135,7 +131,6 @@ class Nelio_Content_Analytics_Helper {
 			$post_id = $post['id'];
 			$this->update_statistics( $post_id );
 		}//end foreach
-
 	}//end update_today_posts()
 
 	/**
@@ -162,7 +157,6 @@ class Nelio_Content_Analytics_Helper {
 			$post_id = $post['id'];
 			$this->update_statistics( $post_id );
 		}//end foreach
-
 	}//end update_month_posts()
 
 	/**
@@ -189,7 +183,6 @@ class Nelio_Content_Analytics_Helper {
 			$post_id = $post['id'];
 			$this->update_statistics( $post_id );
 		}//end foreach
-
 	}//end update_other_posts()
 
 	/**
@@ -240,7 +233,6 @@ class Nelio_Content_Analytics_Helper {
 
 		// Refresh last update.
 		update_post_meta( $post_id, '_nc_last_update', time() );
-
 	}//end update_statistics()
 
 	/**
@@ -282,7 +274,6 @@ class Nelio_Content_Analytics_Helper {
 			'engagement' => $engagement,
 			'pageviews'  => $pageviews,
 		);
-
 	}//end get_post_stats()
 
 	/**
@@ -337,7 +328,6 @@ class Nelio_Content_Analytics_Helper {
 				'pages' => $query->max_num_pages,
 			),
 		);
-
 	}//end get_paginated_posts()
 
 	private function get_posts_using_last_update( $params ) {
@@ -420,7 +410,7 @@ class Nelio_Content_Analytics_Helper {
 	 * @since  1.2.0
 	 * @access public
 	 */
-	public function update_comment_count( $post_id, $new ) {
+	public function update_comment_count( $post_id, $new ) { // phpcs:ignore
 
 		$total = 0;
 		foreach ( self::$engagement_metrics as $metric ) {
@@ -431,7 +421,6 @@ class Nelio_Content_Analytics_Helper {
 		}//end foreach
 
 		update_post_meta( $post_id, '_nc_engagement_total', $total + $new );
-
 	}//end update_comment_count()
 
 	/**
@@ -483,7 +472,6 @@ class Nelio_Content_Analytics_Helper {
 		delete_option( 'nc_ga_token_error' );
 
 		return $json->token;
-
 	}//end refresh_access_token()
 
 	private function needs_to_be_updated( $post_id ) {
@@ -506,7 +494,6 @@ class Nelio_Content_Analytics_Helper {
 
 		$updated_today = time() - $last_update <= DAY_IN_SECONDS;
 		return ! $updated_today;
-
 	}//end needs_to_be_updated()
 
 	private function save_engagement( $post_id, $engagement ) {
@@ -554,7 +541,7 @@ class Nelio_Content_Analytics_Helper {
 		$i     = 0;
 		while ( ( $number / $step ) > 0.9 ) {
 			$number = $number / $step;
-			$i++;
+			++$i;
 		}//end while
 
 		if ( floor( $number ) >= 100 ) {
@@ -612,7 +599,6 @@ class Nelio_Content_Analytics_Helper {
 		}//end if
 
 		return $count;
-
 	}//end get_social_count()
 
 	private function get_pinterest_count( $url ) {
@@ -644,7 +630,6 @@ class Nelio_Content_Analytics_Helper {
 
 		$value = intval( $json['count'] );
 		return $value;
-
 	}//end get_pinterest_count()
 
 	private function get_reddit_count( $url ) {
@@ -686,7 +671,6 @@ class Nelio_Content_Analytics_Helper {
 		}//end foreach
 
 		return $value;
-
 	}//end get_reddit_count()
 
 	private function get_ga_data( $ga4_prop, $post_id, $url, $start_date ) {
@@ -727,10 +711,9 @@ class Nelio_Content_Analytics_Helper {
 				preg_replace(
 					'/\s/',
 					'',
-					<<<JSON
-					{
+					'{
 						"dateRanges": [ {
-							"startDate": %1\$s,
+							"startDate": %1$s,
 							"endDate": "today"
 						} ],
 						"dimensions": [ {
@@ -743,13 +726,12 @@ class Nelio_Content_Analytics_Helper {
 							"filter": {
 								"fieldName": "pagePathPlusQueryString",
 								"inListFilter": {
-									"values": %2\$s,
+									"values": %2$s,
 									"caseSensitive": false
 								}
 							}
 						}
-					}
-JSON
+					}'
 				),
 				wp_json_encode( $start_date ),
 				wp_json_encode( $paths )
@@ -776,7 +758,5 @@ JSON
 		}//end foreach
 
 		return $result;
-
 	}//end get_ga_data()
-
 }//end class

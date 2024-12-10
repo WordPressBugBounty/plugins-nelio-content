@@ -37,7 +37,6 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -49,7 +48,6 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-
 	}//end init()
 
 	/**
@@ -68,7 +66,6 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	/**
@@ -161,7 +158,5 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return new WP_REST_Response( 'OK', 200 );
-
 	}//end install_premium()
-
 }//end class

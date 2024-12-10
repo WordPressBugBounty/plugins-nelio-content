@@ -75,5 +75,4 @@ interface Nelio_Content_Setting {
 	 * @access public
 	 */
 	public function sanitize( $input );
-
 }//end interface

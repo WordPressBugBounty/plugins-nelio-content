@@ -99,7 +99,6 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	public function validate_reusable_message( $message ) {
@@ -170,7 +169,7 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 				'fields'         => 'ids',
 				'post_type'      => 'nc_reusable_social',
 				'posts_per_page' => $count,
-				'post__not_in'   => $excluded_ids,
+				'post__not_in'   => $excluded_ids, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
 				's'              => $query,
 				'post_status'    => 'draft',
 			)
@@ -185,5 +184,4 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 			'more'     => 1 < $wpq->max_num_pages,
 		);
 	}//end search()
-
 }//end class

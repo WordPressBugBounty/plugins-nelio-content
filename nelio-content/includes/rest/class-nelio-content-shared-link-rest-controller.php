@@ -37,7 +37,6 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return self::$instance;
-
 	}//end instance()
 
 	/**
@@ -49,7 +48,6 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-
 	}//end init()
 
 	/**
@@ -75,7 +73,6 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-
 	}//end register_routes()
 
 	/**
@@ -207,7 +204,6 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 		}//end foreach
 
 		return new WP_REST_Response( $result, 200 );
-
 	}//end get_shared_link_meta_data()
 
 	private function get_page_content( $url ) {
@@ -257,7 +253,6 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 
 		$result['content'] = $page;
 		return $result;
-
 	}//end get_page_content()
 
 	private function extract_meta_data_from_url( $page ) {
@@ -294,7 +289,6 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return $meta_tags;
-
 	}//end extract_meta_data_from_url()
 
 	private function get_author( $page ) {
@@ -360,7 +354,6 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 
 		// If everything failed, let's return the empty string.
 		return '';
-
 	}//end get_author()
 
 	private function get_author_from_twitter( $username ) {
@@ -397,7 +390,6 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		return $author;
-
 	}//end get_author_from_twitter()
 
 	/**
@@ -413,7 +405,7 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 	 * @return mixed The value of the first key in `$key_options` that appears
 	 *               in $array.
 	 */
-	private function get_first_option( $array, $key_options, $default = false ) {
+	private function get_first_option( $array, $key_options, $default = false ) { // phpcs:ignore
 		if ( ! is_array( $key_options ) ) {
 			$key_options = array( $key_options );
 		}//end if
