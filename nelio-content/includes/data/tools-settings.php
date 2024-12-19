@@ -91,6 +91,23 @@ return array(
 
 	array(
 		'type'     => 'custom',
+		'name'     => 'duplicate_post_types',
+		'label'    => nc_make_settings_title( esc_html_x( 'Duplicate', 'text', 'nelio-content' ), 'welcome-add-page' ),
+		'instance' => new Nelio_Content_Post_Type_Setting(
+			array(
+				'name' => 'duplicate_post_types',
+				'help' => _x(
+					'Easily create a copy of any existing post with just one click.',
+					'user',
+					'nelio-content'
+				),
+			)
+		),
+		'default'  => array( 'post', 'page' ),
+	),
+
+	array(
+		'type'     => 'custom',
 		'name'     => 'rewrite_post_types',
 		'label'    => nc_make_settings_title( esc_html_x( 'Rewrite & Republish', 'text', 'nelio-content' ), 'update' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(

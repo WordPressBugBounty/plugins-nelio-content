@@ -136,3 +136,16 @@ add_action(
 		);
 	}
 );
+
+// Fix DnD issue on calendar when Elementor is active due to its overwriting of “.screen-reader-text” CSS rules.
+add_action(
+	'admin_head',
+	function () {
+		if ( ! did_action( 'elementor/loaded' ) ) {
+			return;
+		}//end if
+
+		echo '<style>*[draggable="true"] .screen-reader-text { top: auto !important; }</style>';
+	},
+	9999
+);

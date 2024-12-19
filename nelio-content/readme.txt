@@ -4,7 +4,7 @@ Donate Link: https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medi
 Tags: social media scheduling, editorial calendar, auto publish, content marketing, social media
 Requires at least: 6.3
 Tested up to: 6.7
-Stable tag: 3.7.2
+Stable tag: 3.7.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -108,6 +108,7 @@ Designed for teams, [Nelio Content Premium](https://neliosoftware.com/content/?u
 
 * Connect up to 15 social profiles.
 * Discuss posts with editorial comments.
+* Duplicate posts with just one click.
 * Rewrite or update a published post without taking it offline, using a copy of its content.
 * Monitor and track team activities with editorial tasks.
 * Receive email notifications for status changes and comments.
@@ -216,6 +217,13 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 3.7.3 (December 19, 2024) =
+* Add a profile setting to establish an alias for the display name of social profiles.
+* Duplicate posts in editorial calendar and content board.
+* Create a rewrite of a post from the editorial calendar and the content board.
+* Allow five tags for Medium messages.
+* Fix compatibility issue with Elementor, which is preventing drag and drop of messages in calendar.
 
 = 3.7.2 (December 10, 2024) =
 * Add rewrite and republish functionality.
@@ -594,5 +602,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.7.2 (December 10, 2024) =
+= 3.7.3 (December 19, 2024) =
 Bug fixes and improvements.

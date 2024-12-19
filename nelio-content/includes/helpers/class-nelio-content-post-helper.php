@@ -400,6 +400,8 @@ class Nelio_Content_Post_Helper {
 			'imageSrc'           => $this->get_post_thumbnail( $post, false ),
 			'images'             => $this->get_images( $post ),
 			'isRewrite'          => $this->is_rewrite( $post ),
+			'canBeRewritten'     => $this->can_be_rewritten( $post ),
+			'rewriteUrl'         => $this->get_rewrite_url( $post ),
 			'networkImageIds'    => $this->get_network_image_ids( $post->ID ),
 			'networkImages'      => $this->get_network_images( $post ),
 			'permalink'          => $this->get_permalink( $post ),
@@ -979,6 +981,26 @@ class Nelio_Content_Post_Helper {
 		 */
 		return apply_filters( 'nelio_content_is_post_a_rewrite', false, $post );
 	}//end is_rewrite()
+
+	private function can_be_rewritten( $post ) {
+		/**
+		 * Filters if a given post can be rewritten and republished.
+		 *
+		 * @param boolean $can_be_rewritten Whether the given post can be rewritten.
+		 * @param WP_Post $post The post.
+		 */
+		return apply_filters( 'nelio_content_can_post_be_rewritten', false, $post );
+	}//end can_be_rewritten()
+
+	private function get_rewrite_url( $post ) {
+		/**
+		 * Filters the rewrite URL of a given post.
+		 *
+		 * @param string|null $rewrite_url The rewrite URL of a given post.
+		 * @param WP_Post $post The post.
+		 */
+		return apply_filters( 'nelio_content_rewrite_url', null, $post );
+	}//end get_rewrite_url()
 
 	private function get_custom_fields( $post_id, $post_type ) {
 		$metas = $this->get_supported_custom_fields( $post_type );

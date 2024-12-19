@@ -661,6 +661,9 @@ function nelio_content_get_post_types( string $context ): array {
 			case 'comments':
 				return $s->get( 'comment_post_types' );
 
+			case 'duplicate':
+				return $s->get( 'duplicate_post_types' );
+
 			case 'future-actions':
 				return $s->get( 'future_action_post_types' );
 
