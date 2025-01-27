@@ -548,6 +548,7 @@ class Nelio_Content_Admin {
 		$installed_plugins    = get_plugins();
 		$is_premium_installed = array_key_exists( $premium_slug, $installed_plugins ) || in_array( $premium_slug, $installed_plugins, true );
 		$status               = $is_premium_installed ? 'inactive' : 'uninstalled';
+		$status               = nc_is_subscribed() ? $status : 'unsubscribed';
 
 		/**
 		 * Filters premium status.
