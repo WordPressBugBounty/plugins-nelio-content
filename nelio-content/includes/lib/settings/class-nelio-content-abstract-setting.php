@@ -116,7 +116,7 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 		$this->label       = $label;
 		$this->option_name = $option_name;
 
-		register_setting(
+		register_setting( // phpcs:ignore
 			$option_group,
 			$option_name,
 			array( $this, 'sanitize' ) // Sanitization function.
