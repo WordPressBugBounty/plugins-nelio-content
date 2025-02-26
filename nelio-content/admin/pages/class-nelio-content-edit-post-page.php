@@ -21,6 +21,7 @@ class Nelio_Content_Edit_Post_Page {
 		add_action( 'enqueue_block_editor_assets', array( $this, 'register_assets' ), 5 );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_classic_editor_assets' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'maybe_enqueue_ncshare_highlight' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'maybe_enqueue_gutenberg_assets' ) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_add_mce_translations' ) );
@@ -177,12 +178,6 @@ class Nelio_Content_Edit_Post_Page {
 	public function enqueue_edit_post_style() {
 		wp_enqueue_style( 'nelio-content-edit-post' );
 
-		// Gutenberg.
-		wp_add_inline_style(
-			'nelio-content-edit-post',
-			'.rich-text ncshare { background: #ffa } .rich-text:focus ncshare[data-rich-text-format-boundary] { background: #fe0 }'
-		);
-
 		// TinyMCE.
 		wp_add_inline_style(
 			'nelio-content-edit-post',
@@ -192,6 +187,19 @@ class Nelio_Content_Edit_Post_Page {
 			)
 		);
 	}//end enqueue_edit_post_style()
+
+	public function maybe_enqueue_ncshare_highlight() {
+		if ( ! is_admin() ) {
+			return;
+		}//end if
+
+		wp_register_style( 'nelio-content-ncshare-highlight', false ); // phpcs:ignore
+		wp_enqueue_style( 'nelio-content-ncshare-highlight' );
+		wp_add_inline_style(
+			'nelio-content-ncshare-highlight',
+			'.rich-text ncshare { background: #ffa } .rich-text:focus ncshare[data-rich-text-format-boundary] { background: #fe0 }'
+		);
+	}//end maybe_enqueue_ncshare_highlight()
 
 	public function get_init_args() {
 		$post_id     = $this->get_current_post_id();
