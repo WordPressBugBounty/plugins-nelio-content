@@ -4,7 +4,7 @@ Donate Link: https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medi
 Tags: social media scheduling, editorial calendar, auto publish, content marketing, social media
 Requires at least: 6.3
 Tested up to: 6.7
-Stable tag: 3.8.2
+Stable tag: 3.8.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -217,6 +217,9 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 3.8.3 (March 3, 2025) =
+* Add safe guard in settings to initialize them during `init` if needed.
 
 = 3.8.2 (February 26, 2025) =
 * Fix related post link in Social Message Editor and Task Editor.
@@ -625,5 +628,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.8.2 (February 26, 2025) =
+= 3.8.3 (March 3, 2025) =
 Bug fixes and improvements.

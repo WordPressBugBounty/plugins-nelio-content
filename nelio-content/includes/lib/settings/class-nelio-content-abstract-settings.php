@@ -85,6 +85,10 @@ abstract class Nelio_Content_Abstract_Settings {
 		$this->tabs           = array();
 		$this->name           = $name;
 		$this->page           = $page;
+
+		if ( did_action( 'init' ) || doing_action( 'init' ) ) {
+			$this->set_tabs();
+		}//end if
 	}//end __construct()
 
 	/**
