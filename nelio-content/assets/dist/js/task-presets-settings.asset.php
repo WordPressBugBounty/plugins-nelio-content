@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('lodash', 'nelio-content-components', 'nelio-content-data', 'nelio-content-utils', 'wp-api-fetch', 'wp-components', 'wp-data', 'wp-element', 'wp-i18n', 'wp-notices'), 'version' => '288a06955b674b54501f');
+<?php return array('dependencies' => array('lodash', 'nelio-content-components', 'nelio-content-data', 'nelio-content-utils', 'wp-api-fetch', 'wp-components', 'wp-data', 'wp-element', 'wp-i18n', 'wp-notices'), 'version' => '041f527577abdc1c8789');

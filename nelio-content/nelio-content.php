@@ -5,14 +5,14 @@
  * Plugin Name:       Nelio Content - Editorial Calendar & Social Media Scheduling
  * Plugin URI:        https://neliosoftware.com/content/
  * Description:       Auto-post, schedule, and share your posts on Twitter, Facebook, LinkedIn, Instagram, and other social networks. Save time with useful automations.
- * Version:           3.8.3
+ * Version:           3.9.0
  *
  * Author:            Nelio Software
  * Author URI:        https://neliosoftware.com
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  *
- * Requires at least: 6.3
+ * Requires at least: 6.6
  * Requires PHP:      7.4
  *
  * Text Domain:       nelio-content

@@ -2,9 +2,9 @@
 Contributors: nelio, davilera, avillegasn
 Donate Link: https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content
 Tags: social media scheduling, editorial calendar, auto publish, content marketing, social media
-Requires at least: 6.3
+Requires at least: 6.6
 Tested up to: 6.7
-Stable tag: 3.8.3
+Stable tag: 3.9.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -40,6 +40,7 @@ Outstanding editorial calendar to manage your blog. A complete solution for shar
 * **Reddit** – Post to your subreddits
 * **Threads** – Post to your Threads account
 * **TikTok** – Share your videos on TikTok
+* **Discord** - Post to your Discord channels
 * **Buffer** – Share your content to your connected Buffer profiles
 * **Hootsuite** – Share your content to your connected Hootsuite profiles
 
@@ -217,6 +218,14 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 3.9.0 (April 14, 2025) =
+* Add **Discord support**.
+* Fix UTC date conversion in editorial calendar to use WordPress timezone instead of browser timezone.
+* Fix compatibility with super admin users in multisite installations.
+* Share messages with up to 10 images in Discord.
+* Update plugin dependencies.
+* Use `wp_get_environment_type` to detect `staging` environments.
 
 = 3.8.3 (March 3, 2025) =
 * Add safe guard in settings to initialize them during `init` if needed.
@@ -628,5 +637,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.8.3 (March 3, 2025) =
+= 3.9.0 (April 14, 2025) =
 Bug fixes and improvements.

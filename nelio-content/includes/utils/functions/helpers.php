@@ -322,6 +322,9 @@ function nc_get_language() {
  * @since 1.4.0
  */
 function nc_is_staging() {
+	if ( 'staging' === wp_get_environment_type() ) {
+		return true;
+	}//end if
 
 	/**
 	 * List of URLs (or keywords) used to identify a staging site.
