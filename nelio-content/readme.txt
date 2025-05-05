@@ -5,7 +5,7 @@ Tags: social media scheduling, editorial calendar, auto publish, content marketi
 Requires PHP: 7.4
 Requires at least: 6.6
 Tested up to: 6.8
-Stable tag: 3.9.1
+Stable tag: 3.9.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -219,6 +219,9 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 3.9.2 (May 5, 2025) =
+* Fix “r is not a constructor” error in classic editor.
 
 = 3.9.1 (May 5, 2025) =
 * Add **Slack support**.
@@ -642,5 +645,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.9.1 (May 5, 2025) =
+= 3.9.2 (May 5, 2025) =
 Add Slack support.
