@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('nelio-content-components', 'nelio-content-data', 'nelio-content-social-message-editor', 'nelio-content-social-timeline', 'wp-components', 'wp-data', 'wp-dom-ready', 'wp-element', 'wp-i18n'), 'version' => '67b22b810bb7bc0fa699');
+<?php return array('dependencies' => array('nelio-content-components', 'nelio-content-data', 'nelio-content-social-message-editor', 'nelio-content-social-timeline', 'react-jsx-runtime', 'wp-components', 'wp-data', 'wp-dom-ready', 'wp-element', 'wp-i18n'), 'version' => '387fdf32c528d02b8e59');

@@ -2,10 +2,10 @@
 Contributors: nelio, davilera, avillegasn
 Donate Link: https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content
 Tags: social media scheduling, editorial calendar, auto publish, content marketing, social media
-Requires at least: 6.6
-Tested up to: 6.7
-Stable tag: 3.9.0
 Requires PHP: 7.4
+Requires at least: 6.6
+Tested up to: 6.8
+Stable tag: 3.9.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,7 @@ Outstanding editorial calendar to manage your blog. A complete solution for shar
 * **Threads** – Post to your Threads account
 * **TikTok** – Share your videos on TikTok
 * **Discord** - Post to your Discord channels
+* **Slack** - Post to your Slack channels
 * **Buffer** – Share your content to your connected Buffer profiles
 * **Hootsuite** – Share your content to your connected Hootsuite profiles
 
@@ -218,6 +219,10 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 3.9.1 (May 5, 2025) =
+* Add **Slack support**.
+* Share messages with up to 10 images in Slack.
 
 = 3.9.0 (April 14, 2025) =
 * Add **Discord support**.
@@ -637,5 +642,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.9.0 (April 14, 2025) =
-Bug fixes and improvements.
+= 3.9.1 (May 5, 2025) =
+Add Slack support.
