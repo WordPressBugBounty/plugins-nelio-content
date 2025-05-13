@@ -5,7 +5,7 @@ Tags: social media scheduling, editorial calendar, auto publish, content marketi
 Requires PHP: 7.4
 Requires at least: 6.6
 Tested up to: 6.8
-Stable tag: 3.9.2
+Stable tag: 3.9.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -219,6 +219,11 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 3.9.3 (May 13, 2025) =
+* Tweak social message editor to allow message creation when no profile is selected and currently active network has one profile only.
+* Load quality analysis summary conditionally on post status info panel.
+* Load social media summary conditionally on post status info panel.
 
 = 3.9.2 (May 5, 2025) =
 * Fix “r is not a constructor” error in classic editor.
@@ -645,5 +650,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.9.2 (May 5, 2025) =
-Add Slack support.
+= 3.9.3 (May 13, 2025) =
+Bug fixes and other minor improvements.
