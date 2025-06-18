@@ -5,7 +5,7 @@ Tags: social media scheduling, editorial calendar, auto publish, content marketi
 Requires PHP: 7.4
 Requires at least: 6.6
 Tested up to: 6.8
-Stable tag: 3.9.3
+Stable tag: 3.9.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -219,6 +219,10 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 3.9.4 (June 18, 2025) =
+* Bug fix with custom post types created with Custom Post Type UI. Plugin should be available when using those post types, but wasn’t.
+* Increase message length on Google My Business
 
 = 3.9.3 (May 13, 2025) =
 * Tweak social message editor to allow message creation when no profile is selected and currently active network has one profile only.
@@ -650,5 +654,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.9.3 (May 13, 2025) =
+= 3.9.4 (June 18, 2025) =
 Bug fixes and other minor improvements.

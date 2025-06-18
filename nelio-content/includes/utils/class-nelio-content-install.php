@@ -53,9 +53,6 @@ class Nelio_Content_Install {
 		add_action( 'nelio_content_installed', array( $this, 'update_to_nc2' ), 10, 2 );
 		add_action( 'nelio_content_updated', array( $this, 'update_to_nc2' ), 10, 2 );
 
-		add_action( 'nelio_content_installed', array( $this, 'update_to_nc3' ), 10, 2 );
-		add_action( 'nelio_content_updated', array( $this, 'update_to_nc3' ), 10, 2 );
-
 		add_action( 'nelio_content_installed', array( $this, 'update_to_nc3_6' ), 10, 2 );
 		add_action( 'nelio_content_updated', array( $this, 'update_to_nc3_6' ), 10, 2 );
 	}//end init()
@@ -284,24 +281,6 @@ class Nelio_Content_Install {
 	}//end update_to_nc2()
 
 	// phpcs:ignore
-	private $did_migrate_to_nc3 = false;
-	public function update_to_nc3( $_, $prev_version ) {
-		if ( $this->did_migrate_to_nc3 ) {
-			return;
-		}//end if
-		$this->did_migrate_to_nc3 = true;
-
-		if (
-			! version_compare( $prev_version, '3.0', '<' ) ||
-			empty( nc_get_site_id() )
-		) {
-			return;
-		}//end if
-
-		$this->init_universal_group();
-	}//end update_to_nc3()
-
-	// phpcs:ignore
 	private $did_migrate_to_nc3_6 = false;
 	public function update_to_nc3_6( $_, $prev_version ) {
 		if ( $this->did_migrate_to_nc3_6 ) {
@@ -382,67 +361,4 @@ class Nelio_Content_Install {
 			update_option( 'nelio-content_settings', $settings );
 		}//end if
 	}//end update_auto_sharing_fields()
-
-	private function init_universal_group() {
-		$settings = get_option( 'nelio-content_settings', array() );
-		$end_mode = isset( $settings['auto_share_end_mode'] )
-			? $settings['auto_share_end_mode']
-			: 'never';
-		unset( $settings['auto_share_end_mode'] );
-		update_option( 'nelio-content_settings', $settings );
-
-		$days = array(
-			'never'    => 0,
-			'1-month'  => 30,
-			'2-months' => 60,
-			'3-months' => 90,
-			'6-months' => 180,
-			'1-year'   => 365,
-		);
-
-		$publication = array(
-			'type' => 'max-age',
-			'days' => isset( $days[ $end_mode ] ) ? $days[ $end_mode ] : 60,
-		);
-		$publication = empty( $publication['days'] )
-			? array( 'type' => 'always' )
-			: $publication;
-
-		$categories = get_terms(
-			array(
-				'taxonomy' => 'category',
-				'fields'   => 'id=>slug',
-			)
-		);
-		$categories = array_map(
-			function ( $id, $slug ) {
-				return array(
-					'id'   => $id,
-					'slug' => $slug,
-				);
-			},
-			array_keys( $categories ),
-			array_values( $categories )
-		);
-
-		$body = array(
-			'categories'  => $categories,
-			'publication' => $publication,
-		);
-
-		$site_id = nc_get_site_id();
-		$url     = nc_get_api_url( "/site/{$site_id}/init-universal-group", 'wp' );
-		$data    = array(
-			'method'    => 'POST',
-			'timeout'   => apply_filters( 'nelio_content_request_timeout', 30 ),
-			'sslverify' => ! nc_does_api_use_proxy(),
-			'body'      => wp_json_encode( $body ),
-			'headers'   => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
-				'accept'        => 'application/json',
-				'content-type'  => 'application/json',
-			),
-		);
-		wp_remote_request( $url, $data );
-	}//end init_universal_group()
 }//end class

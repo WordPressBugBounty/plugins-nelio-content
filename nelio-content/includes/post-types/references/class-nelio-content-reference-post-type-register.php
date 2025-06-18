@@ -162,6 +162,10 @@ class Nelio_Content_Reference_Post_Type_Register {
 			return $capabilities;
 		}//end if
 
+		if ( ! did_action( 'init' ) || doing_action( 'init' ) ) {
+			return $capabilities;
+		}//end if
+
 		remove_filter( 'user_has_cap', array( $this, 'set_user_capabilities' ), 10, 4 );
 		if ( nc_can_current_user_use_plugin() ) {
 			$reference_capabilities = array(
