@@ -144,6 +144,10 @@ class Nelio_Content_Reusable_Message {
 							'tiktok',
 							'tumblr',
 							'twitter',
+							'discord',
+							'medium',
+							'slack',
+							'threads',
 						)
 					),
 					'postAuthor'   => Z::number()->optional(),

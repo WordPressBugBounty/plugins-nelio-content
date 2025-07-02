@@ -385,39 +385,44 @@ class Nelio_Content_Post_Helper {
 		require_once ABSPATH . '/wp-admin/includes/post.php';
 		$analytics          = Nelio_Content_Analytics_Helper::instance();
 		$post_status_object = get_post_status_object( $post->post_status );
+		$images             = $this->get_images( $post );
 		$result             = array(
-			'id'                 => $post->ID,
-			'author'             => absint( $post->post_author ),
-			'authorName'         => $this->get_the_author( $post ),
-			'content'            => $this->get_the_content( $post ),
-			'customFields'       => $this->get_custom_fields( $post->ID, $post->post_type ),
-			'customPlaceholders' => $this->get_custom_placeholders( $post->ID, $post->post_type ),
-			'date'               => $this->get_post_time( $post ),
-			'editLink'           => $this->get_edit_post_link( $post ),
-			'excerpt'            => $this->get_the_excerpt( $post ),
-			'followers'          => $this->get_post_followers( $post ),
-			'imageId'            => $this->get_post_thumbnail_id( $post ),
-			'imageSrc'           => $this->get_post_thumbnail( $post, false ),
-			'images'             => $this->get_images( $post ),
-			'isRewrite'          => $this->is_rewrite( $post ),
-			'canBeRewritten'     => $this->can_be_rewritten( $post ),
-			'rewriteUrl'         => $this->get_rewrite_url( $post ),
-			'networkImageIds'    => $this->get_network_image_ids( $post->ID ),
-			'networkImages'      => $this->get_network_images( $post ),
-			'permalink'          => $this->get_permalink( $post ),
-			'permalinks'         => $this->get_network_permalinks( $post ),
-			'permalinkQueryArgs' => $this->get_permalink_query_args( $post->ID ),
-			'permalinkTemplate'  => get_sample_permalink( $post->ID, $this->get_the_title( $post ), '' )[0],
-			'series'             => $this->get_series( $post->ID ),
-			'statistics'         => $analytics->get_post_stats( $post->ID ),
-			'status'             => $post->post_status,
-			'statusName'         => ! empty( $post_status_object ) ? $post_status_object->label : $post->post_status,
-			'taxonomies'         => $this->get_taxonomies( $post ),
-			'thumbnailSrc'       => $this->get_featured_thumb( $post ),
-			'title'              => $this->get_the_title( $post ),
-			'type'               => $post->post_type,
-			'typeName'           => $this->get_post_type_name( $post ),
-			'viewLink'           => get_permalink( $post ),
+			'id'                   => $post->ID,
+			'author'               => absint( $post->post_author ),
+			'authorName'           => $this->get_the_author( $post ),
+			'content'              => $this->get_the_content( $post ),
+			'customFields'         => $this->get_custom_fields( $post->ID, $post->post_type ),
+			'customPlaceholders'   => $this->get_custom_placeholders( $post->ID, $post->post_type ),
+			'date'                 => $this->get_post_time( $post ),
+			'editLink'             => $this->get_edit_post_link( $post ),
+			'excerpt'              => $this->get_the_excerpt( $post ),
+			'followers'            => $this->get_post_followers( $post ),
+			'imageId'              => $this->get_post_thumbnail_id( $post ),
+			'imageSrc'             => $this->get_post_thumbnail( $post, false ),
+			'imageAltText'         => $this->get_post_thumbnail_alt_text( $post ),
+			'images'               => wp_list_pluck( $images, 'url' ),
+			'imageIds'             => wp_list_pluck( $images, 'id' ),
+			'imageAltTexts'        => wp_list_pluck( $images, 'alt' ),
+			'isRewrite'            => $this->is_rewrite( $post ),
+			'canBeRewritten'       => $this->can_be_rewritten( $post ),
+			'rewriteUrl'           => $this->get_rewrite_url( $post ),
+			'networkImageIds'      => $this->get_network_image_ids( $post->ID ),
+			'networkImages'        => $this->get_network_images( $post ),
+			'networkImageAltTexts' => $this->get_network_image_alt_texts( $post ),
+			'permalink'            => $this->get_permalink( $post ),
+			'permalinks'           => $this->get_network_permalinks( $post ),
+			'permalinkQueryArgs'   => $this->get_permalink_query_args( $post->ID ),
+			'permalinkTemplate'    => get_sample_permalink( $post->ID, $this->get_the_title( $post ), '' )[0],
+			'series'               => $this->get_series( $post->ID ),
+			'statistics'           => $analytics->get_post_stats( $post->ID ),
+			'status'               => $post->post_status,
+			'statusName'           => ! empty( $post_status_object ) ? $post_status_object->label : $post->post_status,
+			'taxonomies'           => $this->get_taxonomies( $post ),
+			'thumbnailSrc'         => $this->get_featured_thumb( $post ),
+			'title'                => $this->get_the_title( $post ),
+			'type'                 => $post->post_type,
+			'typeName'             => $this->get_post_type_name( $post ),
+			'viewLink'             => get_permalink( $post ),
 		);
 
 		return $result;
@@ -455,7 +460,6 @@ class Nelio_Content_Post_Helper {
 				'featuredImage'      => $this->get_post_thumbnail( $post, 'none' ),
 				'highlights'         => $this->get_post_highlights( $post->ID ),
 				'isAutoShareEnabled' => $this->is_auto_share_enabled( $post->ID ),
-				'networkImages'      => $this->get_network_images( $post ),
 				'references'         => $this->get_external_references( $post ),
 				'series'             => $this->get_series( $post->ID ),
 				'timezone'           => nc_get_timezone(),
@@ -737,6 +741,21 @@ class Nelio_Content_Post_Helper {
 		return absint( $post_thumbnail_id );
 	}//end get_post_thumbnail_id()
 
+	private function get_post_thumbnail_alt_text( $post ) {
+
+		$post_thumbnail_id = get_post_meta( $post->ID, '_thumbnail_id', true );
+		if ( empty( $post_thumbnail_id ) ) {
+			return '';
+		}//end if
+
+		$image_alt = trim( wp_strip_all_tags( get_post_meta( $post_thumbnail_id, '_wp_attachment_image_alt', true ) ) );
+		if ( empty( $image_alt ) ) {
+			$image_alt = '';
+		}//end if
+
+		return $image_alt;
+	}//end get_post_thumbnail_alt_text()
+
 	private function get_post_type_name( $post ) {
 
 		$post_type_name = _x( 'Post', 'text (default post type name)', 'nelio-content' );
@@ -904,16 +923,27 @@ class Nelio_Content_Post_Helper {
 		foreach ( $matches[0] as $img ) {
 			$url = $this->get_url_from_image_tag( $img );
 			if ( $url ) {
-				array_push( $result, $url );
+				array_push(
+					$result,
+					array(
+						'url' => $url,
+						'id'  => $this->get_id_from_image_tag( $img ),
+						'alt' => $this->get_alt_text_from_image_tag( $img ),
+					)
+				);
 			}//end if
 		}//end foreach
 
 		shuffle( $result );
-		return array_slice( $result, 0, 10 );
+		return array_values( $result );
 	}//end get_images()
 
 	private static function get_network_image_ids( $post_id ) {
-		return get_post_meta( $post_id, '_nc_network_image_ids', true );
+		$ids = get_post_meta( $post_id, '_nc_network_image_ids', true );
+		if ( ! is_array( $ids ) ) {
+			$ids = array();
+		}//end if
+		return $ids;
 	}//end get_network_image_ids()
 
 	public function get_series( $post_id ) {
@@ -971,6 +1001,16 @@ class Nelio_Content_Post_Helper {
 
 		return false;
 	}//end get_url_from_image_tag()
+
+	private function get_id_from_image_tag( $img ) {
+		preg_match( '/wp-image-(\d+)/', $img, $matches );
+		return isset( $matches[1] ) ? (int) $matches[1] : 0;
+	}//end get_id_from_image_tag()
+
+	private function get_alt_text_from_image_tag( $img ) {
+		preg_match( '/alt=(["\'])(.*?)\1/', $img, $matches );
+		return isset( $matches[2] ) ? html_entity_decode( $matches[2], ENT_QUOTES ) : '';
+	}//end get_alt_text_from_image_tag()
 
 	private function is_rewrite( $post ) {
 		/**
@@ -1138,6 +1178,31 @@ class Nelio_Content_Post_Helper {
 		);
 		return array_filter( array_combine( self::$networks, $images ) );
 	}//end get_network_images()
+
+	public static function get_network_image_alt_texts( $post ) {
+		$post_id           = $post->ID;
+		$network_image_ids = self::get_network_image_ids( $post_id );
+		$image_alt_texts   = array_map(
+			function ( $network ) use ( $post_id, $network_image_ids ) {
+				$image_alt = ! empty( $network_image_ids[ $network ] ) ? trim( wp_strip_all_tags( get_post_meta( $network_image_ids[ $network ], '_wp_attachment_image_alt', true ) ) ) : '';
+
+				/**
+				 * Sets the exact image alt text that should be used when sharing the post on a certain network.
+				 *
+				 * Notice that not all messages that Nelio Content generates will contain an image.
+				 * This filter only overwrites the shared image alt text on those messages that contain one.
+				 *
+				 * @param string $image_alt The image that should be used. Default: `` (i.e. “none”).
+				 * @param int    $post_id   The post that’s about to be shared.
+				 *
+				 * @since 3.9.5
+				 */
+				return apply_filters( "nelio_content_{$network}_featured_image_alt_text", $image_alt ?? '', $post_id );
+			},
+			self::$networks
+		);
+		return array_filter( array_combine( self::$networks, $image_alt_texts ) );
+	}//end get_network_image_alt_texts()
 
 	private function get_network_permalinks( $post ) {
 		$post_id    = $post->ID;
