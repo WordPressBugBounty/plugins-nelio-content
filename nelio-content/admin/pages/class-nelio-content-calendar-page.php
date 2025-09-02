@@ -49,6 +49,7 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 			'simplifyCalendarTime'           => $this->simplify_calendar_time(),
 		);
 
+		wp_enqueue_style( 'nelio-content-colored-post' );
 		wp_enqueue_style(
 			'nelio-content-calendar-page',
 			nelio_content()->plugin_url . '/assets/dist/css/calendar-page.css',

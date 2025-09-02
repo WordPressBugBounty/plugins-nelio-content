@@ -5,3 +5,4 @@
 .nelio-content-text-field-control{position:relative}
 .nelio-content-series-metadata-setting{display:flex;flex-direction:column;gap:2em;max-width:50em;padding-top:.5em}.nelio-content-series-metadata-setting__activation-control .components-checkbox-control__help{margin:0}
 .nelio-content-series-post-list-setting{display:flex;flex-direction:column;gap:2em;max-width:50em;padding-top:.5em}.nelio-content-series-post-list-setting__activation-control .components-checkbox-control__help{margin:0}
+.nelio-content-social-sharing-delay-setting__input{max-width:10em;width:100%}.nelio-content-social-sharing-delay-setting__error-message{color:#a00;font-style:italic}

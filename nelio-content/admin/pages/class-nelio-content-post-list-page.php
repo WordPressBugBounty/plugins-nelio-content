@@ -39,6 +39,7 @@ class Nelio_Content_Post_List_Page {
 
 		add_filter( 'post_row_actions', array( $this, 'customize_row_actions' ), 10, 2 );
 		add_filter( 'page_row_actions', array( $this, 'customize_row_actions' ), 10, 2 );
+		add_filter( 'display_post_states', array( $this, 'display_post_custom_states' ), 10, 2 );
 	}//end init()
 
 	public function maybe_enqueue_social_assets() {
@@ -82,7 +83,27 @@ class Nelio_Content_Post_List_Page {
 			array( 'nelio-content-components' ),
 			nc_get_script_version( 'post-list-page' )
 		);
+
 		nc_enqueue_script_with_auto_deps( 'nelio-content-post-list-page', 'post-list-page', true );
+		global $post_type;
+		wp_add_inline_script(
+			'nelio-content-post-list-page',
+			sprintf(
+				'NelioContent.initPage( %s );',
+				wp_json_encode(
+					array(
+						'customStatuses' => array_values(
+							array_filter(
+								nelio_content_get_post_custom_statuses( $post_type ),
+								function ( $status ) {
+									return $status['available'];
+								}
+							)
+						),
+					)
+				)
+			)
+		);
 	}//end maybe_enqueue_social_assets()
 
 	public function add_page_column_for_auto_share( $columns ) {
@@ -254,8 +275,64 @@ class Nelio_Content_Post_List_Page {
 			);
 		}//end if
 
+		if ( empty( $actions['view'] ) ) {
+			return $actions;
+		}//end if
+
+		$custom_statuses = nelio_content_get_post_custom_statuses( $post->post_type );
+		$custom_statuses = wp_list_pluck( $custom_statuses, 'slug' );
+		$custom_statuses = array_values( array_unique( $custom_statuses ) );
+		if ( ! empty( $custom_statuses ) && in_array( $post->post_status, $custom_statuses, true ) ) {
+			$title           = _draft_or_post_title( $post );
+			$preview_link    = get_preview_post_link( $post );
+			$actions['view'] = sprintf(
+				'<a href="%s" rel="bookmark" aria-label="%s">%s</a>',
+				esc_url( $preview_link ),
+				/* translators: %s: Post title. */
+				esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;' ), $title ) ),
+				__( 'Preview' )
+			);
+		}//end if
+
 		return $actions;
 	}//end customize_row_actions()
+
+	public function display_post_custom_states( $states, $post ) {
+		if ( empty( $post ) ) {
+			return $states;
+		}//end if
+
+		$custom_statuses       = nelio_content_get_post_custom_statuses( $post->post_type );
+		$custom_statuses_slugs = wp_list_pluck( $custom_statuses, 'slug' );
+		$custom_statuses_slugs = array_values( array_unique( $custom_statuses_slugs ) );
+
+		if ( empty( $custom_statuses_slugs ) ) {
+			return $states;
+		}//end if
+
+		if ( ! in_array( $post->post_status, $custom_statuses_slugs, true ) ) {
+			return $states;
+		}//end if
+
+		if ( isset( $_REQUEST['post_status'] ) && $post->post_status === $_REQUEST['post_status'] ) { // phpcs:ignore
+			return $states;
+		}//end if
+
+		if ( in_array( $post->post_status, $custom_statuses_slugs, true ) ) {
+			$custom_status = array_filter(
+				$custom_statuses,
+				function ( $status ) use ( $post ) {
+					return $status['slug'] === $post->post_status;
+				}
+			);
+			$custom_status = array_shift( $custom_status );
+			if ( ! empty( $custom_status['name'] ) ) {
+				$states[ $post->post_status ] = $custom_status['name'];
+			}//end if
+		}//end if
+
+		return $states;
+	}//end display_post_custom_states()
 
 	private function get_auto_share_end_select() {
 		$options = nc_get_auto_share_end_modes();

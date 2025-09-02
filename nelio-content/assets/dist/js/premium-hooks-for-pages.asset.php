@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('nelio-content-utils', 'wp-hooks'), 'version' => '6fe8023aec68a953ec90');
+<?php return array('dependencies' => array('nelio-content-utils', 'wp-hooks'), 'version' => 'd334741800aaf9351f6e');

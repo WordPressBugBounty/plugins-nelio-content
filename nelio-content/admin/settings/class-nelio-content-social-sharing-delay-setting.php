@@ -7,23 +7,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Notification emails.
  */
-class Nelio_Content_Cloud_Notification_Emails_Setting extends Nelio_Content_Abstract_React_Setting {
+class Nelio_Content_Social_Sharing_Delay_Setting extends Nelio_Content_Abstract_React_Setting {
 
 	public function __construct() {
-		parent::__construct( 'cloud_notification_emails', 'CloudNotificationEmailsSetting' );
+		parent::__construct( 'social_sharing_delay', 'SocialSharingDelaySetting' );
 	}//end __construct()
 
 	// @Implements
 	// phpcs:ignore
 	public function sanitize( $input ) {
 
-		$value = isset( $input[ $this->name ] ) ? $input[ $this->name ] : '';
-		$value = trim( sanitize_text_field( $value ) );
-		$value = explode( ',', $value );
-		$value = array_filter( array_map( 'trim', $value ) );
+		$value = isset( $input[ $this->name ] ) ? $input[ $this->name ] : '0';
+		$value = absint( $value );
 
 		$body = array(
-			'notificationEmails' => $value,
+			'socialSharingDelay' => $value,
 		);
 
 		$data = array(

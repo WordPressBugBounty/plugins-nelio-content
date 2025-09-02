@@ -70,6 +70,13 @@ function include_nab_tests( $events ) {
 }//end include_nab_tests()
 add_filter( 'nelio_content_internal_events', 'include_nab_tests' );
 
+add_filter(
+	'nelio_content_hidden_post_statuses',
+	function ( $hidden_statuses ) {
+		return array_merge( $hidden_statuses, array( 'nab_ready', 'nab_scheduled', 'nab_running', 'nab_paused', 'nab_paused_draft', 'nab_finished', 'nab_hidden' ) );
+	}
+);
+
 // =======
 // HELPERS
 // =======

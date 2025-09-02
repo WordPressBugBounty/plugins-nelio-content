@@ -96,6 +96,11 @@ class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 						'fields' => include nelio_content()->plugin_path . '/includes/data/tools-settings.php',
 					),
 					array(
+						'name'   => 'custom-statuses',
+						'label'  => _x( 'Custom Statuses', 'text', 'nelio-content' ),
+						'custom' => true,
+					),
+					array(
 						'name'   => 'task-presets',
 						'label'  => _x( 'Task Presets', 'text', 'nelio-content' ),
 						'custom' => true,

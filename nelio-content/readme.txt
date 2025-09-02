@@ -3,9 +3,9 @@ Contributors: nelio, davilera, avillegasn
 Donate Link: https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content
 Tags: social media scheduling, editorial calendar, auto publish, content marketing, social media
 Requires PHP: 7.4
-Requires at least: 6.6
+Requires at least: 6.7
 Tested up to: 6.8
-Stable tag: 3.9.5
+Stable tag: 4.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,8 @@ Outstanding editorial calendar to manage your blog. A complete solution for shar
 * **TikTok** – Share your videos on TikTok
 * **Discord** - Post to your Discord channels
 * **Slack** - Post to your Slack channels
+* **Band** - Post to your bands
+* **VK** - Post to your community wall.
 * **Buffer** – Share your content to your connected Buffer profiles
 * **Hootsuite** – Share your content to your connected Hootsuite profiles
 
@@ -69,6 +71,7 @@ The Editorial Calendar provides a bird’s-eye view of all your content, includi
 * Integrate iCal events, MailPoet newsletters, and events from The Events Calendar.
 * Filter content by author and status.
 * Filter social messages by profile, creation method, and publication issues.
+* Define and manage custom statuses that match your unique editorial workflow.
 
 View the RSS feeds of your favorite blogs directly in your WordPress so you can generate new content from them:
 
@@ -219,6 +222,25 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 4.0.0 (September 2, 2025) =
+* Add **Band support**.
+* Add **VK support**.
+* Add section in settings to define and manage custom statuses.
+* Add taxonomy filter in editorial calendar.
+* Add taxonomy filter in content board.
+* Add setting to apply a delay before sharing a WordPress post on social media when it is published.
+* Add additional `data-*` attributes to calendar and board items to allow CSS customization.
+* Add custom statuses in status selectors and bulk actions.
+* Support registered custom statuses using `nelio_content_post_statuses` filter in standard user interfaces.
+* Show custom status colors in calendar and board items.
+* Show preview of published messages.
+* Show link to manage published messages in their network (when possible).
+* Fix recovery of custom placeholders and custom fields in templates.
+* Fix sanitize of notification emails.
+* Fix og:url in Open Graph metadata.
+* Update plugin dependencies.
+* Bump minimum required WordPress version to 6.7.
 
 = 3.9.5 (July 2, 2025) =
 * Add support for alternative text (alt text) when sharing images and videos on social media.
@@ -658,5 +680,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 3.9.5 (July 2, 2025) =
-Bug fixes and other minor improvements.
+= 4.0.0 (September 2, 2025) =
+Custom statuses, new social networks, and more.

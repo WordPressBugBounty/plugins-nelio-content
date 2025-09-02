@@ -120,9 +120,10 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 
 	private function get_custom_subpage_script( $subpage ) {
 		$scripts = array(
-			'social--profiles'    => 'social-profile-settings',
-			'social--automations' => 'automations-settings',
-			'tools--task-presets' => 'task-presets-settings',
+			'social--profiles'       => 'social-profile-settings',
+			'social--automations'    => 'automations-settings',
+			'tools--custom-statuses' => 'custom-statuses-settings',
+			'tools--task-presets'    => 'task-presets-settings',
 		);
 		return isset( $scripts[ $subpage ] ) ? $scripts[ $subpage ] : false;
 	}//end get_custom_subpage_script()

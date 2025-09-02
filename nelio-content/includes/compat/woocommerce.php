@@ -43,7 +43,7 @@ function nc_woocommerce_maybe_add_order_statuses( $statuses, $post_type ) {
 			return array(
 				'slug' => $key,
 				'name' => $value,
-				'icon' => 'cart',
+				'icon' => 'store',
 			);
 		},
 		array_keys( $wc_statuses ),

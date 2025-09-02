@@ -149,6 +149,6 @@ class Nelio_Content_Meta_Tags {
 
 	private function get_og_url() {
 		global $wp;
-		return home_url( add_query_arg( array(), $wp->request ) );
+		return trailingslashit( home_url( add_query_arg( array(), $wp->request ) ) );
 	}//end get_og_url()
 }//end class

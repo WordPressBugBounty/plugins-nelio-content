@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit231dfbf35a12f8a66d51613b34c491e8
+class ComposerStaticInit76e9fe54686d6206009d2be0237d8921
 {
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
@@ -83,6 +83,8 @@ class ComposerStaticInit231dfbf35a12f8a66d51613b34c491e8
         'Nelio_Content_Settings' => __DIR__ . '/../..' . '/includes/utils/class-nelio-content-settings.php',
         'Nelio_Content_Settings_Page' => __DIR__ . '/../..' . '/admin/pages/class-nelio-content-settings-page.php',
         'Nelio_Content_Shared_Link_REST_Controller' => __DIR__ . '/../..' . '/includes/rest/class-nelio-content-shared-link-rest-controller.php',
+        'Nelio_Content_Social_Sharing_Delay_Setting' => __DIR__ . '/../..' . '/admin/settings/class-nelio-content-social-sharing-delay-setting.php',
+        'Nelio_Content_Statuses_REST_Controller' => __DIR__ . '/../..' . '/includes/rest/class-nelio-content-statuses-rest-controller.php',
         'Nelio_Content_Task_Preset' => __DIR__ . '/../..' . '/includes/post-types/task-presets/class-nelio-content-task-preset.php',
         'Nelio_Content_Task_Preset_Post_Type_Register' => __DIR__ . '/../..' . '/includes/post-types/task-presets/class-nelio-content-task-preset-post-type-register.php',
         'Nelio_Content_Task_Presets_REST_Controller' => __DIR__ . '/../..' . '/includes/post-types/task-presets/class-nelio-content-task-presets-rest-controller.php',
@@ -93,7 +95,7 @@ class ComposerStaticInit231dfbf35a12f8a66d51613b34c491e8
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInit231dfbf35a12f8a66d51613b34c491e8::$classMap;
+            $loader->classMap = ComposerStaticInit76e9fe54686d6206009d2be0237d8921::$classMap;
 
         }, null, ClassLoader::class);
     }

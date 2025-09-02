@@ -32,8 +32,14 @@ class Nelio_Content_Post_Saving {
 	}//end init()
 
 	public function add_hooks_to_trigger_custom_save_post_action() {
-		$on_regular_post_save = function ( $post_id, $post, $update ) {
+		$post_types = nelio_content_get_post_types( 'cloud' );
+
+		$on_regular_post_save = function ( $post_id, $post, $update ) use ( $post_types ) {
 			if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+				return;
+			}//end if
+
+			if ( ! in_array( $post->post_type, $post_types, true ) ) {
 				return;
 			}//end if
 			$this->trigger_save_post_action( $post_id, ! $update );
@@ -45,7 +51,6 @@ class Nelio_Content_Post_Saving {
 
 		add_action( 'wp_insert_post', $on_regular_post_save, self::LATE_PRIORITY, 3 );
 
-		$post_types = nelio_content_get_post_types( 'cloud' );
 		foreach ( $post_types as $post_type ) {
 			add_action( "rest_after_insert_{$post_type}", $on_rest_post_save, self::LATE_PRIORITY, 4 );
 		}//end foreach

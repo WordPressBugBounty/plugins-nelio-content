@@ -625,16 +625,14 @@ class Nelio_Content_Post_Helper {
 	}//end update_post_highlights()
 
 	public function get_supported_custom_fields_in_templates() {
-		$settings = Nelio_Content_Settings::instance();
-		$types    = $settings->get( 'social' );
-		$types    = is_array( $types ) ? $types : array();
-		$fields   = array_map( array( $this, 'get_supported_custom_fields' ), $types );
+		$types  = nelio_content_get_post_types( 'social' );
+		$types  = is_array( $types ) ? $types : array();
+		$fields = array_map( array( $this, 'get_supported_custom_fields' ), $types );
 		return array_combine( $types, $fields );
 	}//end get_supported_custom_fields_in_templates()
 
 	public function get_supported_custom_placeholders_in_templates() {
-		$settings     = Nelio_Content_Settings::instance();
-		$types        = $settings->get( 'social' );
+		$types        = nelio_content_get_post_types( 'social' );
 		$types        = is_array( $types ) ? $types : array();
 		$placeholders = array_map( array( $this, 'get_supported_custom_placeholders' ), $types );
 		$placeholders = json_decode( wp_json_encode( $placeholders ), ARRAY_A );

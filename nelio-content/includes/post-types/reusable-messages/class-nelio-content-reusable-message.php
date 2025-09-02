@@ -132,6 +132,7 @@ class Nelio_Content_Reusable_Message {
 					'imageId'      => Z::number()->optional(),
 					'network'      => Z::enum(
 						array(
+							'band',
 							'bluesky',
 							'facebook',
 							'gmb',

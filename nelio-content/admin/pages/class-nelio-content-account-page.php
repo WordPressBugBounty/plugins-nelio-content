@@ -17,16 +17,10 @@ class Nelio_Content_Account_Page extends Nelio_Content_Abstract_Page {
 
 	public function __construct() {
 
-		if ( nc_is_subscribed() ) {
-			$title = _x( 'Account', 'text', 'nelio-content' );
-		} else {
-			$title = _x( 'Upgrade', 'user', 'nelio-content' );
-		}//end if
-
 		parent::__construct(
 			'nelio-content',
 			'nelio-content-account',
-			$title,
+			_x( 'Account', 'text', 'nelio-content' ),
 			nc_can_current_user_manage_account()
 		);
 	}//end __construct()

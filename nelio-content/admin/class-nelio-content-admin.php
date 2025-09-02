@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }//end if
 
+use function Nelio_Content\Helpers\get as ncget;
 use function Nelio_Content\Helpers\not;
 use function Nelio_Content\Helpers\key_by;
 
@@ -170,6 +171,7 @@ class Nelio_Content_Admin {
 		$scripts = array(
 			'nelio-content-calendar',
 			'nelio-content-components',
+			'nelio-content-constants',
 			'nelio-content-data',
 			'nelio-content-date',
 			'nelio-content-networks',
@@ -192,6 +194,9 @@ class Nelio_Content_Admin {
 			array( 'wp-admin', 'wp-components' ),
 			nc_get_script_version( 'components' )
 		);
+
+		wp_register_style( 'nelio-content-colored-post', false ); // phpcs:ignore
+		wp_add_inline_style( 'nelio-content-colored-post', $this->get_post_status_colors_style() );
 
 		$settings    = Nelio_Content_Settings::instance();
 		$post_helper = Nelio_Content_Post_Helper::instance();
@@ -222,6 +227,7 @@ class Nelio_Content_Admin {
 			'postTypes'          => $this->get_post_types(),
 			'postTypesByContext' => $this->get_post_types_by_context(),
 			'restUrl'            => untrailingslashit( get_rest_url() ),
+			'roles'              => $this->get_roles(),
 			'timezone'           => nc_get_timezone(),
 		);
 
@@ -243,8 +249,9 @@ class Nelio_Content_Admin {
 			ncdata.initSiteSettings( %2$s );
 			ncdata.initUserSettings( %3$s );
 			ncdata.markSocialPublicationAsPaused( !! NelioContent?.utils?.getValue( "isSocialPublicationPaused" ) );
-			ncdata.resetTaskPresets( %4$s );
-			ncdata.receiveFeeds( %5$s );
+			ncdata.resetStatuses( %4$s );
+			ncdata.resetTaskPresets( %5$s );
+			ncdata.receiveFeeds( %6$s );
 			setInterval( function() {
 				wp.data.dispatch( "nelio-content/data" ).setUtcNow( new Date().toISOString() );
 			}, 30 * 60000 );
@@ -260,6 +267,7 @@ class Nelio_Content_Admin {
 				wp_json_encode( $plugin_settings ),
 				wp_json_encode( $site_settings ),
 				wp_json_encode( $user_settings ),
+				wp_json_encode( nelio_content_get_statuses() ),
 				wp_json_encode( $this->get_task_presets() ),
 				wp_json_encode( get_option( 'nc_feeds', array() ) )
 			)
@@ -360,6 +368,7 @@ class Nelio_Content_Admin {
 					return false;
 				}//end if
 
+				$remove_colors = fn( $t ) => array_filter( $t, fn( $k ) => 'colors' !== $k, ARRAY_FILTER_USE_KEY );
 				return array(
 					'name'     => $type->name,
 					'labels'   => array(
@@ -369,7 +378,10 @@ class Nelio_Content_Admin {
 						'plural'   => $type->labels->name,
 						'singular' => $type->labels->singular_name,
 					),
-					'statuses' => nelio_content_get_post_statuses( $type->name ),
+					'statuses' => array_map(
+						$remove_colors,
+						nelio_content_get_post_statuses( $type->name )
+					),
 					'supports' => array(
 						'author'        => post_type_supports( $type->name, 'author' ),
 						'title'         => post_type_supports( $type->name, 'title' ),
@@ -399,6 +411,23 @@ class Nelio_Content_Admin {
 
 		return key_by( $post_types, 'name' );
 	}//end get_post_types()
+
+	private function get_roles() {
+		$roles = wp_roles()->roles;
+		$roles = array_map(
+			function ( $role, $key ) {
+				return array(
+					'id'           => $key,
+					'name'         => translate_user_role( $role['name'] ),
+					'capabilities' => array_keys( array_filter( $role['capabilities'] ) ),
+				);
+			},
+			$roles,
+			array_keys( $roles )
+		);
+		asort( $roles );
+		return key_by( $roles, 'id' );
+	}//end get_roles()
 
 	private function get_first_day_of_week() {
 		/**
@@ -542,6 +571,56 @@ class Nelio_Content_Admin {
 		usort( $posts, fn( $a, $b ) => $a['id'] - $b['id'] );
 		return $posts;
 	}//end get_task_presets()
+
+	private function get_post_status_colors_style() {
+		$post_types = $this->get_post_types_by_context();
+		$post_types = array_values( array_unique( \Nelio_Content\Helpers\flatten( $post_types ) ) );
+
+		$statuses_by_type = array_combine(
+			$post_types,
+			array_map( 'nelio_content_get_post_statuses', $post_types )
+		);
+
+		$default_statuses = array_values( $statuses_by_type )[0];
+		if ( empty( $default_statuses ) ) {
+			return '';
+		}//end if
+
+		$default_statuses = array_combine(
+			wp_list_pluck( $default_statuses, 'slug' ),
+			$default_statuses
+		);
+
+		$statuses_by_type = array_map(
+			fn ( $statuses ) => array_filter(
+				$statuses,
+				fn( $status ) => (
+					ncget( $status, 'colors.main' ) !== ncget( $default_statuses, "{$status['slug']}.colors.main" ) ||
+					ncget( $status, 'colors.background' ) !== ncget( $default_statuses, "{$status['slug']}.colors.background" )
+				)
+			),
+			$statuses_by_type
+		);
+
+		$statuses_by_type = array_merge( array( '' => $default_statuses ), $statuses_by_type );
+
+		$result = '';
+		foreach ( $statuses_by_type as $type => $statuses ) {
+			$type_selector = empty( $type )
+				? '.nelio-content-colored-post'
+				: ".nelio-content-colored-post[data-post-type=\"{$type}\"]";
+			foreach ( $statuses as $status ) {
+				$result .= sprintf(
+					'%1$s{background-color:%2$s;border-top-color:%3$s}',
+					"{$type_selector}[data-status=\"{$status['slug']}\"]",
+					ncget( $status, 'colors.background' ),
+					ncget( $status, 'colors.main' )
+				);
+			}//end foreach
+		}//end foreach
+
+		return $result;
+	}//end get_post_status_colors_style()
 
 	private function get_premium_status() {
 		$premium_slug         = 'nelio-content-premium/nelio-content-premium.php';

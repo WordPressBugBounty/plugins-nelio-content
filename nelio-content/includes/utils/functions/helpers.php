@@ -8,6 +8,8 @@
  * @since      2.0.0
  */
 
+use function Nelio_Content\Helpers\key_by;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }//end if
@@ -509,7 +511,7 @@ function nelio_content_get_post_statuses( $post_type ) {
 		array(
 			'slug'   => 'draft',
 			'name'   => __( 'Draft' ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain
-			'icon'   => 'edit',
+			'icon'   => 'drafts',
 			'colors' => array(
 				'main'       => '#c44',
 				'background' => '#fee',
@@ -518,7 +520,7 @@ function nelio_content_get_post_statuses( $post_type ) {
 		array(
 			'slug'   => 'pending',
 			'name'   => __( 'Pending' ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain
-			'icon'   => 'visibility',
+			'icon'   => 'pending',
 			'colors' => array(
 				'main'       => '#f9d510',
 				'background' => '#fffdf1',
@@ -527,7 +529,7 @@ function nelio_content_get_post_statuses( $post_type ) {
 		array(
 			'slug'   => 'future',
 			'name'   => __( 'Scheduled' ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain
-			'icon'   => 'clock',
+			'icon'   => 'scheduled',
 			'colors' => array(
 				'main'       => '#447d37',
 				'background' => '#e5f0e7',
@@ -536,6 +538,7 @@ function nelio_content_get_post_statuses( $post_type ) {
 		array(
 			'slug'   => 'publish',
 			'name'   => __( 'Published' ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain
+			'icon'   => 'published',
 			'colors' => array(
 				'main'       => '#447d37',
 				'background' => '#e5f0e7',
@@ -549,7 +552,7 @@ function nelio_content_get_post_statuses( $post_type ) {
 			array(
 				'slug'   => 'private',
 				'name'   => __( 'Private' ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain
-				'icon'   => 'hidden',
+				'icon'   => 'notAllowed',
 				'colors' => array(
 					'main'       => '#447d37',
 					'background' => '#e5f0e7',
@@ -557,6 +560,16 @@ function nelio_content_get_post_statuses( $post_type ) {
 			)
 		);
 	}//end if
+
+	$custom_statuses = nelio_content_get_saved_statuses();
+	$custom_statuses = array_filter(
+		$custom_statuses,
+		function ( $status ) use ( $post_type ) {
+			return in_array( $post_type, isset( $status['postTypes'] ) ? $status['postTypes'] : array( $post_type ), true );
+		}
+	);
+
+	$statuses = array_values( array_merge( key_by( $statuses, 'slug' ), key_by( $custom_statuses, 'slug' ) ) );
 
 	/**
 	 * Filters whether the given post type supports its content being “unscheduled” or not.
@@ -614,24 +627,154 @@ function nelio_content_get_post_statuses( $post_type ) {
 		$statuses
 	);
 
-	return array_map(
-		function ( $status ) use ( $post_type ) {
-			/**
-			 * Filters whether current user can set this status or not.
-			 *
-			 * @param boolean  $available  whether current user can set this status or not.
-			 * @param string   $status     status slug.
-			 * @param string   $post_type  post type.
-			 *
-			 * @since 2.3.5
-			 */
-			$available           = apply_filters( 'nelio_content_can_use_post_status', $status['available'], $status['slug'], $post_type );
-			$status['available'] = ! empty( $available );
-			return $status;
-		},
-		$statuses
+	$statuses = nelio_content_sort_statuses( $statuses, nelio_content_get_saved_statuses() );
+
+	return array_values(
+		array_map(
+			function ( $status ) use ( $post_type ) {
+				/**
+				 * Filters whether current user can set this status or not.
+				 *
+				 * @param boolean  $available  whether current user can set this status or not.
+				 * @param string   $status     status slug.
+				 * @param string   $post_type  post type.
+				 *
+				 * @since 2.3.5
+				 */
+				$available           = apply_filters( 'nelio_content_can_use_post_status', $status['available'], $status['slug'], $post_type );
+				$status['available'] = ! empty( $available );
+				return $status;
+			},
+			$statuses
+		)
 	);
 }//end nelio_content_get_post_statuses()
+
+function nelio_content_get_post_custom_statuses( $post_type ) {
+	$post_statuses   = nelio_content_get_post_statuses( $post_type );
+	$custom_statuses = array_values(
+		array_filter(
+			$post_statuses,
+			function ( $status ) {
+				return ! in_array( $status['slug'], array( 'draft', 'pending', 'future', 'private', 'publish', 'trash', 'nelio-content-unscheduled' ), true );
+			}
+		)
+	);
+	return $custom_statuses;
+}//end nelio_content_get_post_custom_statuses()
+
+function nelio_content_get_statuses() {
+	$registered_statuses = array_filter(
+		get_post_stati( array( 'internal' => false ), 'objects' ),
+		function ( $status ) {
+			/**
+			 * List of statuses that are hidden.
+			 *
+			 * @param array $statuses list of hidden statuses. Default: `[ 'nc_pending', 'nc_improvable', 'nc_complete', 'nc_broken', 'nc_check', 'nc_executed' ]`.
+			 *
+			 * @since 4.0.0
+			 */
+			$hidden_statuses = apply_filters( 'nelio_content_hidden_post_statuses', array( 'nc_pending', 'nc_improvable', 'nc_complete', 'nc_broken', 'nc_check', 'nc_executed' ) );
+			return ! in_array( $status->name, $hidden_statuses, true );
+		}
+	);
+	$statuses            = array_map(
+		function ( $status ) {
+			return array(
+				'slug'        => $status->name,
+				'name'        => $status->label,
+				'description' => isset( $status->description ) ? $status->description : '',
+				'core'        => $status->_builtin,
+				'available'   => true,
+				'flags'       => array(),
+			);
+		},
+		$registered_statuses
+	);
+
+	// Maybe use `nelio_content_get_post_types()` instead.
+	$post_types = get_post_types(
+		array(
+			'show_ui'      => true,
+			'show_in_rest' => true,
+		),
+		'objects'
+	);
+	$post_types = array_filter(
+		$post_types,
+		function ( $post_type ) {
+			return ! in_array( $post_type->name, array( 'nav_menu', 'attachment', 'revision', 'wp_navigation', 'wp_block' ), true );
+		}
+	);
+
+	foreach ( $post_types as $type ) {
+		$statuses_of_type = nelio_content_get_post_statuses( $type->name );
+		$statuses_of_type = array_filter(
+			$statuses_of_type,
+			function ( $status ) {
+				return ! in_array( $status['slug'], array( 'trash', 'nelio-content-unscheduled' ), true );
+			}
+		);
+
+		foreach ( $statuses_of_type as $status ) {
+			if ( ! isset( $statuses[ $status['slug'] ] ) ) {
+				$statuses[ $status['slug'] ]              = $status;
+				$statuses[ $status['slug'] ]['postTypes'] = array( $type->name );
+				continue;
+			}//end if
+
+			$statuses[ $status['slug'] ] = array_merge(
+				$statuses[ $status['slug'] ],
+				$status,
+				array(
+					'postTypes' => array_unique(
+						array_merge(
+							$statuses[ $status['slug'] ]['postTypes'] ?? array(),
+							array( $type->name )
+						),
+					),
+				),
+			);
+		}//end foreach
+	}//end foreach
+
+	$statuses = array_values( nelio_content_sort_statuses( $statuses, nelio_content_get_saved_statuses() ) );
+
+	return $statuses;
+}//end nelio_content_get_statuses()
+
+function nelio_content_get_saved_statuses() {
+	return get_option( 'nc_statuses', array() );
+}//end nelio_content_get_saved_statuses()
+
+function nelio_content_set_saved_statuses( $statuses ) {
+	update_option( 'nc_statuses', $statuses );
+}//end nelio_content_set_saved_statuses()
+
+function nelio_content_sort_statuses( array $statuses, array $ordered ) {
+
+	$statuses = key_by( $statuses, 'slug' );
+	$ordered  = key_by( $ordered, 'slug' );
+
+	$order = array();
+	foreach ( array_values( $ordered ) as $index => $item ) {
+		$order[ $item['slug'] ] = $index;
+	}//end foreach
+
+	if ( ! empty( $order ) ) {
+		uksort(
+			$statuses,
+			function ( $a, $b ) use ( $order ) {
+				$a_pos = $order[ $a ] ?? PHP_INT_MAX;
+				$b_pos = $order[ $b ] ?? PHP_INT_MAX;
+				return $a_pos <=> $b_pos;
+			}
+		);
+	}//end if
+
+	$statuses = key_by( $statuses, 'slug' );
+	return $statuses;
+}//end nelio_content_sort_statuses()
 
 /**
  * Returns the supported post types in the given context.

@@ -52,6 +52,14 @@ return array(
 	),
 
 	array(
+		'type'     => 'custom',
+		'name'     => 'social_sharing_delay',
+		'label'    => esc_html_x( 'Social Sharing Delay', 'text', 'nelio-content' ),
+		'instance' => new Nelio_Content_Social_Sharing_Delay_Setting(),
+		'default'  => 0,
+	),
+
+	array(
 		'type'    => 'checkbox',
 		'name'    => 'are_meta_tags_active',
 		'label'   => esc_html_x( 'Meta', 'text', 'nelio-content' ),
