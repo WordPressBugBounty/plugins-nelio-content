@@ -19,6 +19,7 @@ require_once __DIR__ . '/pagefrog.php';
 require_once __DIR__ . '/the-events-calendar.php';
 require_once __DIR__ . '/nelio-ab-testing.php';
 require_once __DIR__ . '/nelio-forms.php';
+require_once __DIR__ . '/nelio-popups.php';
 require_once __DIR__ . '/user-submitted-posts.php';
 require_once __DIR__ . '/woocommerce.php';
 require_once __DIR__ . '/wpml.php';

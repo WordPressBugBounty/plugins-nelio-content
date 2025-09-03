@@ -3,7 +3,7 @@
         'name' => 'neliosoftware/nelio-content',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '8aa93d7d8642ade694a54e36bdce0b9b89c57346',
+        'reference' => 'b28bc0aad38780772b732f5cbfbcaa210f46c1dd',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'neliosoftware/nelio-content' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '8aa93d7d8642ade694a54e36bdce0b9b89c57346',
+            'reference' => 'b28bc0aad38780772b732f5cbfbcaa210f46c1dd',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

@@ -1,6 +1,6 @@
 <?php
 /**
- * Compatibility with Nelio Forms.
+ * Compatibility with Nelio Popups.
  *
  * @package    Nelio_Content
  * @subpackage Nelio_Content/includes/compat
@@ -13,19 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }//end if
 
 add_filter(
-	'nelio_content_hidden_post_statuses',
-	function ( $hidden_statuses ) {
-		return array_merge( $hidden_statuses, array( 'nelio_forms_spam', 'nelio_forms_submit' ) );
-	}
-);
-
-add_filter(
 	'nelio_content_get_post_types',
 	function ( $post_types ) {
 		return array_filter(
 			$post_types,
 			function ( $type ) {
-				return ! in_array( $type, array( 'nelio_form' ), true );
+				return ! in_array( $type, array( 'nelio_popup' ), true );
 			}
 		);
 	}

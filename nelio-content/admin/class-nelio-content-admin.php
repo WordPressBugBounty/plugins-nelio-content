@@ -352,6 +352,7 @@ class Nelio_Content_Admin {
 			'series',
 			'social',
 			'tasks',
+			'wp',
 		);
 		$post_types = array_map( 'nelio_content_get_post_types', $contexts );
 		return array_combine( $contexts, $post_types );

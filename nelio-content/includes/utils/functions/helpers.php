@@ -692,23 +692,30 @@ function nelio_content_get_statuses() {
 		$registered_statuses
 	);
 
-	// Maybe use `nelio_content_get_post_types()` instead.
-	$post_types = get_post_types(
-		array(
-			'show_ui'      => true,
-			'show_in_rest' => true,
-		),
-		'objects'
-	);
-	$post_types = array_filter(
-		$post_types,
-		function ( $post_type ) {
-			return ! in_array( $post_type->name, array( 'nav_menu', 'attachment', 'revision', 'wp_navigation', 'wp_block' ), true );
-		}
-	);
+	$saved_statuses = nelio_content_get_saved_statuses();
+	foreach ( $saved_statuses as $status ) {
+		if ( ! isset( $statuses[ $status['slug'] ] ) ) {
+			continue;
+		}//end if
+
+		$statuses[ $status['slug'] ] = array_merge(
+			$statuses[ $status['slug'] ],
+			$status,
+			array(
+				'postTypes' => array_unique(
+					array_merge(
+						$statuses[ $status['slug'] ]['postTypes'] ?? array(),
+						isset( $status['postTypes'] ) ? $status['postTypes'] : array()
+					),
+				),
+			),
+		);
+	}//end foreach
+
+	$post_types = nelio_content_get_post_types( 'wp' );
 
 	foreach ( $post_types as $type ) {
-		$statuses_of_type = nelio_content_get_post_statuses( $type->name );
+		$statuses_of_type = nelio_content_get_post_statuses( $type );
 		$statuses_of_type = array_filter(
 			$statuses_of_type,
 			function ( $status ) {
@@ -719,7 +726,7 @@ function nelio_content_get_statuses() {
 		foreach ( $statuses_of_type as $status ) {
 			if ( ! isset( $statuses[ $status['slug'] ] ) ) {
 				$statuses[ $status['slug'] ]              = $status;
-				$statuses[ $status['slug'] ]['postTypes'] = array( $type->name );
+				$statuses[ $status['slug'] ]['postTypes'] = array( $type );
 				continue;
 			}//end if
 
@@ -730,7 +737,7 @@ function nelio_content_get_statuses() {
 					'postTypes' => array_unique(
 						array_merge(
 							$statuses[ $status['slug'] ]['postTypes'] ?? array(),
-							array( $type->name )
+							array( $type )
 						),
 					),
 				),
@@ -833,6 +840,29 @@ function nelio_content_get_post_types( string $context ): array {
 
 			case 'quality-checks':
 				return $s->get( 'quality_check_post_types' );
+
+			case 'wp':
+				/**
+				 * List of post type names that can be used in Nelio Content in the context of WordPress.
+				 *
+				 * @param array $post_types list of post type names. Default: `[ 'post', 'page', ... ]`.
+				 *
+				 * @since 4.0.0
+				 */
+				return apply_filters(
+					'nelio_content_get_post_types',
+					array_filter(
+						get_post_types(
+							array(
+								'show_ui'      => true,
+								'show_in_rest' => true,
+							),
+						),
+						function ( $post_type ) {
+							return ! in_array( $post_type, array( 'nav_menu', 'attachment', 'revision', 'wp_navigation', 'wp_block' ), true );
+						}
+					)
+				);
 
 			default:
 				return wp_die( esc_html( "Unknown context {$c}" ) );

@@ -65,14 +65,12 @@ class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 					'protected'   => true,
 					'label_count' => array(
 						'singular' => sprintf(
-							/* translators: %1$s: status name, %2$s: item count */
-							__( '%1$s <span class="count">(%2$s)</span>', 'nelio-content' ),
+							'%1$s <span class="count">(%2$s)</span>',
 							$status['name'],
 							'%s'
 						),
 						'plural'   => sprintf(
-							/* translators: %1$s: status name, %2$s: item count */
-							__( '%1$s <span class="count">(%2$s)</span>', 'nelio-content' ),
+							'%1$s <span class="count">(%2$s)</span>',
 							$status['name'],
 							'%s'
 						),
@@ -95,7 +93,7 @@ class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 			foreach ( $roles->role_objects as $role_name => $role ) {
 				$cap_name = 'status_change_' . str_replace( '-', '_', $status['slug'] );
 
-				if ( empty( $status['roles'] ) || ! in_array( $role_name, $status['roles'], true ) ) {
+				if ( isset( $status['roles'] ) && ! in_array( $role_name, $status['roles'], true ) ) {
 					$role->remove_cap( $cap_name );
 					continue;
 				}//end if
@@ -109,12 +107,7 @@ class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 
 	public function filter_can_use_post_status( $available, $status_slug, $post_type ) {
 		$statuses = nelio_content_get_saved_statuses();
-		$status   = find(
-			$statuses,
-			function ( $s ) use ( $status_slug ) {
-				return $s['slug'] === $status_slug;
-			}
-		);
+		$status   = find( $statuses, fn ( $s ) => $s['slug'] === $status_slug );
 
 		if ( ! $status ) {
 			return $available;
@@ -124,28 +117,26 @@ class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 			return $available;
 		}//end if
 
-		if ( ! empty( $status['postTypes'] ) && ! in_array( $post_type, $status['postTypes'], true ) ) {
+		$is_post_type_valid = ! isset( $status['postTypes'] ) || in_array( $post_type, $status['postTypes'], true );
+		if ( ! $is_post_type_valid ) {
 			return false;
 		}//end if
 
-		if ( ! empty( $status['roles'] ) ) {
-			$user = wp_get_current_user();
-			if ( current_user_can( 'manage_options' ) ) {
-				return true;
-			}//end if
-
-			$cap_name = 'status_change_' . str_replace( '-', '_', $status['slug'] );
-			if (
-				( ! empty( $status['roles'] ) && ! array_intersect( $user->roles, $status['roles'] ) ) ||
-				! current_user_can( $cap_name ) ||
-				( 'post' === $post_type && ! current_user_can( 'edit_posts' ) ) ||
-				( 'page' === $post_type && ! current_user_can( 'edit_pages' ) )
-			) {
-				return false;
-			}//end if
+		$user = wp_get_current_user();
+		if ( current_user_can( 'manage_options' ) ) {
+			return $available;
 		}//end if
 
-		return $available;
+		$cap_name = 'status_change_' . str_replace( '-', '_', $status['slug'] );
+		if ( current_user_can( $cap_name ) ) {
+			return $available;
+		}//end if
+
+		if ( ! isset( $status['roles'] ) || array_intersect( $user->roles, $status['roles'] ) ) {
+			return $available;
+		}//end if
+
+		return false;
 	}//end filter_can_use_post_status()
 
 	/**

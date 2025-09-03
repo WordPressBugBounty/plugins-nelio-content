@@ -16,6 +16,25 @@ function nc_woocommerce_hooks() {
 
 	add_filter( 'nelio_content_available_post_types_setting', 'nc_woocommerce_add_order_type' );
 	add_filter( 'nelio_content_post_statuses', 'nc_woocommerce_maybe_add_order_statuses', 10, 2 );
+
+	add_filter(
+		'nelio_content_hidden_post_statuses',
+		function ( $hidden_statuses ) {
+			return array_merge( $hidden_statuses, array( 'wc-pending', 'wc-processing', 'wc-on-hold', 'wc-completed', 'wc-cancelled', 'wc-refunded', 'wc-failed', 'wc-checkout-draft' ) );
+		}
+	);
+
+	add_filter(
+		'nelio_content_get_post_types',
+		function ( $post_types ) {
+			return array_filter(
+				$post_types,
+				function ( $type ) {
+					return ! in_array( $type, array( 'product' ), true );
+				}
+			);
+		}
+	);
 }//end nc_woocommerce_hooks()
 add_action( 'woocommerce_init', 'nc_woocommerce_hooks' );
 
