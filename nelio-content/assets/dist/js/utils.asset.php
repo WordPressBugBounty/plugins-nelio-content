@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('lodash', 'moment', 'nelio-content-date', 'nelio-content-networks', 'wp-data', 'wp-hooks', 'wp-i18n', 'wp-notices', 'wp-url'), 'version' => '0d09c66000b86783a4b9');
+<?php return array('dependencies' => array('lodash', 'moment', 'nelio-content-date', 'nelio-content-networks', 'wp-data', 'wp-hooks', 'wp-i18n', 'wp-notices', 'wp-url'), 'version' => '65342c1f6d74af0bf9a7');
