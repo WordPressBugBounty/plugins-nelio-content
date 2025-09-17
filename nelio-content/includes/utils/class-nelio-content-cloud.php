@@ -12,6 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }//end if
 
+use function Nelio_Content\Helpers\get;
+
 /**
  * This class implements some functions to sync WordPress with Nelio’s cloud.
  */
@@ -186,11 +188,7 @@ class Nelio_Content_Cloud {
 		);
 
 		$response = wp_remote_request( $url, $data );
-		if ( is_wp_error( $response )
-			|| ! isset( $response['response'] )
-			|| ! isset( $response['response']['code'] )
-			|| 200 !== $response['response']['code']
-		) {
+		if ( is_wp_error( $response ) || 200 !== get( $response, 'response.code' ) ) {
 			return;
 		}//end if
 
@@ -217,13 +215,13 @@ class Nelio_Content_Cloud {
 		}//end if
 
 		$subject = sprintf(
-			/* translators: blogname */
+			/* translators: %s: Blogname. */
 			_x( '[%s] Action Required: Re-Authenticate Social Profiles', 'text', 'nelio-content' ),
 			get_option( 'blogname' )
 		);
 
 		$message = sprintf(
-			/* translators: 1 -> website name, 2 -> website URL  */
+			/* translators: %1$s: Website name. %2$s: Website URL . */
 			_x( 'One or more social profiles in %1$s need to be re-authenticated. Please go to Nelio Content’s Settings (%2$s) and re-authenticate them.', 'user', 'nelio-content' ),
 			get_option( 'blogname' ),
 			admin_url( 'admin.php?page=nelio-content-settings&subpage=social--profiles' )
@@ -255,13 +253,7 @@ class Nelio_Content_Cloud {
 
 		$response = wp_remote_request( $url, $data );
 
-		if ( is_wp_error( $response ) ) {
-			return false;
-		}//end if
-
-		if ( ! isset( $response['response'] )
-			|| ! isset( $response['response']['code'] )
-			|| 200 !== $response['response']['code'] ) {
+		if ( is_wp_error( $response ) || 200 !== get( $response, 'response.code' ) ) {
 			return false;
 		}//end if
 

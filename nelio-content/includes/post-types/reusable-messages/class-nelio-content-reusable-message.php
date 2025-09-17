@@ -40,7 +40,7 @@ class Nelio_Content_Reusable_Message {
 	public function __construct( $preset = 0 ) {
 		$preset = $preset instanceof Nelio_Content_Reusable_Message ? $preset->ID : $preset;
 		$preset = $preset instanceof WP_Post ? $preset->ID : $preset;
-		$preset = is_numeric( $preset ) ? absint( $preset ) : 0;
+		$preset = absint( $preset );
 		$preset = get_post( $preset );
 		$preset = $preset instanceof WP_Post ? $preset : false;
 
@@ -62,7 +62,7 @@ class Nelio_Content_Reusable_Message {
 	 * @since 3.2.0
 	 */
 	public static function parse( $json ) {
-		$json = is_string( $json ) ? json_decode( $json, ARRAY_A ) : $json;
+		$json = is_string( $json ) ? json_decode( $json, true ) : $json;
 		$json = is_array( $json ) ? $json : array();
 
 		$parsed = self::schema()->safe_parse( $json );
@@ -97,8 +97,8 @@ class Nelio_Content_Reusable_Message {
 		);
 
 		$result = empty( $this->ID )
-			? wp_insert_post( $args )
-			: wp_update_post( array_merge( $args, array( 'ID' => $this->ID ) ) );
+			? wp_insert_post( $args, true )
+			: wp_update_post( array_merge( $args, array( 'ID' => $this->ID ) ), true );
 
 		if ( is_wp_error( $result ) ) {
 			return $result;

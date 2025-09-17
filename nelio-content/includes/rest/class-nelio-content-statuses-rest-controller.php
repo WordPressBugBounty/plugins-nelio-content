@@ -19,9 +19,9 @@ class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 	 * The single instance of this class.
 	 *
 	 * @since 4.0.0
-	 * @var   Nelio_Content_Statuses_REST_Controller
+	 * @var   Nelio_Content_Statuses_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -218,7 +218,7 @@ class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 	}//end schema()
 
 	public static function parse( $json ) {
-		$json = is_string( $json ) ? json_decode( $json, ARRAY_A ) : $json;
+		$json = is_string( $json ) ? json_decode( $json, true ) : $json;
 		$json = is_array( $json ) ? $json : array();
 
 		$parsed = self::schema()->safe_parse( $json );

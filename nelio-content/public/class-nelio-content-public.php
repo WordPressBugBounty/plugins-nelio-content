@@ -27,9 +27,9 @@ class Nelio_Content_Public {
 	 *
 	 * @since  1.3.4
 	 * @access protected
-	 * @var    Nelio_Content
+	 * @var    Nelio_Content_Public|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.

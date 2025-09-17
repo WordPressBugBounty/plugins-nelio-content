@@ -29,9 +29,9 @@ class Nelio_Content_External_Featured_Image_Public {
 	 *
 	 * @since  2.0.1
 	 * @access protected
-	 * @var    self
+	 * @var    Nelio_Content_External_Featured_Image_Public|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -113,7 +113,7 @@ class Nelio_Content_External_Featured_Image_Public {
 	 * @param integer $object_id The post whose featured image we're interested in.
 	 * @param string  $meta_key  The meta property we're trying to retrieve.
 	 *
-	 * @return integer This function might return different values:
+	 * @return boolean|integer This function might return different values:
 	 *                 * If the meta property isn't `_thumbnail_id`, we return `$null`.
 	 *                 * If it is, we simulate it has a thumbnail as required.
 	 *                   That is, if a external featured image has been manually
@@ -145,7 +145,7 @@ class Nelio_Content_External_Featured_Image_Public {
 		if ( ! is_string( $efi_url ) || ! strlen( $efi_url ) ) {
 
 			// Let's check if there's a regular featured image.
-			remove_filter( 'get_post_metadata', array( $this, 'maybe_simulate_post_thumbnail_attachment' ), 10, 3 );
+			remove_filter( 'get_post_metadata', array( $this, 'maybe_simulate_post_thumbnail_attachment' ), 10 );
 			$featured_image = get_post_meta( $object_id, '_thumbnail_id', true );
 			add_filter( 'get_post_metadata', array( $this, 'maybe_simulate_post_thumbnail_attachment' ), 10, 3 );
 
@@ -194,7 +194,7 @@ class Nelio_Content_External_Featured_Image_Public {
 	 * the post that has an external featured image, but with a negative sign.
 	 *
 	 * @param array        $image     the image to return.
-	 * @param integer      $attach_id the ID of the attachment.
+	 * @param int          $attach_id the ID of the attachment.
 	 * @param string|array $size      the size of the thumbnail.
 	 *
 	 * @return array the image to return.
@@ -203,10 +203,6 @@ class Nelio_Content_External_Featured_Image_Public {
 	 * @access public
 	 */
 	public function maybe_return_efi_url( $image, $attach_id, $size ) {
-
-		if ( ! is_numeric( $attach_id ) ) {
-			return $image;
-		}//end if
 
 		if ( $attach_id < 0 ) {
 
@@ -269,7 +265,7 @@ class Nelio_Content_External_Featured_Image_Public {
 	 * @since  1.1.1
 	 * @access public
 	 */
-	public function maybe_add_efi_as_background( $html, $post_id = 0, $post_thumbnail_id = '', $size = false, $attr = array() ) {
+	public function maybe_add_efi_as_background( $html, $post_id = 0, $post_thumbnail_id = '', $size = array(), $attr = array() ) {
 
 		$aux                  = Nelio_Content_External_Featured_Image_Helper::instance();
 		$nelio_featured_image = $aux->get_nelio_featured_image( $post_id );
@@ -373,12 +369,12 @@ class Nelio_Content_External_Featured_Image_Public {
 
 			$attach_id = wp_insert_attachment( $attachment, $filename );
 
-			if ( ! is_wp_error( $attach_id ) ) {
+			if ( ! empty( $attach_id ) ) {
 
 				update_option( 'nc_efi_placeholder_id', $attach_id );
 
 				// Generate the metadata for the attachment, and update the database record.
-				require_once ABSPATH . 'wp-admin/includes/image.php';
+				nelio_content_require_wp_file( '/wp-admin/includes/image.php' );
 				$attach_data = wp_generate_attachment_metadata( $attach_id, $filename );
 				wp_update_attachment_metadata( $attach_id, $attach_data );
 

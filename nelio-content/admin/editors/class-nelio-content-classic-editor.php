@@ -113,7 +113,7 @@ class Nelio_Content_Classic_Editor {
 		}//end if
 
 		$values = sanitize_text_field( wp_unslash( $_REQUEST['nelio-content-classic-values'] ) ); // phpcs:ignore
-		$values = json_decode( $values, ARRAY_A ); // phpcs:ignore
+		$values = json_decode( $values, true );
 		Nelio_Content_Gutenberg::instance()->save( $values, $post );
 	}//end save_classic_meta_boxes_values()
 

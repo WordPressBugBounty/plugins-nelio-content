@@ -142,7 +142,7 @@ function nc_create_reference( $url ) {
 			)
 		);
 
-		if ( $reference && ! is_wp_error( $reference ) ) {
+		if ( $reference ) {
 			// We add the URL using the meta directly, or else the status would be
 			// changed from "pending" to "improvable", because all Reference setters
 			// may update its status.

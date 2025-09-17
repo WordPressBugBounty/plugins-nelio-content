@@ -18,9 +18,9 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @since  2.0.0
 	 * @access protected
-	 * @var    Nelio_Content_Shared_Link_REST_Controller
+	 * @var    Nelio_Content_Shared_Link_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -80,7 +80,7 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response|WP_Error The response.
 	 */
 	public function get_shared_link_meta_data( $request ) {
 
@@ -114,7 +114,7 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 			return new WP_Error(
 				'internal-error',
 				sprintf(
-					/* translators: a URL */
+					/* translators: %s: URL. */
 					_x( 'Unable to load URL “%s”.', 'text', 'nelio-content' ),
 					$url
 				)
@@ -130,7 +130,7 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 			return new WP_Error(
 				'internal-error',
 				sprintf(
-					/* translators: a URL */
+					/* translators: %s: URL. */
 					_x( 'Unable to load URL “%s”.', 'text', 'nelio-content' ),
 					$url
 				)
@@ -142,7 +142,7 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 			return new WP_Error(
 				'internal-error',
 				sprintf(
-					/* translators: a URL */
+					/* translators: %s: URL. */
 					_x( 'Unable to load URL “%s”.', 'text', 'nelio-content' ),
 					$url
 				)

@@ -56,7 +56,7 @@ class NumberSchema extends Schema {
 				sprintf(
 					'Expected a number greater than or equal to %1$s, but %2$s found.',
 					esc_html( $this->min ),
-					esc_html( $value )
+					esc_html( "$value" )
 				)
 			);
 		}//end if
@@ -66,7 +66,7 @@ class NumberSchema extends Schema {
 				sprintf(
 					'Expected a number less than or equal to %1$s, but %2$s found.',
 					esc_html( $this->max ),
-					esc_html( $value )
+					esc_html( "$value" )
 				)
 			);
 		}//end if

@@ -153,7 +153,7 @@ class Nelio_Content_Install {
 		}//end if
 
 		$profiles = array();
-		if ( isset( $response['body'] ) ) {
+		if ( ! empty( $response['body'] ) ) {
 			$profiles = json_decode( $response['body'] );
 		}//end if
 
@@ -332,6 +332,7 @@ class Nelio_Content_Install {
 
 		$escape_array = function ( $arr ) {
 			$values = array_map( 'esc_sql', $arr );
+			$values = array_values( array_filter( $values, fn( $v ) => is_string( $v ) ) );
 			return "'" . implode( "', '", $values ) . "'";
 		};
 

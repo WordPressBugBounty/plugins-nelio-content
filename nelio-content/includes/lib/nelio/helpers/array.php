@@ -12,9 +12,8 @@ namespace Nelio_Content\Helpers;
  * @return mixed The value at path or default if not found.
  */
 function get( $element, $path, $default = null ) { // phpcs:ignore
-	if ( is_string( $path ) ) {
-		$path = explode( '.', $path );
-		$path = empty( $path ) ? array() : $path;
+	if ( ! is_array( $path ) ) {
+		$path = explode( '.', (string) $path );
 	}//end if
 
 	$result = array_reduce(

@@ -19,9 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @subpackage Nelio_Content/includes/lib/settings
  * @author     David Aguilera <david.aguilera@neliosoftware.com>
  * @since      1.0.0
- *
- * @SuppressWarnings( PHPMD.CyclomaticComplexity )
- * @SuppressWarnings( PHPMD.ExcessiveClassComplexity )
  */
 abstract class Nelio_Content_Abstract_Settings {
 
@@ -152,11 +149,11 @@ abstract class Nelio_Content_Abstract_Settings {
 	 * Returns the value of the given setting.
 	 *
 	 * @param string $name  The name of the parameter whose value we want to obtain.
-	 * @param object $value Optional. Default value if the setting is not found and
+	 * @param mixed  $value Optional. Default value if the setting is not found and
 	 *                      the setting didn't define a default value already.
 	 *                      Default: `false`.
 	 *
-	 * @return object The concrete value of the specified parameter.
+	 * @return mixed  The concrete value of the specified parameter.
 	 *                If the setting has never been saved and it registered no
 	 *                default value (during the construction of `Nelio_Content_Settings`),
 	 *                then the parameter `$value` will be returned instead.
@@ -287,8 +284,6 @@ abstract class Nelio_Content_Abstract_Settings {
 	 *
 	 * @since  3.6.0
 	 * @access private
-	 *
-	 * @SuppressWarnings( PHPMD.ExcessiveMethodLength )
 	 */
 	private function register_subpage( $subpage ) {
 
@@ -315,7 +310,7 @@ abstract class Nelio_Content_Abstract_Settings {
 					add_settings_section(
 						$field['name'],
 						$field['label'],
-						'',
+						'__return_false',
 						$this->get_settings_page_name()
 					);
 					break;
@@ -511,8 +506,6 @@ abstract class Nelio_Content_Abstract_Settings {
 	 *
 	 * @since  1.0.0
 	 * @access public
-	 *
-	 * @SuppressWarnings( PHPMD.UnusedLocalVariable )
 	 */
 	public function open_subpage_content( $subpage ) {
 

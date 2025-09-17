@@ -1,22 +1,22 @@
 <?php return array(
     'root' => array(
-        'pretty_version' => 'dev-main',
-        'version' => 'dev-main',
+        'pretty_version' => '4.0.2',
+        'version' => '4.0.2.0',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '8999621ec5843927bdedde440235b407d874a500',
+        'reference' => null,
         'name' => 'neliosoftware/nelio-content',
         'dev' => false,
     ),
     'versions' => array(
         'neliosoftware/nelio-content' => array(
-            'pretty_version' => 'dev-main',
-            'version' => 'dev-main',
+            'pretty_version' => '4.0.2',
+            'version' => '4.0.2.0',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '8999621ec5843927bdedde440235b407d874a500',
+            'reference' => null,
             'dev_requirement' => false,
         ),
     ),

@@ -22,14 +22,14 @@ class Nelio_Content_Reference_Post_Type_Register {
 	 *
 	 * @since  1.0.0
 	 * @access protected
-	 * @var    Nelio_Content
+	 * @var    Nelio_Content_Reference_Post_Type_Register|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
 	 *
-	 * @return Nelio_Content the single instance of this class.
+	 * @return Nelio_Content_Reference_Post_Type_Register the single instance of this class.
 	 *
 	 * @since  1.0.0
 	 * @access public
@@ -110,7 +110,7 @@ class Nelio_Content_Reference_Post_Type_Register {
 		$args = array(
 			'protected'   => true,
 			'label'       => _x( 'Pending', 'text (reference)', 'nelio-content' ),
-			/* translators: a number */
+			/* translators: %s: Number. */
 			'label_count' => _nx_noop( 'Pending <span class="count">(%s)</span>', 'Pending <span class="count">(%s)</span>', 'text (reference)', 'nelio-content' ),
 		);
 		register_post_status( 'nc_pending', $args );
@@ -118,7 +118,7 @@ class Nelio_Content_Reference_Post_Type_Register {
 		$args = array(
 			'protected'   => true,
 			'label'       => _x( 'Improvable', 'text (reference)', 'nelio-content' ),
-			/* translators: a number */
+			/* translators: %s: Number. */
 			'label_count' => _nx_noop( 'Improvable <span class="count">(%s)</span>', 'Improvable <span class="count">(%s)</span>', 'text (reference)', 'nelio-content' ),
 		);
 		register_post_status( 'nc_improvable', $args );
@@ -126,7 +126,7 @@ class Nelio_Content_Reference_Post_Type_Register {
 		$args = array(
 			'protected'   => true,
 			'label'       => _x( 'Complete', 'text (reference)', 'nelio-content' ),
-			/* translators: a number */
+			/* translators: %s: Number. */
 			'label_count' => _nx_noop( 'Complete <span class="count">(%s)</span>', 'Complete <span class="count">(%s)</span>', 'text (reference)', 'nelio-content' ),
 		);
 		register_post_status( 'nc_complete', $args );
@@ -134,7 +134,7 @@ class Nelio_Content_Reference_Post_Type_Register {
 		$args = array(
 			'protected'   => true,
 			'label'       => _x( 'Broken', 'text (reference)', 'nelio-content' ),
-			/* translators: a number */
+			/* translators: %s: Number. */
 			'label_count' => _nx_noop( 'Broken <span class="count">(%s)</span>', 'Broken <span class="count">(%s)</span>', 'text (reference)', 'nelio-content' ),
 		);
 		register_post_status( 'nc_broken', $args );
@@ -142,7 +142,7 @@ class Nelio_Content_Reference_Post_Type_Register {
 		$args = array(
 			'protected'   => true,
 			'label'       => _x( 'Check Required', 'text (reference)', 'nelio-content' ),
-			/* translators: a number */
+			/* translators: %s: Number. */
 			'label_count' => _nx_noop( 'Check Required <span class="count">(%s)</span>', 'Check Required <span class="count">(%s)</span>', 'text (reference)', 'nelio-content' ),
 		);
 		register_post_status( 'nc_check', $args );
@@ -166,7 +166,7 @@ class Nelio_Content_Reference_Post_Type_Register {
 			return $capabilities;
 		}//end if
 
-		remove_filter( 'user_has_cap', array( $this, 'set_user_capabilities' ), 10, 4 );
+		remove_filter( 'user_has_cap', array( $this, 'set_user_capabilities' ), 10 );
 		if ( nc_can_current_user_use_plugin() ) {
 			$reference_capabilities = array(
 				'create_nc_references',

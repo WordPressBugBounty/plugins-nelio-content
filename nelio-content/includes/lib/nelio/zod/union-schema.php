@@ -29,7 +29,7 @@ class UnionSchema extends Schema {
 		if ( empty( $result['success'] ) ) {
 			throw new \Exception(
 				sprintf(
-					'Invalid value',
+					'Invalid value %s',
 					esc_html( gettype( $value ) )
 				)
 			);

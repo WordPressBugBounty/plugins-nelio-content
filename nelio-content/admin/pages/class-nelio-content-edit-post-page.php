@@ -280,12 +280,4 @@ class Nelio_Content_Edit_Post_Page {
 			'alt' => get_post_meta( $post_id, '_nelioefi_alt', true ),
 		);
 	}//end get_external_featured_image()
-
-	private function is_post_type_feature_enabled( $setting_name ) {
-		$settings     = Nelio_Content_Settings::instance();
-		$current_type = get_post_type( $this->get_current_post_id() );
-		$post_types   = $settings->get( $setting_name );
-		$post_types   = is_array( $post_types ) ? $post_types : array();
-		return in_array( $current_type, $post_types, true );
-	}//end is_post_type_feature_enabled()
 }//end class

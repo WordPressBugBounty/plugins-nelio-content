@@ -112,7 +112,7 @@ class Nelio_Content_External_Featured_Image_Admin {
 		}//end if
 
 		// If it is, let's regenerate the thumbnails (or, at least, try to).
-		require_once ABSPATH . 'wp-admin/includes/image.php';
+		nelio_content_require_wp_file( '/wp-admin/includes/image.php' );
 		$filename    = get_attached_file( $attach_id );
 		$attach_data = wp_generate_attachment_metadata( $attach_id, $filename );
 		wp_update_attachment_metadata( $attach_id, $attach_data );

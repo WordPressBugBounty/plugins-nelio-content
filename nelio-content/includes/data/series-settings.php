@@ -62,7 +62,7 @@ return array(
 			'isActive' => true,
 			'location' => 'top',
 			'template' => sprintf(
-				/* translators: 1 -> an HTML wrapper opening tag, 2 -> a number, 3 -> a number, 4 -> a link, 5 -> an HTML wrapper closing tag */
+				/* translators: %1$s: HTML wrapper opening tag. %2$s: Number. %3$s: Number. %4$s: Link. %5$s: HTML wrapper closing tag. */
 				_x( '%1$sThis entry is part %2$s of %3$s in the series %4$s%5$s', 'text', 'nelio-content' ),
 				'<div class="nelio-content-series-meta">',
 				'{series_part_number}',

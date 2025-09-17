@@ -113,7 +113,7 @@ function nc_can_current_user_use_plugin() {
 	$post_types = nelio_content_get_post_types( 'calendar' );
 	foreach ( $post_types as $name ) {
 		$type = get_post_type_object( $name );
-		if ( empty( $type ) || is_wp_error( $type ) ) {
+		if ( empty( $type ) ) {
 			continue;
 		}//end if
 		if ( current_user_can( $type->cap->edit_posts ) ) {
@@ -222,7 +222,7 @@ function nc_enqueue_script_with_auto_deps( $handle, $file_name, $footer ) {
  * This function makes sure that a certain pair of meta key and value for a
  * given posts exists only once in the database.
  *
- * @param string $post_id    the post ID related to the given meta.
+ * @param int    $post_id    the post ID related to the given meta.
  * @param string $meta_key   the meta key.
  * @param mixed  $meta_value the meta value.
  *
@@ -240,7 +240,7 @@ function nc_add_post_meta_once( $post_id, $meta_key, $meta_value ) {
  * This function makes sure that only the values in the array of meta values
  * exists in the database for the given post and meta key (one row per value).
  *
- * @param string $post_id     the post ID related to the given meta.
+ * @param int    $post_id     the post ID related to the given meta.
  * @param string $meta_key    the meta key.
  * @param array  $meta_values the meta values.
  *
@@ -706,9 +706,9 @@ function nelio_content_get_statuses() {
 					array_merge(
 						$statuses[ $status['slug'] ]['postTypes'] ?? array(),
 						isset( $status['postTypes'] ) ? $status['postTypes'] : array()
-					),
+					)
 				),
-			),
+			)
 		);
 	}//end foreach
 
@@ -738,9 +738,9 @@ function nelio_content_get_statuses() {
 						array_merge(
 							$statuses[ $status['slug'] ]['postTypes'] ?? array(),
 							array( $type )
-						),
+						)
 					),
-				),
+				)
 			);
 		}//end foreach
 	}//end foreach
@@ -809,37 +809,48 @@ function nelio_content_get_post_types( string $context ): array {
 			case 'calendar':
 			case 'efi':
 			case 'social':
-				return $s->get( "{$c}_post_types" );
+				$r = $s->get( "{$c}_post_types" );
+				return is_array( $r ) ? $r : array();
 
 			case 'comments':
-				return $s->get( 'comment_post_types' );
+				$r = $s->get( 'comment_post_types' );
+				return is_array( $r ) ? $r : array();
 
 			case 'duplicate':
-				return $s->get( 'duplicate_post_types' );
+				$r = $s->get( 'duplicate_post_types' );
+				return is_array( $r ) ? $r : array();
 
 			case 'future-actions':
-				return $s->get( 'future_action_post_types' );
+				$r = $s->get( 'future_action_post_types' );
+				return is_array( $r ) ? $r : array();
 
 			case 'notifications':
-				return $s->get( 'notification_post_types' );
+				$r = $s->get( 'notification_post_types' );
+				return is_array( $r ) ? $r : array();
 
 			case 'references':
-				return $s->get( 'reference_post_types' );
+				$r = $s->get( 'reference_post_types' );
+				return is_array( $r ) ? $r : array();
 
 			case 'rewrite':
-				return $s->get( 'rewrite_post_types' );
+				$r = $s->get( 'rewrite_post_types' );
+				return is_array( $r ) ? $r : array();
 
 			case 'series':
-				return $s->get( 'series_post_types' );
+				$r = $s->get( 'series_post_types' );
+				return is_array( $r ) ? $r : array();
 
 			case 'tasks':
-				return $s->get( 'task_post_types' );
+				$r = $s->get( 'task_post_types' );
+				return is_array( $r ) ? $r : array();
 
 			case 'content-board':
-				return $s->get( 'content_board_post_types' );
+				$r = $s->get( 'content_board_post_types' );
+				return is_array( $r ) ? $r : array();
 
 			case 'quality-checks':
-				return $s->get( 'quality_check_post_types' );
+				$r = $s->get( 'quality_check_post_types' );
+				return is_array( $r ) ? $r : array();
 
 			case 'wp':
 				/**
@@ -849,23 +860,24 @@ function nelio_content_get_post_types( string $context ): array {
 				 *
 				 * @since 4.0.0
 				 */
-				return apply_filters(
+				$r = apply_filters(
 					'nelio_content_get_post_types',
 					array_filter(
 						get_post_types(
 							array(
 								'show_ui'      => true,
 								'show_in_rest' => true,
-							),
+							)
 						),
 						function ( $post_type ) {
 							return ! in_array( $post_type, array( 'nav_menu', 'attachment', 'revision', 'wp_navigation', 'wp_block' ), true );
 						}
 					)
 				);
+				return is_array( $r ) ? $r : array();
 
 			default:
-				return wp_die( esc_html( "Unknown context {$c}" ) );
+				wp_die( esc_html( "Unknown context {$c}" ) );
 		}//end switch
 	};
 
@@ -878,9 +890,7 @@ function nelio_content_get_post_types( string $context ): array {
 	};
 
 	$result = array_map( $get_types, explode( ',', $context ) );
-	$result = array_map( fn( $a ) => is_array( $a ) ? $a : array(), $result );
 	$result = $flatten( $result );
-	$result = array_values( $result );
 	$result = array_values( $result );
 	return $result;
 }//end nelio_content_get_post_types()
@@ -923,3 +933,17 @@ function nelio_content_get_social_editor_permission() {
 
 	return $permission;
 }//end nelio_content_get_social_editor_permission()
+
+/**
+ * Requires the file from WordPress once.
+ *
+ * @param string $path Filename relative from ABSPATH.
+ *
+ * @since 4.0.3
+ */
+function nelio_content_require_wp_file( $path ) {
+	if ( 0 !== strpos( $path, '/' ) ) {
+		$path = "/{$path}";
+	}//end if
+	require_once untrailingslashit( ABSPATH ) . $path;
+}//end nelio_content_require_wp_file()

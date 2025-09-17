@@ -16,9 +16,9 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 	 * The single instance of this class.
 	 *
 	 * @since 3.3.0
-	 * @var   Nelio_Content_Reusable_Message_REST_Controller
+	 * @var   Nelio_Content_Reusable_Message_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -126,7 +126,7 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 		if ( 'nc_reusable_social' !== get_post_type( $message_id ) ) {
 			return new WP_Error(
 				sprintf(
-				/* translators: post ID */
+				/* translators: %s: Post ID. */
 					_x(
 						'Item #%s is not a reusable social message.',
 						'text',

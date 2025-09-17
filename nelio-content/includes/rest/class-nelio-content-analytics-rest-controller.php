@@ -19,9 +19,9 @@ class Nelio_Content_Analytics_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @since  2.0.0
 	 * @access protected
-	 * @var    Nelio_Content_Author_REST_Controller
+	 * @var    Nelio_Content_Analytics_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -310,7 +310,7 @@ class Nelio_Content_Analytics_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Refreshes Google Analytics’ access token.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response|WP_Error The response.
 	 */
 	public function refresh_google_analytics_token() {
 

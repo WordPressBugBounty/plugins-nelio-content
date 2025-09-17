@@ -51,8 +51,8 @@ function render_widget() {
 }//end render_widget()
 
 function render_title() {
-	require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
-	require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+	nelio_content_require_wp_file( '/wp-admin/includes/class-wp-filesystem-base.php' );
+	nelio_content_require_wp_file( '/wp-admin/includes/class-wp-filesystem-direct.php' );
 	$filesystem = new \WP_Filesystem_Direct( true );
 	$icon       = $filesystem->get_contents( nelio_content()->plugin_path . '/assets/dist/images/logo.svg' );
 	$icon       = str_replace( 'fill="inherit"', 'fill="currentcolor"', $icon );

@@ -19,9 +19,9 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 	 *
 	 * @since  2.1.0
 	 * @access protected
-	 * @var    Nelio_Content_Author_REST_Controller
+	 * @var    Nelio_Content_External_Calendar_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -144,7 +144,7 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response|WP_Error The response.
 	 */
 	public function create_external_calendar( $request ) {
 
@@ -179,7 +179,7 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response|WP_Error The response.
 	 */
 	public function update_external_calendar( $request ) {
 
@@ -231,7 +231,7 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response|WP_Error The response.
 	 */
 	public function get_events( $request ) {
 		$url      = $request['url'];

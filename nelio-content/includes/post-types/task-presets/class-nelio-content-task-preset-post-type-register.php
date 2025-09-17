@@ -22,14 +22,14 @@ class Nelio_Content_Task_Preset_Post_Type_Register {
 	 *
 	 * @since  3.6.0
 	 * @access protected
-	 * @var    Nelio_Content
+	 * @var    Nelio_Content_Task_Preset_Post_Type_Register|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
 	 *
-	 * @return Nelio_Content the single instance of this class.
+	 * @return Nelio_Content_Task_Preset_Post_Type_Register the single instance of this class.
 	 *
 	 * @since  3.6.0
 	 * @access public
@@ -122,7 +122,7 @@ class Nelio_Content_Task_Preset_Post_Type_Register {
 			return $capabilities;
 		}//end if
 
-		remove_filter( 'user_has_cap', array( $this, 'set_user_capabilities' ), 10, 4 );
+		remove_filter( 'user_has_cap', array( $this, 'set_user_capabilities' ), 10 );
 		if ( nc_can_current_user_use_plugin() ) {
 			$reference_capabilities = array(
 				'create_nc_task_presets',

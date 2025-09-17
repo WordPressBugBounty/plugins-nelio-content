@@ -30,10 +30,10 @@
 	type="range"
 	id="<?php echo esc_attr( $id ); ?>"
 	name="<?php echo esc_attr( $name ); ?>"
-	min="<?php echo esc_attr( $min ); ?>"
-	max="<?php echo esc_attr( $max ); ?>"
-	step="<?php echo esc_attr( $step ); ?>"
-	value="<?php echo esc_attr( $value ); ?>"
+	min="<?php echo esc_attr( "$min" ); ?>"
+	max="<?php echo esc_attr( "$max" ); ?>"
+	step="<?php echo esc_attr( "$step" ); ?>"
+	value="<?php echo esc_attr( "$value" ); ?>"
 	/>
 <?php if ( ! empty( $verbose_value ) ) { ?>
 		<p id="label-<?php echo esc_attr( $id ); ?>" class="description"></p>

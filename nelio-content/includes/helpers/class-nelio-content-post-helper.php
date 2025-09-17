@@ -41,8 +41,6 @@ class Nelio_Content_Post_Helper {
 	 *
 	 * @since  1.3.4
 	 * @access public
-	 *
-	 * @SuppressWarnings( PHPMD.CyclomaticComplexity )
 	 */
 	public function get_references( $post_id, $type = 'all' ) {
 
@@ -94,17 +92,15 @@ class Nelio_Content_Post_Helper {
 	 *
 	 * @since  1.3.4
 	 * @access public
-	 *
-	 * @SuppressWarnings( PHPMD.CyclomaticComplexity )
 	 */
 	public function get_non_reference_domains() {
 
 		/**
 		 * List of domain names that shouldn't be considered as external references.
 		 *
-		 * @param array domains list of domain names that shouldn't be considered as
-		 *                      external references. It accepts the star (*) char as
-		 *                      a wildcard.
+		 * @param array $domains list of domain names that shouldn't be considered as
+		 *                       external references. It accepts the star (*) char as
+		 *                       a wildcard.
 		 *
 		 * @since 1.3.4
 		 */
@@ -349,11 +345,6 @@ class Nelio_Content_Post_Helper {
 	 * @access public
 	 */
 	public function save_post_followers( $post_id, $users ) {
-
-		if ( ! is_array( $users ) ) {
-			$users = array();
-		}//end if
-
 		$users = array_values( array_filter( array_unique( array_map( 'absint', $users ) ) ) );
 		return nc_update_post_meta_array( $post_id, '_nc_following_users', $users );
 	}//end save_post_followers()
@@ -364,13 +355,11 @@ class Nelio_Content_Post_Helper {
 	 *
 	 * @param WP_Post|integer $post The post we want to stringify (or its ID).
 	 *
-	 * @return array a ncselect2-ready object with (a) the current post in the
+	 * @return array|false a ncselect2-ready object with (a) the current post in the
 	 *               loop or (b) the post specified in `$post_id`.
 	 *
 	 * @since  1.0.0
 	 * @access public
-	 *
-	 * @SuppressWarnings( PHPMD.CyclomaticComplexity )
 	 */
 	public function post_to_json( $post ) {
 
@@ -378,11 +367,11 @@ class Nelio_Content_Post_Helper {
 			$post = get_post( $post );
 		}//end if
 
-		if ( is_wp_error( $post ) || ! $post ) {
+		if ( ! $post ) {
 			return false;
 		}//end if
 
-		require_once ABSPATH . '/wp-admin/includes/post.php';
+		nelio_content_require_wp_file( '/wp-admin/includes/post.php' );
 		$analytics          = Nelio_Content_Analytics_Helper::instance();
 		$post_status_object = get_post_status_object( $post->post_status );
 		$images             = $this->get_images( $post );
@@ -433,7 +422,7 @@ class Nelio_Content_Post_Helper {
 	 *
 	 * @param integer $post_id The ID of the post we want to stringify.
 	 *
-	 * @return array an AWS-ready post object.
+	 * @return array|false an AWS-ready post object.
 	 *
 	 * @since  1.4.5
 	 * @access public
@@ -615,9 +604,6 @@ class Nelio_Content_Post_Helper {
 	 * @access public
 	 */
 	public function update_post_highlights( $post_id, $highlights ) {
-		if ( ! is_array( $highlights ) ) {
-			return;
-		}//end if
 		if ( $post_id instanceof WP_Post ) {
 			$post_id = $post_id->ID;
 		}//end if
@@ -626,16 +612,14 @@ class Nelio_Content_Post_Helper {
 
 	public function get_supported_custom_fields_in_templates() {
 		$types  = nelio_content_get_post_types( 'social' );
-		$types  = is_array( $types ) ? $types : array();
 		$fields = array_map( array( $this, 'get_supported_custom_fields' ), $types );
 		return array_combine( $types, $fields );
 	}//end get_supported_custom_fields_in_templates()
 
 	public function get_supported_custom_placeholders_in_templates() {
 		$types        = nelio_content_get_post_types( 'social' );
-		$types        = is_array( $types ) ? $types : array();
 		$placeholders = array_map( array( $this, 'get_supported_custom_placeholders' ), $types );
-		$placeholders = json_decode( wp_json_encode( $placeholders ), ARRAY_A );
+		$placeholders = json_decode( wp_json_encode( $placeholders ), true );
 		return array_combine( $types, $placeholders );
 	}//end get_supported_custom_placeholders_in_templates()
 
@@ -758,7 +742,7 @@ class Nelio_Content_Post_Helper {
 
 		$post_type_name = _x( 'Post', 'text (default post type name)', 'nelio-content' );
 		$post_type      = get_post_type_object( $post->post_type );
-		if ( ! empty( $post_type ) && isset( $post_type->labels ) && isset( $post_type->labels->singular_name ) ) {
+		if ( ! empty( $post_type ) && ! empty( $post_type->labels->singular_name ) ) {
 			$post_type_name = $post_type->labels->singular_name;
 		}//end if
 
@@ -933,7 +917,7 @@ class Nelio_Content_Post_Helper {
 		}//end foreach
 
 		shuffle( $result );
-		return array_values( $result );
+		return $result;
 	}//end get_images()
 
 	private static function get_network_image_ids( $post_id ) {
@@ -1096,18 +1080,16 @@ class Nelio_Content_Post_Helper {
 			)
 		);
 
-		return array_values(
-			array_map(
-				function ( $reference ) {
-					return array(
-						'url'     => $reference['url'],
-						'author'  => $reference['author'],
-						'title'   => $reference['title'],
-						'twitter' => $reference['twitter'],
-					);
-				},
-				$external_references
-			)
+		return array_map(
+			function ( $reference ) {
+				return array(
+					'url'     => $reference['url'],
+					'author'  => $reference['author'],
+					'title'   => $reference['title'],
+					'twitter' => $reference['twitter'],
+				);
+			},
+			$external_references
 		);
 	}//end get_external_references()
 
@@ -1170,7 +1152,7 @@ class Nelio_Content_Post_Helper {
 				 *
 				 * @since 1.4.5
 				 */
-				return apply_filters( "nelio_content_{$network}_featured_image", $image ?? false, $post_id );
+				return apply_filters( "nelio_content_{$network}_featured_image", $image, $post_id );
 			},
 			self::$networks
 		);
@@ -1183,6 +1165,7 @@ class Nelio_Content_Post_Helper {
 		$image_alt_texts   = array_map(
 			function ( $network ) use ( $post_id, $network_image_ids ) {
 				$image_alt = ! empty( $network_image_ids[ $network ] ) ? trim( wp_strip_all_tags( get_post_meta( $network_image_ids[ $network ], '_wp_attachment_image_alt', true ) ) ) : '';
+				$image_alt = (string) $image_alt;
 
 				/**
 				 * Sets the exact image alt text that should be used when sharing the post on a certain network.
@@ -1195,7 +1178,7 @@ class Nelio_Content_Post_Helper {
 				 *
 				 * @since 3.9.5
 				 */
-				return apply_filters( "nelio_content_{$network}_featured_image_alt_text", $image_alt ?? '', $post_id );
+				return apply_filters( "nelio_content_{$network}_featured_image_alt_text", $image_alt, $post_id );
 			},
 			self::$networks
 		);

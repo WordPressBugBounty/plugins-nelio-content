@@ -141,7 +141,7 @@ class Nelio_Content_Post_List_Page {
 
 		if ( 'never' === $end_date ) {
 			printf(
-				/* translators: classname */
+				/* translators: %s: Classname. */
 				_x( '<span class="%s">Enabled</span><br>forever', 'text (auto share)', 'nelio-content' ), // phpcs:ignore
 				esc_attr( 'nc-auto-share nc-auto-share--is-enabled' )
 			);
@@ -153,7 +153,7 @@ class Nelio_Content_Post_List_Page {
 			);
 		} elseif ( $cur_date <= $end_date ) {
 			printf(
-				/* translators: 1 -> classname, 2 -> date */
+				/* translators: %1$s: Classname. %2$s: Date. */
 				_x( '<span class="%1$s">Enabled</span><br>until %2$s', 'text (auto share)', 'nelio-content' ), // phpcs:ignore
 				esc_attr( 'nc-auto-share nc-auto-share--is-enabled' ),
 				esc_html( $end_date )
@@ -163,7 +163,7 @@ class Nelio_Content_Post_List_Page {
 				'<span class="%1$s">%2$s</span>',
 				esc_attr( 'nc-auto-share nc-auto-share--is-finished' ),
 				sprintf(
-					/* translators: date */
+					/* translators: %s: Date. */
 					_x( 'Finished<br>on %s', 'text (auto share)', 'nelio-content' ), // phpcs:ignore
 					esc_html( $end_date )
 				)

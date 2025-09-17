@@ -281,7 +281,7 @@ class Nelio_Content_Analytics_Helper {
 	 *
 	 * @param array $params Parameters to filter the search.
 	 *
-	 * @return object an object with two keys: `items` with the list of posts and `pagination` with info for pagination.
+	 * @return array an object with two keys: `items` with the list of posts and `pagination` with info for pagination.
 	 *
 	 * @since  2.0.0
 	 * @access public
@@ -427,7 +427,7 @@ class Nelio_Content_Analytics_Helper {
 	 * Helper function that obtains the access token and refresh token in Google
 	 * Analytics.
 	 *
-	 * @return string The token to access Google Analytics.
+	 * @return string|false The token to access Google Analytics. False if it couldn’t be refreshed.
 	 */
 	public function refresh_access_token() {
 

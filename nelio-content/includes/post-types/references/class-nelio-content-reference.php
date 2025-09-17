@@ -19,8 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * links that have been suggested by users in WordPress. Regardless of
  * the relationship between a link and a post, the reference will exist
  * as some information about the given link (title, author, and so on).
- *
- * @SuppressWarnings( PHPMD.ShortVariableName )
  */
 class Nelio_Content_Reference {
 
@@ -34,42 +32,42 @@ class Nelio_Content_Reference {
 	/**
 	 * Stores post data.
 	 *
-	 * @var $post WP_Post
+	 * @var WP_Post
 	 */
 	public $post = null;
 
 	/**
 	 * The URL of the reference.
 	 *
-	 * @var $url string
+	 * @var string
 	 */
 	private $url;
 
 	/**
 	 * The name of the reference's author.
 	 *
-	 * @var $author_name string
+	 * @var string
 	 */
 	private $author_name;
 
 	/**
 	 * The email of the reference's author.
 	 *
-	 * @var $author_email string
+	 * @var string
 	 */
 	private $author_email;
 
 	/**
 	 * The Twitter username of the reference's author.
 	 *
-	 * @var $author_twitter string
+	 * @var string
 	 */
 	private $author_twitter;
 
 	/**
 	 * Publication date of the reference.
 	 *
-	 * @var $publication_date string
+	 * @var string
 	 */
 	private $publication_date;
 
@@ -77,7 +75,7 @@ class Nelio_Content_Reference {
 	 * Whether this reference has to be considered a suggestion (for a certain
 	 * post) or not.
 	 *
-	 * @var $is_suggestion string
+	 * @var bool
 	 */
 	private $is_suggestion;
 
@@ -85,7 +83,7 @@ class Nelio_Content_Reference {
 	 * Assuming someone suggested this reference, the name of the user who
 	 * suggested it.
 	 *
-	 * @var $suggestion_advisor string
+	 * @var int
 	 */
 	private $suggestion_advisor;
 
@@ -93,7 +91,7 @@ class Nelio_Content_Reference {
 	 * Assuming someone suggested this reference, the date in which the
 	 * suggestion was made.
 	 *
-	 * @var $suggestion_date string
+	 * @var int
 	 */
 	private $suggestion_date;
 
@@ -133,7 +131,7 @@ class Nelio_Content_Reference {
 			$this->ID   = absint( $reference->ID );
 			$this->post = $reference->post;
 
-		} elseif ( isset( $reference->ID ) ) {
+		} elseif ( ! empty( $reference->ID ) ) {
 
 			$this->ID   = absint( $reference->ID );
 			$this->post = $reference;
@@ -165,8 +163,8 @@ class Nelio_Content_Reference {
 		} else {
 
 			$this->url              = get_permalink( $this->ID );
-			$this->author_name      = get_the_author_meta( 'display_name', $this->post->post_author );
-			$this->author_email     = get_the_author_meta( 'email', $this->post->post_author );
+			$this->author_name      = get_the_author_meta( 'display_name', absint( $this->post->post_author ) );
+			$this->author_email     = get_the_author_meta( 'email', absint( $this->post->post_author ) );
 			$this->author_twitter   = '';
 			$this->publication_date = mysql2date( 'Y-m-d', $this->post->post_date );
 
@@ -216,7 +214,9 @@ class Nelio_Content_Reference {
 
 			$this->post->post_title = trim( $title );
 			if ( $this->ID > 0 && ! $this->maybe_update_status() ) {
-				wp_update_post( $this->post );
+				$postarr                = (array) $this->post;
+				$postarr['post_author'] = absint( $postarr['post_author'] );
+				wp_update_post( $postarr );
 			}//end if
 		}//end if
 	}//end set_title()
@@ -475,7 +475,9 @@ class Nelio_Content_Reference {
 
 			$this->post->post_status = $new_status;
 			if ( $this->ID > 0 ) {
-				wp_update_post( $this->post );
+				$postarr                = (array) $this->post;
+				$postarr['post_author'] = absint( $postarr['post_author'] );
+				wp_update_post( $postarr );
 			}//end if
 			return true;
 

@@ -20,9 +20,9 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @since  2.0.0
 	 * @access protected
-	 * @var    Nelio_Content_Account_REST_Controller
+	 * @var    Nelio_Content_Account_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -214,7 +214,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Retrieves information about the site.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function get_site_data() {
 
@@ -249,7 +249,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Creates a new free site in AWS and updates the info in WordPress.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function create_free_site() {
 
@@ -313,7 +313,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function use_license_in_site( $request ) {
 
@@ -399,7 +399,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function remove_license_from_site( $request ) {
 
@@ -431,7 +431,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function upgrade_subscription( $request ) {
 
@@ -479,7 +479,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Cancels a subscription.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function cancel_subscription() {
 
@@ -530,7 +530,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Un-cancels a subscription.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function uncancel_subscription() {
 
@@ -581,7 +581,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Obtains all sites connected to a subscription.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function get_sites_using_subscription() {
 
@@ -600,7 +600,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		$response = wp_remote_request( $url, $data );
 
 		// If the response is an error, leave.
-		nc_extract_error_from_response( $response );
+		$error = nc_extract_error_from_response( $response );
 		if ( ! empty( $error ) ) {
 			return $error;
 		}//end if
@@ -641,7 +641,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Obtains the invoices of a subscription.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function get_invoices_from_subscription() {
 
@@ -681,10 +681,9 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Obtains the subscription products of Nelio Content.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
-	public function get_products( $request ) {
+	public function get_products() {
 
 		$data = array(
 			'method'    => 'GET',
@@ -744,7 +743,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	/**
 	 * This helper function creates an account object.
 	 *
-	 * @param object $site The data about the site.
+	 * @param array $site The data about the site.
 	 *
 	 * @return array an account object.
 	 *

@@ -5,7 +5,7 @@ Tags: social media scheduling, editorial calendar, auto publish, content marketi
 Requires PHP: 7.4
 Requires at least: 6.7
 Tested up to: 6.8
-Stable tag: 4.0.2
+Stable tag: 4.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,7 +43,7 @@ Outstanding editorial calendar to manage your blog. A complete solution for shar
 * **Discord** - Post to your Discord channels
 * **Slack** - Post to your Slack channels
 * **Band** - Post to your bands
-* **VK** - Post to your community wall.
+* **VK** - Post to your profile or community wall.
 * **Buffer** – Share your content to your connected Buffer profiles
 * **Hootsuite** – Share your content to your connected Hootsuite profiles
 
@@ -113,6 +113,7 @@ Designed for teams, [Nelio Content Premium](https://neliosoftware.com/content/?u
 
 * Connect up to 15 social profiles.
 * Discuss posts with editorial comments.
+* Visualize your editorial pipeline with a content board that organizes posts by their status.
 * Duplicate posts with just one click.
 * Rewrite or update a published post without taking it offline, using a copy of its content.
 * Monitor and track team activities with editorial tasks.
@@ -209,19 +210,27 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Screenshots ==
 
-1. **Editorial Calendar.** The Editorial Calendar shows all your published and scheduled posts, as well as all the social messages that will help you to promote them in your social networks and the related tasks.
-2. **Focus on the important things.** The Editorial Calendar highlights all the elements that are related, so that you can easily identify which social messages and tasks belong to a certain post.
-3. **Social Network Support.** Connect multiple social profiles to Nelio Content and share social messages there automatically, directly from your WordPress dashboard.
-4. **Timeline of Scheduled Social Messages.** Viewing the scheduled social messages you have for any post and adding new ones is extremely easy with this timeline.
-5. **Integrated Social Message Editor.** Nelio Content includes a beautiful dialog where you can select multiple profiles of different networks, create a message that will be shared on all of them, preview how it’ll look like, and schedule the exact date and time in which the message has to be automatically shared.
-6. **Automation Groups.** Customize how you want to share your content using automation groups. Define custom templates per content/network easily.
-7. **Google Analytics and Social Media Metrics.** Find the most interesting metrics from Google Analytics and Social Networks in your own Dashboard. Share the content that works the best easily and effortlessly.
-8. **Post Quality Analysis.** Nelio Content analyzes the quality of your post in a non-disruptive manner. Address all the issues detected by Nelio and your content will look better and more beautiful.
-9. **Improved Featured Image Management.** With Nelio Content, you can use images outside your media library as featured images of your posts.
-10. **External Featured Image**. Paste the external image’s URL and you’re done!
+1. **Editorial Calendar.** With the Editorial Calendar, you can easily track published and scheduled posts, the social messages driving traffic to them, and the tasks tied to your campaigns.
+2. **Focus on what truly matters.** The Editorial Calendar connects every related element, so you instantly see which social messages and tasks belong to each post.
+3. **Social Sharing.** Connect all your profiles to Nelio Content and streamline social sharing from your WordPress dashboard.
+4. **Timeline of Scheduled Social Messages.** Easily view and add social messages for any post with a clear, intuitive timeline.
+5. **Integrated Social Message Editor.** Pick multiple profiles, craft your message, preview it, and schedule automatic posting in seconds.
+6. **Automation Groups.** Define your own rules for social sharing using automation groups, and effortlessly create templates adapted to every channel.
+7. **Google Analytics and Social Media Metrics.** Get valuable performance data from Google Analytics and your social channels right inside your dashboard, and instantly promote your most engaging content.
+8. **Editorial Tools.** Boost productivity with a full suite of features — tasks, comments, quality analysis, notifications, and references designed for editors.
+9. **Custom Post Statuses.** Create, customize, and manage editorial post statuses that reflect how your team really works.
+10. **Feeds**. Keep your content pipeline full by following blogs from WordPress and transforming their RSS feeds into new articles.
+11. **Content Board**. Manage your editorial workflow from a single board that shows your content progress.
+12. **Content Series**. Group related posts into collections and automatically show series details on every post that belongs to them.
 
 
 == Changelog ==
+
+= 4.0.3 (September 17, 2025) =
+* Show plugin version number in Dashboard widget.
+* Add **VK support** for profiles and communities using OAuth.
+* Improve message preview of VK messages.
+* Add setting in Telegram profiles to add a link button on published messages that share an URL.
 
 = 4.0.2 (September 4, 2025) =
 * Fix compatibility issue with sticky option on posts.
@@ -686,5 +695,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 4.0.2 (September 4, 2025) =
-Fix compatibility issue with sticky option on posts.
+= 4.0.3 (September 17, 2025) =
+Improve compatibility with VK.

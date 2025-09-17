@@ -19,9 +19,9 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @since  2.0.0
 	 * @access protected
-	 * @var    Nelio_Content_Author_REST_Controller
+	 * @var    Nelio_Content_Generic_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -259,7 +259,7 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response|WP_Error The response.
 	 */
 	public function pause_publication( $request ) {
 
@@ -395,7 +395,7 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function deactivate_plugin( $request ) {
 
@@ -439,7 +439,7 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function clean_plugin( $request ) {
 

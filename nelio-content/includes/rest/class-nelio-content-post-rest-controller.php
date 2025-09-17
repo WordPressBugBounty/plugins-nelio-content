@@ -20,9 +20,9 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @since  2.0.0
 	 * @access protected
-	 * @var    Nelio_Content_Post_REST_Controller
+	 * @var    Nelio_Content_Post_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -513,7 +513,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 						'part' => ! empty( $series_item['part'] ) ? absint( $series_item['part'] ) : null,
 					);
 				};
-				return array_values( array_filter( array_map( $fix, $values ) ) );
+				return array_map( $fix, $values );
 			},
 			$series
 		);
@@ -524,15 +524,11 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response|WP_Error The response.
 	 */
 	public function get_post( $request ) {
 
 		$post = get_post( $request['id'] );
-		if ( is_wp_error( $post ) ) {
-			return $post;
-		}//end if
-
 		if ( empty( $post ) ) {
 			return new WP_Error(
 				'post-not-found',
@@ -552,7 +548,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function get_post_references( $request ) {
 		$post_id     = $request['id'];
@@ -615,7 +611,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function create_post( $request ) {
 
@@ -660,8 +656,8 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 			$post_data['post_date_gmt'] = '0000-00-00 00:00:00';
 		}//end if
 
-		$post_id = wp_insert_post( $post_data );
-		if ( ! $post_id || is_wp_error( $post_id ) ) {
+		$post_id = wp_insert_post( $post_data, true );
+		if ( is_wp_error( $post_id ) ) {
 			return new WP_Error(
 				'internal-error',
 				_x( 'Post could not be created.', 'text', 'nelio-content' )
@@ -683,7 +679,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		$post_helper->update_series( $post_id, $series );
 
 		$post = get_post( $post_id ); // phpcs:ignore
-		if ( ! $post || is_wp_error( $post ) ) {
+		if ( ! $post ) {
 			return new WP_Error(
 				'internal-error',
 				_x( 'Post was successfully created, but could not be retrieved.', 'text', 'nelio-content' )
@@ -702,7 +698,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function update_post( $request ) {
 
@@ -754,12 +750,12 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 			$post_data['post_date_gmt'] = '0000-00-00 00:00:00';
 		}//end if
 
-		$aux = wp_update_post( $post_data );
+		$aux = wp_update_post( $post_data, true );
 		if ( is_wp_error( $aux ) ) {
 			return new WP_Error(
 				'post-not-updated',
 				sprintf(
-					/* translators: a post ID */
+					/* translators: %s: Post ID. */
 					_x( 'Post %s could not be updated.', 'text', 'nelio-content' ),
 					$post_id
 				)
@@ -776,8 +772,8 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		$this->trigger_save_post_action( $post_id, false );
 
-		$post = get_post( $post_id ); // phpcs:ignore
-		if ( ! $post || is_wp_error( $post ) ) {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
 			return new WP_Error(
 				'internal-error',
 				_x( 'Post was successfully updated, but could not be retrieved.', 'text', 'nelio-content' )
@@ -798,7 +794,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function update_post_items( $request ) {
 
@@ -820,7 +816,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function update_post_status( $request ) {
 
@@ -859,12 +855,12 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 			$post_data['edit_date']     = true;
 		}//end if
 
-		$aux = wp_update_post( $post_data );
+		$aux = wp_update_post( $post_data, true );
 		if ( is_wp_error( $aux ) ) {
 			return new WP_Error(
 				'post-not-updated',
 				sprintf(
-					/* translators: a post ID */
+					/* translators: %s: Post ID. */
 					_x( 'Post %s could not be updated.', 'text', 'nelio-content' ),
 					$post_id
 				)
@@ -873,8 +869,8 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		$this->trigger_save_post_action( $post_id, false );
 
-		$post = get_post( $post_id ); // phpcs:ignore
-		if ( ! $post || is_wp_error( $post ) ) {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
 			return new WP_Error(
 				'internal-error',
 				_x( 'Post status was successfully updated, but could not be retrieved.', 'text', 'nelio-content' )
@@ -917,7 +913,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function reschedule_post( $request ) {
 
@@ -957,7 +953,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function unschedule_post( $request ) {
 
@@ -979,7 +975,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		$this->trigger_save_post_action( $post_id, false );
 
 		$post = get_post( $post_id ); // phpcs:ignore
-		if ( ! $post || is_wp_error( $post ) ) {
+		if ( ! $post ) {
 			return new WP_Error(
 				'internal-error',
 				_x( 'Post was successfully unscheduled, but could not be retrieved.', 'text', 'nelio-content' )
@@ -995,7 +991,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function trash_post( $request ) {
 
@@ -1006,8 +1002,11 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		$result = wp_trash_post( $post_id );
-		if ( is_wp_error( $result ) ) {
-			return $result;
+		if ( empty( $result ) ) {
+			return new WP_Error(
+				'trash-post-failed',
+				_x( 'Something went wrong when trashing the post.', 'text', 'nelio-content' )
+			);
 		}//end if
 		$this->trigger_save_post_action( $post_id, false );
 
@@ -1058,7 +1057,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		add_filter( 'posts_where', array( $this, 'add_title_filter_to_wp_query' ), 10, 2 );
 		$wp_query = new WP_Query( $args );
-		remove_filter( 'posts_where', array( $this, 'add_title_filter_to_wp_query' ), 10, 2 );
+		remove_filter( 'posts_where', array( $this, 'add_title_filter_to_wp_query' ), 10 );
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		while ( $wp_query->have_posts() ) {
@@ -1097,7 +1096,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		$post = get_post( $post_id );
-		if ( ! $post || is_wp_error( $post ) ) {
+		if ( ! $post ) {
 			return array();
 		}//end if
 
@@ -1152,11 +1151,11 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		$post = get_post( $post_id ); // phpcs:ignore
-		if ( is_wp_error( $post ) || empty( $post ) ) {
+		if ( empty( $post ) ) {
 			return new WP_Error(
 				'post-not-found',
 				sprintf(
-					/* translators: a post ID */
+					/* translators: %s: Post ID. */
 					_x( 'Post %s not found.', 'text', 'nelio-content' ),
 					$post_id
 				)

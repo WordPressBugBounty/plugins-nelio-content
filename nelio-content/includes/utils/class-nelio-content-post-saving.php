@@ -119,7 +119,7 @@ class Nelio_Content_Post_Saving {
 			 */
 			if ( apply_filters( 'nelio_content_notification_auto_subscribe_post_creator', true ) ) {
 				$user      = wp_get_current_user();
-				$default[] = $user ? $user->ID : 0;
+				$default[] = $user->ID;
 			}//end if
 		}//end if
 

@@ -29,7 +29,7 @@ function nc_wpml_use_actual_post_link( $permalink, $post_id ) {
 	$sitepress_settings['auto_adjust_ids'] = false;
 
 	$post = get_post( $post_id );
-	if ( ! $post || is_wp_error( $post ) ) {
+	if ( ! $post ) {
 		return $permalink;
 	}//end if
 
@@ -39,7 +39,7 @@ function nc_wpml_use_actual_post_link( $permalink, $post_id ) {
 		$aux              = clone $post;
 		$aux->post_status = 'publish';
 		if ( empty( $aux->post_name ) ) {
-			$aux->post_name = sanitize_title( $aux->post_title, $aux->ID );
+			$aux->post_name = sanitize_title( $aux->post_title );
 		}//end if
 		$aux->post_name = wp_unique_post_slug( $aux->post_name, $aux->ID, 'publish', $aux->post_type, $aux->post_parent );
 		$permalink      = get_permalink( $aux );

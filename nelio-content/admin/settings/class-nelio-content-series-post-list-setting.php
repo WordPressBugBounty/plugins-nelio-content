@@ -18,7 +18,7 @@ class Nelio_Content_Series_Post_List_Setting extends Nelio_Content_Abstract_Reac
 	public function sanitize( $input ) {
 
 		$value = isset( $input[ $this->name ] ) ? $input[ $this->name ] : $this->default_value;
-		$value = is_string( $value ) ? json_decode( $value, ARRAY_A ) : $value;
+		$value = is_string( $value ) ? json_decode( $value, true ) : $value;
 		$value = is_array( $value ) ? wp_parse_args( $value, $this->default_value ) : $this->default_value;
 
 		$input[ $this->name ] = $value;

@@ -19,9 +19,9 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @since  2.0.0
 	 * @access protected
-	 * @var    Nelio_Content_Author_REST_Controller
+	 * @var    Nelio_Content_Feed_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -150,11 +150,11 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response|WP_Error The response.
 	 */
 	public function create_feed( $request ) {
 
-		include_once ABSPATH . WPINC . '/feed.php';
+		nelio_content_require_wp_file( WPINC . '/feed.php' );
 
 		$feed_url = $request['url'];
 		$rss      = fetch_feed( $feed_url );
@@ -183,7 +183,7 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response|WP_Error The response.
 	 */
 	public function update_feed( $request ) {
 
@@ -243,7 +243,7 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response|WP_Error The response.
 	 */
 	public function get_feed_items( $request ) {
 
@@ -256,7 +256,7 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 			);
 		}//end if
 
-		include_once ABSPATH . WPINC . '/feed.php';
+		nelio_content_require_wp_file( WPINC . '/feed.php' );
 
 		$rss = fetch_feed( $feed['feed'] );
 		if ( is_wp_error( $rss ) ) {
@@ -269,7 +269,6 @@ class Nelio_Content_Feed_REST_Controller extends WP_REST_Controller {
 		$rss_items = $rss->get_items( 0, 10 );
 		$result    = array_map(
 			function ( $item ) use ( $feed_id ) {
-				$feed = $item->get_feed();
 				return array(
 					'id'        => $item->get_permalink(),
 					'authors'   => $this->prepare_authors( ! empty( $item->get_authors() ) ? $item->get_authors() : array() ),

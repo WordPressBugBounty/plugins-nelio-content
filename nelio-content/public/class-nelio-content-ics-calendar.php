@@ -136,8 +136,8 @@ class Nelio_Content_Ics_Calendar {
 			$this->current_week = $current_week;
 			$week_posts         = $this->get_calendar_posts_for_week( $post_query_args );
 
-			foreach ( $week_posts as $date => $day_posts ) {
-				foreach ( $day_posts as $num => $post ) {
+			foreach ( $week_posts as $day_posts ) {
+				foreach ( $day_posts as $post ) {
 
 					$start_date    = gmdate( 'Ymd', strtotime( $post->post_date_gmt ) ) . 'T' . gmdate( 'His', strtotime( $post->post_date_gmt ) ) . 'Z';
 					$end_date      = gmdate( 'Ymd', strtotime( $post->post_date_gmt ) + ( 5 * 60 ) ) . 'T' . gmdate( 'His', strtotime( $post->post_date_gmt ) + ( 5 * 60 ) ) . 'Z';
@@ -171,8 +171,6 @@ class Nelio_Content_Ics_Calendar {
 				}//end foreach
 			}//end foreach
 		}//end for
-
-		$aux = Nelio_Content::instance();
 
 		// Other template data.
 		$header = array(
@@ -252,8 +250,9 @@ class Nelio_Content_Ics_Calendar {
 	public function get_ending_of_week( $date, $format = 'Y-m-d', $week = 1 ) {
 
 		$date                  = strtotime( $date );
+		$date                  = empty( $date ) ? time() : $date;
 		$end_of_week           = get_option( 'start_of_week' ) - 1;
-		$day_of_week           = gmdate( 'w', $date );
+		$day_of_week           = absint( gmdate( 'w', $date ) );
 		$date                 += ( ( $end_of_week - $day_of_week + 7 ) % 7 ) * 60 * 60 * 24;
 		$additional            = 3600 * 24 * 7 * ( $week - 1 );
 		$formatted_end_of_week = gmdate( $format, $date + $additional );
@@ -398,7 +397,7 @@ class Nelio_Content_Ics_Calendar {
 	/**
 	 * Get relevant fields of the post.
 	 *
-	 * @param obj $post Post to gather relevant information fields for.
+	 * @param WP_Post $post Post to gather relevant information fields for.
 	 *
 	 * @return array All of the information fields of the post.
 	 *
@@ -412,7 +411,7 @@ class Nelio_Content_Ics_Calendar {
 		// Post author.
 		$information_fields['author'] = array(
 			'label' => _x( 'Author', 'text', 'nelio-content' ),
-			'value' => get_the_author_meta( 'display_name', $post->post_author ),
+			'value' => get_the_author_meta( 'display_name', absint( $post->post_author ) ),
 			'type'  => 'author',
 		);
 
@@ -435,12 +434,12 @@ class Nelio_Content_Ics_Calendar {
 			if ( 'future' === $post->post_status ) {
 				$information_fields['post_date'] = array(
 					'label' => _x( 'Scheduled', 'text (post status)', 'nelio-content' ),
-					'value' => get_the_time( null, $post->ID ),
+					'value' => get_the_time( '', $post->ID ),
 				);
 			} else {
 				$information_fields['post_date'] = array(
 					'label' => _x( 'Published', 'text (post status)', 'nelio-content' ),
-					'value' => get_the_time( null, $post->ID ),
+					'value' => get_the_time( '', $post->ID ),
 				);
 			}//end if
 		}//end if
@@ -449,7 +448,7 @@ class Nelio_Content_Ics_Calendar {
 		$args       = array(
 			'post_type' => $post->post_type,
 		);
-		$taxonomies = get_object_taxonomies( $args, 'object' );
+		$taxonomies = get_object_taxonomies( $args, 'objects' );
 		foreach ( (array) $taxonomies as $taxonomy ) {
 			// Sometimes taxonomies skip by, so let's make sure it has a label too.
 			if ( ! $taxonomy->public || ! $taxonomy->label ) {
@@ -457,20 +456,12 @@ class Nelio_Content_Ics_Calendar {
 			}//end if
 
 			$terms = get_the_terms( $post->ID, $taxonomy->name );
-			if ( ! $terms || is_wp_error( $terms ) ) {
+			if ( empty( $terms ) || is_wp_error( $terms ) ) {
 				continue;
 			}//end if
 
-			$key = 'tax_' . $taxonomy->name;
-			if ( count( $terms ) ) {
-				$value = '';
-				foreach ( (array) $terms as $term ) {
-					$value .= $term->name . ', ';
-				}//end foreach
-				$value = rtrim( $value, ', ' );
-			} else {
-				$value = '';
-			}//end if
+			$key   = 'tax_' . $taxonomy->name;
+			$value = implode( ', ', wp_list_pluck( $terms, 'name' ) );
 
 			// Used when editing editorial metadata and post meta.
 			if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {

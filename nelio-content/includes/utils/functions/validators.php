@@ -71,7 +71,7 @@ function nc_is_datetime( $variable ) {
 	}//end if
 
 	if ( false === strpos( $variable, 'T' ) ) {
-		return;
+		return false;
 	}//end if
 
 	$datetime = explode( 'T', $variable );
@@ -193,7 +193,7 @@ function nc_bool( $variable ) {
  *
  * @param callable $predicate name of a boolean function to test each element in the array.
  *
- * @return function a function that checks if the variable is an array of the expected type.
+ * @return callable a function that checks if the variable is an array of the expected type.
  *
  * @since 2.2.2
  */

@@ -18,9 +18,9 @@ class Nelio_Content_Placeholders_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @since  2.5.0
 	 * @access protected
-	 * @var    Nelio_Content_Placeholders_REST_Controller
+	 * @var    Nelio_Content_Placeholders_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.

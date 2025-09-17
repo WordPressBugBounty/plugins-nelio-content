@@ -20,9 +20,9 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @since  2.0.0
 	 * @access protected
-	 * @var    Nelio_Content_Author_REST_Controller
+	 * @var    Nelio_Content_Author_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -114,7 +114,7 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function get_author( $request ) {
 
@@ -125,7 +125,7 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 			return new WP_Error(
 				'author-not-found',
 				sprintf(
-					/* translators: author id */
+					/* translators: %d: Author id. */
 					_x( 'Author %d not found.', 'text', 'nelio-content' ),
 					$author_id
 				)
@@ -169,12 +169,12 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 			$args['exclude'] = $this->get_priority_authors(); // phpcs:ignore
 		}//end if
 
-		$wp_query = new WP_User_Query( $args );
-		$authors  = array_map(
+		$wp_user_query = new WP_User_Query( $args );
+		$authors       = array_map(
 			function ( $user ) {
 				return $this->json( $user->data );
 			},
-			$wp_query->get_results()
+			$wp_user_query->get_results()
 		);
 
 		if ( empty( $query ) ) {
@@ -184,11 +184,12 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		// Build result object, ready for pagination.
-		$result = array(
+		$max_num_pages = ceil( $wp_user_query->get_total() / $per_page );
+		$result        = array(
 			'results'    => $authors,
 			'pagination' => array(
-				'more'  => $page < $wp_query->max_num_pages,
-				'pages' => $wp_query->max_num_pages,
+				'more'  => $page < $max_num_pages,
+				'pages' => $max_num_pages,
 			),
 		);
 

@@ -59,7 +59,7 @@ class Nelio_Content_Admin {
 			'Nelio Content',
 			$capability,
 			'nelio-content',
-			null,
+			'__return_false',
 			$this->get_plugin_icon(),
 			25
 		);
@@ -82,7 +82,7 @@ class Nelio_Content_Admin {
 					_x( 'Calendar', 'text', 'nelio-content' ),
 					$capability,
 					'nelio-content',
-					null
+					'__return_false'
 				);
 			}//end if
 		}//end foreach
@@ -365,7 +365,7 @@ class Nelio_Content_Admin {
 			function ( $name ) {
 
 				$type = get_post_type_object( $name );
-				if ( ! $type || is_wp_error( $type ) ) {
+				if ( empty( $type ) ) {
 					return false;
 				}//end if
 
@@ -467,7 +467,7 @@ class Nelio_Content_Admin {
 
 		add_filter( 'users_pre_query', $remove_users_sorting, 10, 2 );
 		$authors = get_users( $args );
-		remove_filter( 'users_pre_query', $remove_users_sorting, 10, 2 );
+		remove_filter( 'users_pre_query', $remove_users_sorting, 10 );
 
 		return 1 < count( $authors );
 	}//end is_multi_author()
@@ -494,7 +494,7 @@ class Nelio_Content_Admin {
 		$capabilities = array();
 		foreach ( $post_types as $name ) {
 			$type = get_post_type_object( $name );
-			if ( empty( $type ) || is_wp_error( $type ) ) {
+			if ( empty( $type ) ) {
 				continue;
 			}//end if
 
@@ -626,7 +626,7 @@ class Nelio_Content_Admin {
 	private function get_premium_status() {
 		$premium_slug         = 'nelio-content-premium/nelio-content-premium.php';
 		$installed_plugins    = get_plugins();
-		$is_premium_installed = array_key_exists( $premium_slug, $installed_plugins ) || in_array( $premium_slug, $installed_plugins, true );
+		$is_premium_installed = array_key_exists( $premium_slug, $installed_plugins );
 		$status               = $is_premium_installed ? 'inactive' : 'uninstalled';
 		$status               = nc_is_subscribed() ? $status : 'unsubscribed';
 
@@ -635,7 +635,7 @@ class Nelio_Content_Admin {
 		 *
 		 * Possible statuses: `uninstalled`, `inactive`, `unsubscribed`, `invalid-version`, or `ready`.
 		 *
-		 * @param string status Status of the premium plugin.
+		 * @param string $status Status of the premium plugin.
 		 *
 		 * @since 3.6.0
 		 */

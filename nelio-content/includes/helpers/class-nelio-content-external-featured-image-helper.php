@@ -174,7 +174,7 @@ class Nelio_Content_External_Featured_Image_Helper {
 		}//end if
 
 		$post = get_post( $post_id );
-		if ( ! $post || is_wp_error( $post ) ) {
+		if ( ! $post ) {
 			delete_post_meta( $post_id, '_nc_auto_efi' );
 			return false;
 		}//end if
@@ -186,7 +186,7 @@ class Nelio_Content_External_Featured_Image_Helper {
 			$matches
 		);
 
-		if ( count( $matches ) <= 1 ) {
+		if ( empty( $matches[1] ) ) {
 			delete_post_meta( $post_id, '_nc_auto_efi' );
 			return false;
 		}//end if
@@ -202,12 +202,10 @@ class Nelio_Content_External_Featured_Image_Helper {
 			'last'  => '',
 		);
 
-		if ( count( $matches ) > 0 ) {
-			$last            = count( $matches ) - 1;
-			$result['first'] = $matches[0];
-			$result['any']   = $matches[ $last ];
-			$result['last']  = $matches[ $last ];
-		}//end if
+		$last            = count( $matches ) - 1;
+		$result['first'] = $matches[0];
+		$result['any']   = $matches[ $last ];
+		$result['last']  = $matches[ $last ];
 
 		if ( count( $matches ) > 2 ) {
 

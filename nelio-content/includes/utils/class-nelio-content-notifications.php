@@ -316,7 +316,7 @@ class Nelio_Content_Notifications {
 
 		$current_user = wp_get_current_user();
 		if ( 0 !== $current_user->ID ) {
-			/* translators: 1: user name, 2. user email */
+			/* translators: %1$s: User name. %2$s: User email. */
 			$username_and_email = sprintf( _x( '%1$s (%2$s)', 'text', 'nelio-content' ), $current_user->display_name, $current_user->user_email );
 		} else {
 			$username_and_email = _x( 'WordPress Scheduler', 'text', 'nelio-content' );
@@ -329,7 +329,7 @@ class Nelio_Content_Notifications {
 		if ( 'new' === $old_status || 'auto-draft' === $old_status ) {
 
 			$subject = sprintf(
-				/* translators: 1: site name, 2: post type, 3. post title */
+				/* translators: %1$s: Site name. %2$s: Post type. %3$s: Post title. */
 				_x( '[%1$s] New %2$s Created: “%3$s”', 'text', 'nelio-content' ),
 				$blog_name,
 				$post_type,
@@ -337,7 +337,7 @@ class Nelio_Content_Notifications {
 			);
 
 			$message .= sprintf(
-				/* translators: 1: post type, 2: post id, 3. post title, 4. user name */
+				/* translators: %1$s: Post type. %2$s: Post id. %3$s: Post title. %4$s: User name. */
 				_x( 'A new %1$s (#%2$s “%3$s”) was created by %4$s', 'text', 'nelio-content' ),
 				$post_type,
 				$post_id,
@@ -348,7 +348,7 @@ class Nelio_Content_Notifications {
 		} elseif ( 'trash' === $post_status ) {
 
 			$subject = sprintf(
-				/* translators: 1: site name, 2: post type, 3. post title */
+				/* translators: %1$s: Site name. %2$s: Post type. %3$s: Post title. */
 				_x( '[%1$s] %2$s Trashed: “%3$s”', 'text', 'nelio-content' ),
 				$blog_name,
 				$post_type,
@@ -356,7 +356,7 @@ class Nelio_Content_Notifications {
 			);
 
 			$message .= sprintf(
-				/* translators: 1: post type, 2: post id, 3. post title, 4. user name */
+				/* translators: %1$s: Post type. %2$s: Post id. %3$s: Post title. %4$s: User name. */
 				_x( '%1$s #%2$s “%3$s” was moved to the trash by %4$s', 'text', 'nelio-content' ),
 				$post_type,
 				$post_id,
@@ -367,7 +367,7 @@ class Nelio_Content_Notifications {
 		} elseif ( 'trash' === $old_status ) {
 
 			$subject = sprintf(
-				/* translators: 1: site name, 2: post type, 3. post title */
+				/* translators: %1$s: Site name. %2$s: Post type. %3$s: Post title. */
 				_x( '[%1$s] %2$s Restored (from Trash): “%3$s”', 'text', 'nelio-content' ),
 				$blog_name,
 				$post_type,
@@ -375,7 +375,7 @@ class Nelio_Content_Notifications {
 			);
 
 			$message .= sprintf(
-				/* translators: 1: post type, 2: post id, 3. post title, 4. user name */
+				/* translators: %1$s: Post type. %2$s: Post id. %3$s: Post title. %4$s: User name. */
 				_x( '%1$s #%2$s “%3$s” was restored from trash by %4$s', 'text', 'nelio-content' ),
 				$post_type,
 				$post_id,
@@ -386,7 +386,7 @@ class Nelio_Content_Notifications {
 		} elseif ( 'future' === $post_status ) {
 
 			$subject = sprintf(
-				/* translators: 1: site name, 2: post type, 3. post title */
+				/* translators: %1$s: Site name. %2$s: Post type. %3$s: Post title. */
 				_x( '[%1$s] %2$s Scheduled: “%3$s”', 'text', 'nelio-content' ),
 				$blog_name,
 				$post_type,
@@ -394,7 +394,7 @@ class Nelio_Content_Notifications {
 			);
 
 			$message .= sprintf(
-				/* translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. scheduled date  */
+				/* translators: %1$s: Post type. %2$s: Post id. %3$s: Post title. %4$s: User name. %5$s: Scheduled date . */
 				_x( '%1$s #%2$s “%3$s” was scheduled by %4$s. It will be published on %5$s', 'text', 'nelio-content' ),
 				$post_type,
 				$post_id,
@@ -406,7 +406,7 @@ class Nelio_Content_Notifications {
 		} elseif ( 'publish' === $post_status ) {
 
 			$subject = sprintf(
-				/* translators: 1: site name, 2: post type, 3. post title */
+				/* translators: %1$s: Site name. %2$s: Post type. %3$s: Post title. */
 				_x( '[%1$s] %2$s Published: “%3$s”', 'text', 'nelio-content' ),
 				$blog_name,
 				$post_type,
@@ -414,7 +414,7 @@ class Nelio_Content_Notifications {
 			);
 
 			$message .= sprintf(
-				/* translators: 1: post type, 2: post id, 3. post title, 4. user name */
+				/* translators: %1$s: Post type. %2$s: Post id. %3$s: Post title. %4$s: User name. */
 				_x( '%1$s #%2$s “%3$s” was published by %4$s', 'text', 'nelio-content' ),
 				$post_type,
 				$post_id,
@@ -425,7 +425,7 @@ class Nelio_Content_Notifications {
 		} elseif ( 'publish' === $old_status ) {
 
 			$subject = sprintf(
-				/* translators: 1: site name, 2: post type, 3. post title */
+				/* translators: %1$s: Site name. %2$s: Post type. %3$s: Post title. */
 				_x( '[%1$s] %2$s Unpublished: “%3$s”', 'text', 'nelio-content' ),
 				$blog_name,
 				$post_type,
@@ -433,7 +433,7 @@ class Nelio_Content_Notifications {
 			);
 
 			$message .= sprintf(
-				/* translators: 1: post type, 2: post id, 3. post title, 4. user name */
+				/* translators: %1$s: Post type. %2$s: Post id. %3$s: Post title. %4$s: User name. */
 				_x( '%1$s #%2$s “%3$s” was unpublished by %4$s', 'text', 'nelio-content' ),
 				$post_type,
 				$post_id,
@@ -444,7 +444,7 @@ class Nelio_Content_Notifications {
 		} else {
 
 			$subject = sprintf(
-				/* translators: 1: site name, 2: post type, 3. post title */
+				/* translators: %1$s: Site name. %2$s: Post type. %3$s: Post title. */
 				_x( '[%1$s] %2$s Status Changed for “%3$s”', 'text', 'nelio-content' ),
 				$blog_name,
 				$post_type,
@@ -452,7 +452,7 @@ class Nelio_Content_Notifications {
 			);
 
 			$message .= sprintf(
-				/* translators: 1: post type, 2: post id, 3. post title, 4. user name */
+				/* translators: %1$s: Post type. %2$s: Post id. %3$s: Post title. %4$s: User name. */
 				_x( 'Status was changed for %1$s #%2$s “%3$s” by %4$s', 'text', 'nelio-content' ),
 				$post_type,
 				$post_id,
@@ -463,7 +463,7 @@ class Nelio_Content_Notifications {
 		}//end if
 
 		$message .= sprintf(
-			/* translators: 1: date, 2: time, 3: timezone */
+			/* translators: %1$s: Date. %2$s: Time. %3$s: Timezone. */
 			_x( 'This action was taken on %1$s at %2$s %3$s', 'text', 'nelio-content' ),
 			date_i18n( get_option( 'date_format' ) ),
 			date_i18n( get_option( 'time_format' ) ),
@@ -477,7 +477,7 @@ class Nelio_Content_Notifications {
 		$message .= "\r\n";
 
 		$message .= sprintf(
-			/* translators: 1: old status, 2: new status */
+			/* translators: %1$s: Old status. %2$s: New status. */
 			_x( '%1$s => %2$s', 'text', 'nelio-content' ),
 			$friendly_old_status,
 			$friendly_post_status
@@ -486,15 +486,15 @@ class Nelio_Content_Notifications {
 
 		$message .= "--------------------\r\n\r\n";
 
-		/* translators: post type */
+		/* translators: %s: Post type. */
 		$message .= sprintf( _x( '== %s Details ==', 'title', 'nelio-content' ), $post_type ) . "\r\n";
-		/* translators: post title */
+		/* translators: %s: Post title. */
 		$message .= sprintf( _x( 'Title: %s', 'text', 'nelio-content' ), $post_title ) . "\r\n";
 
 		if ( ! empty( $post_author ) ) {
 
 			$message .= sprintf(
-				/* translators: 1: author name, 2: author email */
+				/* translators: %1$s: Author name. %2$s: Author email. */
 				_x( 'Author: %1$s (%2$s)', 'text', 'nelio-content' ),
 				$post_author->display_name,
 				$post_author->user_email
@@ -512,23 +512,14 @@ class Nelio_Content_Notifications {
 
 	private function get_post_following_email_data( $post ) {
 
-		$post_id     = $post->ID;
 		$post_type   = get_post_type_object( $post->post_type )->labels->singular_name;
 		$post_title  = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
 		$post_author = get_userdata( $post->post_author );
 
 		$blog_name = get_option( 'blogname' );
 
-		$current_user = wp_get_current_user();
-		if ( 0 !== $current_user->ID ) {
-			/* translators: 1: user name, 2. user email */
-			$username_and_email = sprintf( _x( '%1$s (%2$s)', 'text', 'nelio-content' ), $current_user->display_name, $current_user->user_email );
-		} else {
-			$username_and_email = _x( 'WordPress Scheduler', 'text', 'nelio-content' );
-		}//end if
-
 		$subject = sprintf(
-			/* translators: 1: site name, 2: post type, 3. post title */
+			/* translators: %1$s: Site name. %2$s: Post type. %3$s: Post title. */
 			_x( '[%1$s] You’re now watching %2$s “%3$s”', 'text', 'nelio-content' ),
 			$blog_name,
 			$post_type,
@@ -536,14 +527,14 @@ class Nelio_Content_Notifications {
 		);
 
 		$message = sprintf(
-			/* translators: 1: post type, 2: post title */
+			/* translators: %1$s: Post type. %2$s: Post title. */
 			_x( 'You’re now watching %1$s “%2$s”.', 'text', 'nelio-content' ),
 			$post_type,
 			$post_title
 		) . "\r\n\r\n";
 
 		$message .= sprintf(
-			/* translators: 1: date, 2: time, 3: timezone */
+			/* translators: %1$s: Date. %2$s: Time. %3$s: Timezone. */
 			_x( 'This action was taken on %1$s at %2$s %3$s', 'text', 'nelio-content' ),
 			date_i18n( get_option( 'date_format' ) ),
 			date_i18n( get_option( 'time_format' ) ),
@@ -552,15 +543,15 @@ class Nelio_Content_Notifications {
 
 		$message .= "--------------------\r\n\r\n";
 
-		/* translators: post type */
+		/* translators: %s: Post type. */
 		$message .= sprintf( _x( '== %s Details ==', 'title', 'nelio-content' ), $post_type ) . "\r\n";
-		/* translators: post title */
+		/* translators: %s: Post title. */
 		$message .= sprintf( _x( 'Title: %s', 'text', 'nelio-content' ), $post_title ) . "\r\n";
 
 		if ( ! empty( $post_author ) ) {
 
 			$message .= sprintf(
-				/* translators: 1: author name, 2: author email */
+				/* translators: %1$s: Author name. %2$s: Author email. */
 				_x( 'Author: %1$s (%2$s)', 'text', 'nelio-content' ),
 				$post_author->display_name,
 				$post_author->user_email
@@ -569,7 +560,7 @@ class Nelio_Content_Notifications {
 		}//end if
 
 		$message .= sprintf(
-			/* translators: post status */
+			/* translators: %s: Post status. */
 			_x( 'Status: %s', 'text', 'nelio-content' ),
 			$this->get_post_status_label( $post->post_status )
 		) . "\r\n";
@@ -599,14 +590,14 @@ class Nelio_Content_Notifications {
 		$current_time = mysql2date( get_option( 'time_format' ), $comment['date'] );
 
 		$subject = sprintf(
-			/* translators: 1: blog name, 2: post title */
+			/* translators: %1$s: Blog name. %2$s: Post title. */
 			_x( '[%1$s] New Editorial Comment: “%2$s”', 'text', 'nelio-content' ),
 			$blog_name,
 			$post_title
 		);
 
 		$message = sprintf(
-			/* translators: 1: post id, 2: post title, 3. post type */
+			/* translators: %1$s: Post id. %2$s: Post title. %3$s: Post type. */
 			_x( 'A new editorial comment was added to %3$s #%1$s “%2$s”', 'text', 'nelio-content' ),
 			$post_id,
 			$post_title,
@@ -614,7 +605,7 @@ class Nelio_Content_Notifications {
 		) . "\r\n\r\n";
 
 		$message .= sprintf(
-			/* translators: 1: comment author, 2: author email, 3: date, 4: time */
+			/* translators: %1$s: Comment author. %2$s: Author email. %3$s: Date. %4$s: Time. */
 			_x( '%1$s (%2$s) said on %3$s at %4$s:', 'text', 'nelio-content' ),
 			$current_user_name,
 			$current_user_email,
@@ -634,12 +625,6 @@ class Nelio_Content_Notifications {
 
 	private function get_task_creation_email_data( $task, $post ) {
 
-		if ( $post ) {
-			$post_id    = $post->ID;
-			$post_type  = get_post_type_object( $post->post_type )->labels->singular_name;
-			$post_title = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
-		}//end if
-
 		$current_user       = wp_get_current_user();
 		$current_user_name  = $current_user->display_name;
 		$current_user_email = $current_user->user_email;
@@ -647,16 +632,19 @@ class Nelio_Content_Notifications {
 		$blog_name = get_option( 'blogname' );
 
 		if ( $post ) {
+			$post_id    = $post->ID;
+			$post_type  = get_post_type_object( $post->post_type )->labels->singular_name;
+			$post_title = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
 
 			$subject = sprintf(
-				/* translators: 1: blog name, 2: post title */
+				/* translators: %1$s: Blog name. %2$s: Post title. */
 				_x( '[%1$s] New Editorial Task in “%2$s”', 'text', 'nelio-content' ),
 				$blog_name,
 				$post_title
 			);
 
 			$message = sprintf(
-				/* translators: 1: post id, 2: post title, 3. post type */
+				/* translators: %1$s: Post id. %2$s: Post title. %3$s: Post type. */
 				_x( 'A new editorial task was added to %3$s #%1$s “%2$s”.', 'text', 'nelio-content' ),
 				$post_id,
 				$post_title,
@@ -665,14 +653,14 @@ class Nelio_Content_Notifications {
 
 		} else {
 
-			/* translators: blog name */
+			/* translators: %s: Blog name. */
 			$subject = sprintf( _x( '[%s] New Editorial Task', 'text', 'nelio-content' ), $blog_name );
 			$message = _x( 'A new editorial task was added.', 'text', 'nelio-content' ) . "\r\n\r\n";
 
 		}//end if
 
 		$message .= sprintf(
-			/* translators: 1: task author, 2: task author email */
+			/* translators: %1$s: Task author. %2$s: Task author email. */
 			_x( '%1$s (%2$s) created the following task:', 'text', 'nelio-content' ),
 			$current_user_name,
 			$current_user_email
@@ -690,12 +678,6 @@ class Nelio_Content_Notifications {
 
 	private function get_task_updated_email_data( $task, $post ) {
 
-		if ( $post ) {
-			$post_id    = $post->ID;
-			$post_type  = get_post_type_object( $post->post_type )->labels->singular_name;
-			$post_title = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
-		}//end if
-
 		$current_user       = wp_get_current_user();
 		$current_user_name  = $current_user->display_name;
 		$current_user_email = $current_user->user_email;
@@ -703,12 +685,15 @@ class Nelio_Content_Notifications {
 		$blog_name = get_option( 'blogname' );
 
 		if ( $post ) {
+			$post_id    = $post->ID;
+			$post_type  = get_post_type_object( $post->post_type )->labels->singular_name;
+			$post_title = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
 
 			$subject = sprintf(
 				! empty( $task['completed'] )
-					/* translators: 1: blog name, 2: post title */
+					/* translators: %1$s: Blog name. %2$s: Post title. */
 					? _x( '[%1$s] Editorial Task Completed in “%2$s”', 'text', 'nelio-content' )
-					/* translators: 1: blog name, 2: post title */
+					/* translators: %1$s: Blog name. %2$s: Post title. */
 					: _x( '[%1$s] Editorial Task Updated in “%2$s”', 'text', 'nelio-content' ),
 				$blog_name,
 				$post_title
@@ -716,9 +701,9 @@ class Nelio_Content_Notifications {
 
 			$message = sprintf(
 				! empty( $task['completed'] )
-					/* translators: 1: post id, 2: post title, 3. post type */
+					/* translators: %1$s: Post id. %2$s: Post title. %3$s: Post type. */
 					? _x( 'An editorial task was completed in %3$s #%1$s “%2$s”.', 'text', 'nelio-content' )
-					/* translators: 1: post id, 2: post title, 3. post type */
+					/* translators: %1$s: Post id. %2$s: Post title. %3$s: Post type. */
 					: _x( 'An editorial task was updated in %3$s #%1$s “%2$s”.', 'text', 'nelio-content' ),
 				$post_id,
 				$post_title,
@@ -729,9 +714,9 @@ class Nelio_Content_Notifications {
 
 			$subject = sprintf(
 				! empty( $task['completed'] )
-					/* translators: blog name */
+					/* translators: %s: Blog name. */
 					? _x( '[%s] Editorial Task Completed', 'text', 'nelio-content' )
-					/* translators: blog name */
+					/* translators: %s: Blog name. */
 					: _x( '[%s] Editorial Task Updated', 'text', 'nelio-content' ),
 				$blog_name
 			);
@@ -743,9 +728,9 @@ class Nelio_Content_Notifications {
 
 		$message .= sprintf(
 			! empty( $task['completed'] )
-				/* translators: 1: task author, 2: task author email */
+				/* translators: %1$s: Task author. %2$s: Task author email. */
 				? _x( '%1$s (%2$s) completed the following task:', 'text', 'nelio-content' )
-				/* translators: 1: task author, 2: task author email */
+				/* translators: %1$s: Task author. %2$s: Task author email. */
 				: _x( '%1$s (%2$s) updated the following task:', 'text', 'nelio-content' ),
 			$current_user_name,
 			$current_user_email
@@ -779,23 +764,29 @@ class Nelio_Content_Notifications {
 			$assigner_email = $assigner->user_email;
 		}//end if
 
-		/* translators: a task description */
+		/* translators: %s: Task description. */
 		$info = ' - ' . sprintf( _x( 'Task: %s', 'text', 'nelio-content' ), $task['task'] ) . "\r\n";
-		/* translators: 1: user name, 2: user email */
+		/* translators: %1$s: User name. %2$s: User email. */
 		$info .= ' - ' . sprintf( _x( 'Assignee: %1$s (%2$s)', 'text', 'nelio-content' ), $assignee_name, $assignee_email ) . "\r\n";
-		/* translators: 1: user name, 2: user email */
+		/* translators: %1$s: User name. %2$s: User email. */
 		$info .= ' - ' . sprintf( _x( 'Assigner: %1$s (%2$s)', 'text', 'nelio-content' ), $assigner_name, $assigner_email ) . "\r\n";
 
 		if ( $task['dateDue'] ) {
 			$task_due_date = mysql2date( get_option( 'date_format' ), $task['dateDue'] );
-			$task_due_time = mysql2date( get_option( 'time_format' ), $task['dateDue'] );
-			/* translators: a date */
+			/* translators: %s: Date. */
 			$info .= ' - ' . sprintf( _x( 'Due Date: %s', 'text', 'nelio-content' ), $task_due_date ) . "\r\n";
 		}//end if
 
 		return $info;
 	}//end get_task_information()
 
+	/**
+	 * Returns the email footer.
+	 *
+	 * @param WP_Post|false $post the post.
+	 *
+	 * @return string Email footer.
+	 */
 	private function get_email_footer( $post = false ) {
 
 		$blog_name = get_option( 'blogname' );
@@ -818,19 +809,19 @@ class Nelio_Content_Notifications {
 
 			$footer .= "\r\n";
 			$footer .= _x( '== Actions ==', 'title', 'nelio-content' ) . "\r\n";
-			/* translators: 1: the "Edit" command, as in "Edit Post", 2: the edit link */
+			/* translators: %1$s: "Edit" command, as in "Edit Post". %2$s: Edit link. */
 			$footer .= sprintf( _x( '%1$s: %2$s', 'command (edit)', 'nelio-content' ), $post_type_labels->edit_item, $edit_link ) . "\r\n";
-			/* translators: 1: the "View" command, as in "View Post", 2: the view link */
+			/* translators: %1$s: "View" command, as in "View Post". %2$s: View link. */
 			$footer .= sprintf( _x( '%1$s: %2$s', 'command (view)', 'nelio-content' ), $post_type_labels->view_item, $view_link ) . "\r\n";
 
 			$footer .= "\r\n--------------------\r\n";
-			/* translators: a post title */
+			/* translators: %s: Post title. */
 			$footer .= sprintf( _x( 'You are receiving this email because you are subscribed to “%s”.', 'user', 'nelio-content' ), $post_title );
 
 		} else {
 
 			$footer .= "\r\n--------------------\r\n";
-			/* translators: a blog URL */
+			/* translators: %s: Blog URL. */
 			$footer .= sprintf( _x( 'You are receiving this email because you are registered to %s.', 'user', 'nelio-content' ), $blog_url );
 
 		}//end if
@@ -848,7 +839,7 @@ class Nelio_Content_Notifications {
 		$date = date_i18n( get_option( 'date_format' ), $scheduled_timestatmp );
 		$time = date_i18n( get_option( 'time_format' ), $scheduled_timestatmp );
 
-		/* translators: 1: post scheduled date, 2: post scheduled time */
+		/* translators: %1$s: Post scheduled date. %2$s: Post scheduled time. */
 		return sprintf( _x( '%1$s at %2$s', 'text', 'nelio-content' ), $date, $time );
 	}//end get_scheduled_datetime()
 

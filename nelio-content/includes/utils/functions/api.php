@@ -58,7 +58,7 @@ function nc_get_api_url( $method, $context ) {
  * @param string $mode Either 'regular' or 'skip-errors'. If the latter is used, the function
  *                     won't generate any HTML errors.
  *
- * @return string a new token for accessing the API.
+ * @return string|false a new token for accessing the API.
  *
  * @since 1.0.0
  */
@@ -189,7 +189,7 @@ function nc_get_error_message( $code, $default_value = false ) {
  * or not. A response is valid if it's not a WP_Error and the response code is
  * 200.
  *
- * @param array $response the response of a `wp_remote_*` call.
+ * @param array|WP_Error $response the response of a `wp_remote_*` call.
  *
  * @return boolean Whether the response is valid (i.e. not a WP_Error and a 200
  *                 response code) or not.
@@ -232,7 +232,9 @@ function nc_is_response_valid( $response ) {
  * generating a new `500 Internal Server Error`) and a message describing the
  * error.
  *
- * @param array $response the response of a `wp_remote_*` call.
+ * @param array|WP_Error $response the response of a `wp_remote_*` call.
+ *
+ * @return WP_Error|false false if response is valid, a WP_Error otherwise.
  *
  * @since 2.0.0
  */
@@ -265,7 +267,7 @@ function nc_extract_error_from_response( $response ) {
 
 	if ( empty( $error_message ) ) {
 		$error_message = sprintf(
-			/* translators: the placeholder is a string explaining the error returned by the API. */
+			/* translators: %s: The placeholder is a string explaining the error returned by the API. */
 			_x( 'There was an error while accessing Nelio Content’s API: %s.', 'error', 'nelio-content' ),
 			$summary
 		);

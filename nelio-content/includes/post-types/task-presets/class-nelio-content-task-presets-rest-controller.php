@@ -18,9 +18,9 @@ class Nelio_Content_Task_Presets_REST_Controller extends WP_REST_Controller {
 	 * The single instance of this class.
 	 *
 	 * @since 3.2.0
-	 * @var   Nelio_Content_Task_Presets_REST_Controller
+	 * @var   Nelio_Content_Task_Presets_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.

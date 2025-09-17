@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }//end if
 
-require_once ABSPATH . 'wp-admin/includes/plugin.php';
+nelio_content_require_wp_file( '/wp-admin/includes/plugin.php' );
 
 function include_nab_tests( $events ) {
 	global $wpdb;

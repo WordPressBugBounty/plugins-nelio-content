@@ -11,7 +11,9 @@
 /**
  * List of required vars:
  *
- * @var array  $tabs the list of tabs.
+ * @var string $current_subpage current subpage.
+ * @var string $current_tab     current tab.
+ * @var array  $tabs            list of tabs.
  */
 
 printf(

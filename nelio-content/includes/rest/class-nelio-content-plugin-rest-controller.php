@@ -18,9 +18,9 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @since  3.6.0
 	 * @access protected
-	 * @var    Nelio_Content_Plugin_REST_Controller
+	 * @var    Nelio_Content_Plugin_REST_Controller|null
 	 */
-	protected static $instance;
+	protected static $instance = null;
 
 	/**
 	 * Returns the single instance of this class.
@@ -71,7 +71,7 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Retrieves information about the site.
 	 *
-	 * @return WP_REST_Response The response
+	 * @return WP_REST_Response|WP_Error The response
 	 */
 	public function install_premium() {
 
@@ -82,12 +82,12 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 			);
 		}//end if
 
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		include_once ABSPATH . '/wp-admin/includes/admin.php';
-		include_once ABSPATH . '/wp-admin/includes/plugin-install.php';
-		include_once ABSPATH . '/wp-admin/includes/plugin.php';
-		include_once ABSPATH . '/wp-admin/includes/class-wp-upgrader.php';
-		include_once ABSPATH . '/wp-admin/includes/class-plugin-upgrader.php';
+		nelio_content_require_wp_file( '/wp-admin/includes/plugin.php' );
+		nelio_content_require_wp_file( '/wp-admin/includes/admin.php' );
+		nelio_content_require_wp_file( '/wp-admin/includes/plugin-install.php' );
+		nelio_content_require_wp_file( '/wp-admin/includes/plugin.php' );
+		nelio_content_require_wp_file( '/wp-admin/includes/class-wp-upgrader.php' );
+		nelio_content_require_wp_file( '/wp-admin/includes/class-plugin-upgrader.php' );
 
 		$premium_slug = 'nelio-content-premium/nelio-content-premium.php';
 		if ( is_plugin_active( $premium_slug ) ) {
@@ -95,8 +95,8 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 		}//end if
 
 		$installed_plugins = get_plugins();
-		if ( array_key_exists( $premium_slug, $installed_plugins ) || in_array( $premium_slug, $installed_plugins, true ) ) {
-			$activated = activate_plugin( trailingslashit( WP_PLUGIN_DIR ) . $premium_slug, false, false, false );
+		if ( array_key_exists( $premium_slug, $installed_plugins ) ) {
+			$activated = activate_plugin( trailingslashit( WP_PLUGIN_DIR ) . $premium_slug, '', false, false );
 			if ( ! is_wp_error( $activated ) ) {
 				return new WP_REST_Response( 'OK', 200 );
 			} else {
@@ -123,12 +123,18 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 		$url      = nc_get_api_url( '/premium/update', 'wp' );
 		$response = wp_remote_request( $url, $data );
 
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}//end if
+
 		if (
-			is_wp_error( $response )
-			|| 200 !== wp_remote_retrieve_response_code( $response )
+			200 !== wp_remote_retrieve_response_code( $response )
 			|| empty( wp_remote_retrieve_body( $response ) )
 		) {
-			return false;
+			return new WP_Error(
+				'internal-error',
+				_x( 'You do not have permission to install Nelio Content Premium.', 'text', 'nelio-content' )
+			);
 		}//end if
 
 		$data = (object) json_decode( wp_remote_retrieve_body( $response ) );
@@ -149,7 +155,7 @@ class Nelio_Content_Plugin_REST_Controller extends WP_REST_Controller {
 			);
 		}//end if
 
-		$activated = activate_plugin( trailingslashit( WP_PLUGIN_DIR ) . $premium_slug, false, false, true );
+		$activated = activate_plugin( trailingslashit( WP_PLUGIN_DIR ) . $premium_slug, '', false, true );
 		if ( is_wp_error( $activated ) ) {
 			return new WP_Error(
 				'internal-error',

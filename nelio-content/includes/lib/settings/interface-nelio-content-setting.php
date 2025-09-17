@@ -25,7 +25,7 @@ interface Nelio_Content_Setting {
 	/**
 	 * Sets the value of this setting to the given value.
 	 *
-	 * @param object $value The value of this setting.
+	 * @param mixed $value The value of this setting.
 	 *
 	 * @since  1.0.0
 	 * @access public
@@ -35,7 +35,7 @@ interface Nelio_Content_Setting {
 	/**
 	 * Sets the default value of this setting to the given value.
 	 *
-	 * @param object $value The default value of this setting.
+	 * @param mixed $value The default value of this setting.
 	 *
 	 * @since  3.7.0
 	 * @access public

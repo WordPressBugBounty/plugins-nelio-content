@@ -75,7 +75,7 @@ class Nelio_Content_Plugin_List_Page {
 		}//end if
 
 		$installed_plugins   = get_plugins();
-		$is_plugin_installed = array_key_exists( $premium_slug, $installed_plugins ) || in_array( $premium_slug, $installed_plugins, true );
+		$is_plugin_installed = array_key_exists( $premium_slug, $installed_plugins );
 		$html_message        = $is_plugin_installed ?
 			_x( 'You are subscribed to Nelio Content. Please activate <strong>Nelio Content Premium</strong> to benefit from all its features.', 'user', 'nelio-content' ) :
 			_x( 'You are subscribed to Nelio Content. Please install <strong>Nelio Content Premium</strong> to benefit from all its features.', 'user', 'nelio-content' );

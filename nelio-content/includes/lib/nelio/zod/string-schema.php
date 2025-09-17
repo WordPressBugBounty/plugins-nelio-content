@@ -62,7 +62,7 @@ class StringSchema extends Schema {
 				sprintf(
 					'Expected a string with length %1$s, but string is %2$s characters long.',
 					esc_html( $this->min ),
-					esc_html( mb_strlen( $value ) )
+					esc_html( (string) mb_strlen( $value ) )
 				)
 			);
 		}//end if
@@ -72,7 +72,7 @@ class StringSchema extends Schema {
 				sprintf(
 					'Expected a string with length greater than or equal to %1$s, but string is %2$s characters long.',
 					esc_html( $this->min ),
-					esc_html( mb_strlen( $value ) )
+					esc_html( (string) mb_strlen( $value ) )
 				)
 			);
 		}//end if
@@ -82,7 +82,7 @@ class StringSchema extends Schema {
 				sprintf(
 					'Expected a string with length less than or equal to %1$s, but string is %2$s characters long.',
 					esc_html( $this->max ),
-					esc_html( mb_strlen( $value ) )
+					esc_html( (string) mb_strlen( $value ) )
 				)
 			);
 		}//end if
