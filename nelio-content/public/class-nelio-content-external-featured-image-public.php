@@ -182,7 +182,7 @@ class Nelio_Content_External_Featured_Image_Public {
 			}//end if
 		}//end foreach
 
-		return -$object_id;
+		return -1 * absint( $object_id );
 	}//end maybe_simulate_post_thumbnail_attachment()
 
 	/**
@@ -207,7 +207,7 @@ class Nelio_Content_External_Featured_Image_Public {
 		if ( $attach_id < 0 ) {
 
 			$image   = wp_get_attachment_image_src( $this->get_placeholder_id(), $size );
-			$post_id = -$attach_id;
+			$post_id = -1 * absint( $attach_id );
 
 			$aux                  = Nelio_Content_External_Featured_Image_Helper::instance();
 			$nelio_featured_image = $aux->get_nelio_featured_image( $post_id );

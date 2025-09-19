@@ -5,7 +5,7 @@ Tags: social media scheduling, editorial calendar, auto publish, content marketi
 Requires PHP: 7.4
 Requires at least: 6.7
 Tested up to: 6.8
-Stable tag: 4.0.3
+Stable tag: 4.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -225,6 +225,9 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 4.0.4 (September 19, 2025) =
+* Fix PHP fatal error caused by external featured images.
 
 = 4.0.3 (September 17, 2025) =
 * Show plugin version number in Dashboard widget.
@@ -695,5 +698,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 4.0.3 (September 17, 2025) =
-Improve compatibility with VK.
+= 4.0.4 (September 19, 2025) =
+Fix PHP error.
