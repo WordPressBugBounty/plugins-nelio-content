@@ -8,11 +8,8 @@
  * @since      1.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
-use function Nelio_Content\Helpers\get;
 use function Nelio_Content\Helpers\key_by;
 
 /**
@@ -24,110 +21,146 @@ class Nelio_Content_Auto_Sharer {
 	const RESET_MESSAGES     = 'nelio_content_social_automations_reset_social_messages';
 	const MAX_SHARES_PER_DAY = 30;
 
+	/**
+	 * This instance.
+	 *
+	 * @var Nelio_Content_Auto_Sharer|null
+	 */
 	protected static $instance;
 
+	/**
+	 * Returns this instance.
+	 *
+	 * @return Nelio_Content_Auto_Sharer
+	 */
 	public static function instance() {
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 		return self::$instance;
-	}//end instance()
+	}
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 		add_action( 'init', array( $this, 'enable_cron_tasks' ) );
-	}//end init()
+	}
 
+	/**
+	 * Callback to enable cron tasks.
+	 *
+	 * @return void
+	 */
 	public function enable_cron_tasks() {
 		add_action( self::SCHEDULE_WEEK, array( $this, 'schedule_week' ) );
 		add_action( self::RESET_MESSAGES, array( $this, 'schedule_week' ) );
 		$this->add_schedule_week_cron();
-	}//end enable_cron_tasks()
+	}
 
 
+	/**
+	 * Callback to reset.
+	 *
+	 * @return void
+	 */
 	public function reset() {
 		delete_transient( 'nc_automation_groups' );
 		delete_option( 'nc_reshare_last_day' );
 		wp_schedule_single_event( time(), self::RESET_MESSAGES, array( time() ) );
-	}//end reset()
+	}
 
+	/**
+	 * Callback to schedule week.
+	 *
+	 * @return void
+	 */
 	public function schedule_week() {
 
 		$today       = gmdate( 'Y-m-d', time() );
 		$weekdays    = array( 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' );
-		$end_of_week = ( get_option( 'start_of_week', 0 ) + 6 ) % 7;
+		$end_of_week = ( absint( get_option( 'start_of_week', 0 ) ) + 6 ) % 7;
 		$end_of_week = $weekdays[ $end_of_week ];
 
 		$last_day_to_schedule = gmdate( 'Y-m-d', strtotime( "next {$end_of_week}" ) );
 		$last_scheduled_day   = max( $today, get_option( 'nc_reshare_last_day', $today ) );
 		if ( $last_scheduled_day >= $last_day_to_schedule ) {
 			return;
-		}//end if
+		}
 
 		$days_to_schedule = $this->diff_days( $today, $last_day_to_schedule );
 		$posts            = $this->get_posts_for_resharing( $days_to_schedule );
 		if ( empty( $posts ) ) {
 			return;
-		}//end if
+		}
 
 		$posts_per_day = $this->array_split( $posts, $days_to_schedule );
 		foreach ( $posts_per_day as $posts ) {
-			$last_scheduled_day = gmdate( 'Y-m-d', strtotime( $last_scheduled_day . ' +1 day' ) );
-			$this->schedule_day( $last_scheduled_day, is_array( $posts ) ? $posts : array( $posts ) );
-		}//end foreach
+			$last_scheduled_day = strtotime( $last_scheduled_day . ' +1 day' );
+			if ( false === $last_scheduled_day ) {
+				break;
+			}
+			$last_scheduled_day = gmdate( 'Y-m-d', $last_scheduled_day );
+			$this->schedule_day( $last_scheduled_day, $posts );
+		}
 		update_option( 'nc_reshare_last_day', $last_scheduled_day );
-	}//end schedule_week()
+	}
 
 	/**
 	 * This function requests the cloud to generate all the messages for a given
 	 * day, using the given list of posts.
 	 *
-	 * @param string $day   day to schedule.
-	 * @param array  $posts list of posts used to "fill" the day.
+	 * @param string          $day   Day to schedule.
+	 * @param list<TAWS_Post> $posts List of posts used to "fill" the day.
+	 *
+	 * @return void
 	 *
 	 * @since  1.3.0
-	 * @access public
 	 */
 	public function schedule_day( $day, $posts ) {
+		$posts = array_map( fn( $p ) => array_merge( $p, array( 'content' => '' ) ), $posts );
 		if ( empty( $posts ) ) {
 			return;
-		}//end if
+		}
 
-		$posts = array_map(
-			function ( $post ) {
-				$post['content'] = '';
-				return $post;
-			},
-			$posts
+		$body = wp_json_encode(
+			array(
+				'day'   => $day,
+				'posts' => $posts,
+			)
 		);
+		assert( ! empty( $body ) );
 
 		$data = array(
 			'method'    => 'POST',
-			'timeout'   => apply_filters( 'nelio_content_request_timeout', 30 ),
-			'sslverify' => ! nc_does_api_use_proxy(),
+			'timeout'   => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+			'sslverify' => ! nelio_content_does_api_use_proxy(),
 			'headers'   => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
-			'body'      => wp_json_encode(
-				array(
-					'day'   => $day,
-					'posts' => $posts,
-				)
-			),
+			'body'      => $body,
 		);
 
 		$url = sprintf(
-			nc_get_api_url( '/site/%s/social/auto', 'wp' ),
-			nc_get_site_id()
+			nelio_content_get_api_url( '/site/%s/social/auto', 'wp' ),
+			nelio_content_get_site_id()
 		);
 		wp_remote_request( $url, $data );
-	}//end schedule_day()
+	}
 
+	/**
+	 * Adds schedule week cron.
+	 *
+	 * @return void
+	 */
 	private function add_schedule_week_cron() {
 		if ( wp_next_scheduled( self::SCHEDULE_WEEK ) ) {
 			return;
-		}//end if
+		}
 
 		$time     = sprintf(
 			'%02d:%02d:00',
@@ -136,10 +169,22 @@ class Nelio_Content_Auto_Sharer {
 		);
 		$today    = gmdate( 'Y-m-d', time() ) . 'T' . $time;
 		$tomorrow = strtotime( $today . ' +1 day' );
-		wp_schedule_event( $tomorrow, 'daily', self::SCHEDULE_WEEK );
-	}//end add_schedule_week_cron()
+		if ( false === $tomorrow ) {
+			return;
+		}
 
+		wp_schedule_event( $tomorrow, 'daily', self::SCHEDULE_WEEK );
+	}
+
+	/**
+	 * Retrieves posts for resharing.
+	 *
+	 * @param int $num_of_days Number of days.
+	 *
+	 * @return list<TAWS_Post>
+	 */
 	private function get_posts_for_resharing( $num_of_days ) {
+		/** @var wpdb $wpdb */
 		global $wpdb;
 		$queries = array(
 			'top' => $this->get_top_posts_query(),
@@ -151,23 +196,27 @@ class Nelio_Content_Auto_Sharer {
 			'fbq' => $this->get_fallback_query(),
 		);
 
+		/** @var list<int> $post_ids */
 		$post_ids        = array();
-		$total_posts     = $num_of_days * self::MAX_SHARES_PER_DAY;
-		$posts_per_block = ceil( $total_posts / count( $queries ) );
+		$total_posts     = absint( $num_of_days * self::MAX_SHARES_PER_DAY );
+		$posts_per_block = absint( ceil( $total_posts / count( $queries ) ) );
 		foreach ( $queries as $key => $query ) {
-			$query    = $this->exclude_post_ids( $post_ids, $query );
-			$count    = 'fbq' !== $key ? $posts_per_block : $total_posts - count( $post_ids );
-			$query    = $this->limit_post_count( $count, $query );
+			$query = $this->exclude_post_ids( $post_ids, $query );
+			$count = 'fbq' !== $key ? $posts_per_block : $total_posts - count( $post_ids );
+			$query = $this->limit_post_count( $count, $query );
+
+			/** @var list<int> $post_ids */
 			$post_ids = array_merge(
 				$post_ids,
-				array_map( 'absint', $wpdb->get_col( $query ) ) // phpcs:ignore
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+				array_map( fn( $id ) => absint( $id ), $wpdb->get_col( $query ) )
 			);
-		}//end foreach
+		}
 
 		/**
 		 * Filters the post IDs that will be reshared.
 		 *
-		 * @param array  $post_ids List of post IDs.
+		 * @param list<int>  $post_ids List of post IDs.
 		 * @param number $days     Number of days to schedule.
 		 *
 		 * @since 3.0.0
@@ -176,19 +225,25 @@ class Nelio_Content_Auto_Sharer {
 
 		if ( empty( $post_ids ) ) {
 			return array();
-		}//end if
+		}
 
 		if ( count( $post_ids ) < $num_of_days ) {
 			$post_ids = array_fill( 0, $num_of_days, $post_ids );
 			$post_ids = array_merge( ...$post_ids );
 			$post_ids = array_slice( $post_ids, 0, $num_of_days );
-		}//end if
+		}
 		shuffle( $post_ids );
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
-		return array_map( array( $post_helper, 'post_to_aws_json' ), $post_ids );
-	}//end get_posts_for_resharing()
+		$posts       = array_map( fn( $id ) => $post_helper->post_to_aws_json( $id ), $post_ids );
+		return array_values( array_filter( $posts ) );
+	}
 
+	/**
+	 * Gets top posts query.
+	 *
+	 * @return string
+	 */
 	private function get_top_posts_query() {
 		$query  = $this->get_basic_query();
 		$joins  = array();
@@ -199,12 +254,13 @@ class Nelio_Content_Auto_Sharer {
 		$wheres[] = sprintf( '(engtot.meta_value >= %d)', $this->get_meta_value_threshold( $key ) );
 
 		$settings = Nelio_Content_Settings::instance();
-		$ga_view  = $settings->get( 'ga4_property_id' );
+		$ga_data  = $settings->get( 'google_analytics_data' );
+		$ga_view  = $ga_data['id'];
 		if ( ! empty( $ga_view ) ) {
 			$key      = "_nc_pageviews_total_{$ga_view}";
 			$joins[]  = $this->left_meta_join( 'googanal', $key );
 			$wheres[] = sprintf( '(googanal.meta_value >= %d)', $this->get_meta_value_threshold( $key ) );
-		}//end if
+		}
 
 		$join  = implode( ' ', $joins );
 		$where = 'AND (' . implode( ' OR ', $wheres ) . ')';
@@ -212,32 +268,53 @@ class Nelio_Content_Auto_Sharer {
 		$query = str_replace( '{{joins}}', $join, $query );
 		$query = str_replace( '{{wheres}}', $where, $query );
 		return $query;
-	}//end get_top_posts_query()
+	}
 
+	/**
+	 * Gets recent posts query.
+	 *
+	 * @param int $max_months Max months.
+	 *
+	 * @return string
+	 */
 	private function get_recent_posts_query( $max_months ) {
 		$today = gmdate( 'Y-m-d', time() );
-		$date  = gmdate( 'Y-m-d', strtotime( "{$today} - {$max_months} months" ) );
+		$date  = strtotime( "{$today} - {$max_months} months" );
+		$date  = false !== $date ? $date : absint( time() - ( MONTH_IN_SECONDS * $max_months ) );
+		$date  = gmdate( 'Y-m-d', $date );
 		$where = sprintf( 'AND \'%s\' <= p.post_date_gmt', esc_sql( $date ) );
 
 		$query = $this->get_basic_query();
 		$query = str_replace( '{{joins}}', '', $query );
 		$query = str_replace( '{{wheres}}', $where, $query );
 		return $query;
-	}//end get_recent_posts_query()
+	}
 
+	/**
+	 * Gets fallback query.
+	 *
+	 * @return string
+	 */
 	private function get_fallback_query() {
 		$query = $this->get_basic_query();
 		$query = str_replace( '{{joins}}', '', $query );
 		$query = str_replace( '{{wheres}}', '', $query );
 		return $query;
-	}//end get_fallback_query()
+	}
 
+	/**
+	 * Gets basic query.
+	 *
+	 * @return string
+	 */
 	private function get_basic_query() {
+		/** @var string $query */
 		static $query;
 		if ( ! empty( $query ) ) {
 			return $query;
-		}//end if
+		}
 
+		/** @var wpdb $wpdb */
 		global $wpdb;
 		$query = '' .
 			"SELECT DISTINCT ID FROM {$wpdb->posts} p {{joins}}" .
@@ -250,8 +327,15 @@ class Nelio_Content_Auto_Sharer {
 		$query = $this->add_end_mode_filter( $query );
 
 		return $query;
-	}//end get_basic_query()
+	}
 
+	/**
+	 * Adds post type filter.
+	 *
+	 * @param string $query Query.
+	 *
+	 * @return string
+	 */
 	private function add_post_type_filter( $query ) {
 		$post_types = nelio_content_get_post_types( 'social' );
 		$post_types = array_map(
@@ -265,22 +349,34 @@ class Nelio_Content_Auto_Sharer {
 		$where = 'AND p.post_type IN (' . implode( ',', $post_types ) . ')';
 
 		return str_replace( '{{wheres}}', "{$where} {{wheres}}", $query );
-	}//end add_post_type_filter()
+	}
 
+	/**
+	 * Adds automation group filter.
+	 *
+	 * @param string $query Query.
+	 *
+	 * @return string
+	 */
 	private function add_automation_group_filter( $query ) {
-		$groups = nc_get_automation_groups();
+		$groups = nelio_content_get_automation_groups();
 		$groups = array_filter(
 			$groups,
 			function ( $g ) {
+				/** @var TAutomation_Group $g */
+
 				return (
 					! empty( $g['priority'] ) &&
 					array_reduce(
 						$g['profileSettings'],
 						function ( $carry, $ps ) {
+							/** @var bool                                    $carry */
+							/** @var TSimplified_Profile_Automation_Settings $ps    */
+
 							if ( $carry ) {
 								return $carry;
-							}//end if
-							return ! empty( $ps['enabled'] ) && ! empty( $ps['reshare'] ) && ! empty( $ps['reshare']['enabled'] );
+							}
+							return ! empty( $ps['enabled'] ) && ! empty( $ps['reshare']['enabled'] );
 						},
 						false
 					)
@@ -290,15 +386,15 @@ class Nelio_Content_Auto_Sharer {
 
 		if ( empty( $groups ) ) {
 			return str_replace( '{{wheres}}', 'AND FALSE', $query );
-		}//end if
+		}
 
 		$groups = key_by( $groups, 'id' );
 		if ( ! empty( $groups['universal'] ) ) {
-			$publication = get( $groups['universal'], 'publication.type', 'always' );
+			$publication = $groups['universal']['publication']['type'];
 			if ( 'always' === $publication ) {
 				return $query;
-			}//end if
-		}//end if
+			}
+		}
 
 		$term_map   = $this->get_term_taxonomy_ids_from_groups( $groups );
 		$tax_tables = array();
@@ -313,7 +409,7 @@ class Nelio_Content_Auto_Sharer {
 			);
 
 			$tax_tables = array_combine( $taxs, $names );
-		}//end if
+		}
 
 		$query  = $this->join_term_tables( $term_map, $tax_tables, $query );
 		$today  = gmdate( 'Y-m-d', time() );
@@ -321,25 +417,30 @@ class Nelio_Content_Auto_Sharer {
 			function ( $group ) use ( $today, &$term_map, &$tax_tables ) {
 				$where = array();
 
-				$post_type = get( $group, 'postType' );
+				$post_type = $group['postType'] ?? '';
 				if ( ! empty( $post_type ) ) {
 					$where[] = sprintf( "p.post_type = '%s'", esc_sql( $post_type ) );
-				}//end if
+				}
 
-				$taxonomies = get( $group, 'taxonomies', array() );
+				$taxonomies = $group['taxonomies'] ?? array();
 				if ( ! empty( $taxonomies ) ) {
 					$conds   = array_map(
 						function ( $tax, $terms ) use ( &$term_map, &$tax_tables ) {
+							/** @var string    $tax   */
+							/** @var list<int> $terms */
+
 							$terms = array_map(
 								function ( $term ) use ( $tax, &$term_map ) {
-									return get( $term_map, array( $tax, $term ), 0 );
+									/** @var int $term */
+
+									return $term_map[ $tax ][ $term ] ?? 0;
 								},
 								$terms
 							);
 							$terms = array_values( array_filter( $terms ) );
 							if ( empty( $terms ) ) {
 								return '';
-							}//end if
+							}
 							$table = $tax_tables[ $tax ];
 							return sprintf( "{$table}.term_taxonomy_id IN (%s)", implode( ',', $terms ) );
 						},
@@ -347,19 +448,21 @@ class Nelio_Content_Auto_Sharer {
 						array_values( $taxonomies )
 					);
 					$where[] = '(' . implode( ' AND ', array_filter( $conds ) ) . ')';
-				}//end if
+				}
 
-				$authors = get( $group, 'authors', array() );
-				$authors = array_values( array_filter( array_map( 'absint', $authors ) ) );
+				$authors = $group['authors'] ?? array();
+				$authors = array_values( array_filter( array_map( fn( $id ) => absint( $id ), $authors ) ) );
 				if ( ! empty( $authors ) ) {
 					$where[] = 'p.post_author IN (' . implode( ', ', $authors ) . ')';
-				}//end if
+				}
 
-				if ( 'max-age' === get( $group, 'publication.type', 'always' ) ) {
-					$days    = get( $group, 'publication.days', 60 );
-					$date    = gmdate( 'Y-m-d', strtotime( "{$today} - {$days} days" ) );
+				if ( 'max-age' === $group['publication']['type'] ) {
+					$days    = $group['publication']['days'];
+					$date    = strtotime( "{$today} - {$days} days" );
+					$date    = false !== $date ? $date : absint( time() - ( DAY_IN_SECONDS * $days ) );
+					$date    = gmdate( 'Y-m-d', $date );
 					$where[] = sprintf( '\'%s\' <= p.post_date_gmt', esc_sql( $date ) );
-				}//end if
+				}
 
 				return empty( $where ) ? '' : '(' . implode( ' AND ', $where ) . ')';
 			},
@@ -367,20 +470,32 @@ class Nelio_Content_Auto_Sharer {
 		);
 		$where  = implode( ' OR ', array_filter( $wheres ) );
 		return str_replace( '{{wheres}}', "AND ({$where}) {{wheres}}", $query );
-	}//end add_automation_group_filter()
+	}
 
+	/**
+	 * Gets term taxonomy IDs from groups.
+	 *
+	 * @param array<TAutomation_Group> $groups Groups.
+	 *
+	 * @return array<string,array<int,int>>
+	 */
 	private function get_term_taxonomy_ids_from_groups( $groups ) {
+		/** @var array<string,array<int,int>> $taxonomies */
 		$taxonomies = array_reduce(
 			$groups,
 			function ( $result, $g ) {
-				$gt = get( $g, 'taxonomies', array() );
+				/** @var array<string,array<int,int>> $result */
+				/** @var TAutomation_Group $g                 */
+
+				$gt = $g['taxonomies'] ?? array();
 				foreach ( $gt as $tax => $terms ) {
-					$terms          = array_values( array_filter( array_map( 'absint', $terms ) ) );
+					$terms          = array_map( fn( $t ) => absint( $t ), $terms );
+					$terms          = array_values( array_filter( $terms ) );
 					$result[ $tax ] = isset( $result[ $tax ] ) ? $result[ $tax ] : array();
 					foreach ( $terms as $term ) {
 						$result[ $tax ][ $term ] = 0;
-					}//end foreach
-				}//end foreach
+					}
+				}
 				return $result;
 			},
 			array()
@@ -393,40 +508,53 @@ class Nelio_Content_Auto_Sharer {
 				esc_sql( $tax ),
 				implode( ',', array_merge( array( 0 ), array_keys( $terms ) ) )
 			);
-		}//end foreach
+		}
 
+		/** @var wpdb $wpdb */
 		global $wpdb;
 		$sql = "SELECT term_id AS old_id, term_taxonomy_id AS new_id, taxonomy FROM {$wpdb->term_taxonomy} t WHERE {{wheres}}";
 		$sql = str_replace( '{{wheres}}', implode( ' OR ', $wheres ), $sql );
 
-		$mappings = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:disable
+		/** @var list<array{taxonomy:string,old_id:int,new_id:int}> $mappings */
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$mappings = $wpdb->get_results( $sql, ARRAY_A );
 		foreach ( $mappings as $m ) {
-			$taxonomies[ $m['taxonomy'] ][ $m['old_id'] ] = absint( $m['new_id'] );
-		}//end foreach
+			$taxonomies[ $m['taxonomy'] ][ absint( $m['old_id'] ) ] = absint( $m['new_id'] );
+		}
 
 		$taxonomies = array_map(
-			function( $terms ) {
-				$terms = array_filter( $terms );
-				return empty( $terms ) ? false : $terms;
-			},
+			fn ( $terms ) => array_values( array_filter( $terms ) ),
 			$taxonomies
 		);
 
 		return array_filter( $taxonomies );
-	}//end get_term_taxonomy_ids_from_groups()
+	}
 
+	/**
+	 * Joins term tables.
+	 *
+	 * @param array<string,array<int,int>> $tax_terms   Tax terms.
+	 * @param array<string,string>         $join_tables Tables.
+	 * @param string                       $query       Query.
+	 *
+	 * @return string
+	 */
 	private function join_term_tables( $tax_terms, $join_tables, $query ) {
 		$joins = array();
 		foreach ( $tax_terms as $tax => $terms ) {
 			$joins[] = array(
-				'terms' => array_values( $terms ),
+				'terms' => $terms,
 				'table' => isset( $join_tables[ $tax ] ) ? $join_tables[ $tax ] : false,
 			);
-		}//end foreach
+		}
 
+		/** @var string */
 		return array_reduce(
 			$joins,
-			function( $q, $j ) {
+			function ( $q, $j ) {
+				/** @var string $q */
+				/** @var array{terms:list<int>,table:string|false} $j */
+
 				$terms = $j['terms'];
 				$table = $j['table'];
 				$join  = sprintf(
@@ -438,8 +566,15 @@ class Nelio_Content_Auto_Sharer {
 			},
 			$query
 		);
-	}//end join_term_tables()
+	}
 
+	/**
+	 * Adds share filter.
+	 *
+	 * @param string $query Query.
+	 *
+	 * @return string
+	 */
 	private function add_share_filter( $query ) {
 		$settings = Nelio_Content_Settings::instance();
 
@@ -459,11 +594,17 @@ class Nelio_Content_Auto_Sharer {
 		$query = str_replace( '{{joins}}', "{$join} {{joins}}", $query );
 		$query = str_replace( '{{wheres}}', "{$where} {{wheres}}", $query );
 		return $query;
-	}//end add_share_filter()
+	}
 
+	/**
+	 * Adds end mode filter.
+	 *
+	 * @param string $query Query.
+	 *
+	 * @return string
+	 */
 	private function add_end_mode_filter( $query ) {
-		// FIXME. This needs addressing.
-		$end_modes = nc_get_auto_share_end_modes();
+		$end_modes = nelio_content_get_auto_share_end_modes();
 		$end_modes = key_by( $end_modes, 'value' );
 
 		$conditions = array_map( array( $this, 'end_mode_to_sql_condition' ), $end_modes );
@@ -473,18 +614,27 @@ class Nelio_Content_Auto_Sharer {
 		$query = str_replace( '{{joins}}', "{$join} {{joins}}", $query );
 		$query = str_replace( '{{wheres}}', "{$where} {{wheres}}", $query );
 		return $query;
-	}//end add_end_mode_filter()
+	}
 
+	/**
+	 * Creates end mode SQL condition.
+	 *
+	 * @param TAuto_Share_End_Mode $mode Mode.
+	 *
+	 * @return string
+	 */
 	private function end_mode_to_sql_condition( $mode ) {
 		$mv = 'end_mode.meta_value';
 		$pd = 'p.post_date_gmt';
 
 		if ( 'never' === $mode['value'] ) {
 			return sprintf( '(%1$s IS NULL) OR (%1$s = \'never\')', $mv );
-		}//end if
+		}
 
 		$today = gmdate( 'Y-m-d', time() );
-		$date  = gmdate( 'Y-m-d', strtotime( "{$today} - {$mode['months']} months" ) );
+		$date  = strtotime( "{$today} - {$mode['months']} months" );
+		$date  = false !== $date ? $date : absint( time() - ( MONTH_IN_SECONDS * $mode['months'] ) );
+		$date  = gmdate( 'Y-m-d', $date );
 		return sprintf(
 			'(%1$s = \'%2$s\' AND  \'%3$s\' <= %4$s)',
 			$mv,
@@ -492,17 +642,40 @@ class Nelio_Content_Auto_Sharer {
 			esc_sql( $date ),
 			$pd
 		);
-	}//end end_mode_to_sql_condition()
+	}
 
+	/**
+	 * Excludes post IDs.
+	 *
+	 * @param list<int> $post_ids Post IDs.
+	 * @param string    $query    Query.
+	 *
+	 * @return string
+	 */
 	private function exclude_post_ids( $post_ids, $query ) {
 		$pids = '(' . implode( ',', array_merge( array( 0 ), $post_ids ) ) . ')';
 		return str_replace( '{{pids}}', $pids, $query );
-	}//end exclude_post_ids()
+	}
 
+	/**
+	 * Limits post count.
+	 *
+	 * @param int    $count Count.
+	 * @param string $query Query.
+	 *
+	 * @return string
+	 */
 	private function limit_post_count( $count, $query ) {
-		return str_replace( '{{post_count}}', $count, $query );
-	}//end limit_post_count()
+		return str_replace( '{{post_count}}', "$count", $query );
+	}
 
+	/**
+	 * Gets meta value threshold.
+	 *
+	 * @param string $meta_name Meta name.
+	 *
+	 * @return int
+	 */
 	private function get_meta_value_threshold( $meta_name ) {
 
 		$meta_value = 0;
@@ -511,7 +684,8 @@ class Nelio_Content_Auto_Sharer {
 		$args          = array(
 			'post_status'    => 'publish',
 			'posts_per_page' => 1,
-			'meta_key'       => $meta_name, // phpcs:ignore
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_key'       => $meta_name,
 			'orderby'        => 'meta_value_num',
 			'order'          => 'desc',
 		);
@@ -525,65 +699,70 @@ class Nelio_Content_Auto_Sharer {
 		$query          = new WP_Query( $args );
 		if ( $query->have_posts() ) {
 			$query->the_post();
-			$meta_value = absint( get_post_meta( get_the_ID(), $meta_name, true ) );
-		}//end if
+			$meta_value = absint( get_post_meta( absint( get_the_ID() ), $meta_name, true ) );
+		}
 		wp_reset_postdata();
 
 		return 1 + $meta_value;
+	}
 
-	}//end get_meta_value_threshold()
-
-	private function array_split( $array, $parts = 1 ) {
+	/**
+	 * Splits array.
+	 *
+	 * @template T
+	 *
+	 * @param list<T> $items Items.
+	 * @param int     $parts Optional. Default: 1.
+	 *
+	 * @return list<list<T>>
+	 */
+	private function array_split( $items, $parts = 1 ) {
 
 		if ( 1 >= $parts ) {
-			return $array;
-		}//end if
+			return array( $items );
+		}
 
 		$index  = 0;
 		$result = array_fill( 0, $parts, array() );
-		$max    = ceil( count( $array ) / $parts );
-		foreach ( $array as $v ) {
+		$max    = ceil( count( $items ) / $parts );
+		foreach ( $items as $v ) {
 			if ( count( $result[ $index ] ) >= $max ) {
 				++$index;
-			}//end if
+			}
 			array_push( $result[ $index ], $v );
-		}//end foreach
+		}
 
 		return $result;
+	}
 
-	}//end array_split()
-
+	/**
+	 * Creates a left meta join.
+	 *
+	 * @param string $alias    Alias.
+	 * @param string $meta_key Meta key.
+	 *
+	 * @return string
+	 */
 	private function left_meta_join( $alias, $meta_key ) {
+		/** @var wpdb $wpdb */
 		global $wpdb;
 		return '' .
 			"LEFT JOIN {$wpdb->postmeta} {$alias} ON (" .
 			"p.ID = {$alias}.post_id AND " .
 			"{$alias}.meta_key = '{$meta_key}')";
-	}//end left_meta_join()
+	}
 
+	/**
+	 * Returns the diff in days.
+	 *
+	 * @param string $a One date.
+	 * @param string $b Another date.
+	 *
+	 * @return int
+	 */
 	private function diff_days( $a, $b ) {
 		$a = new DateTime( $a );
 		$b = new DateTime( $b );
 		return absint( $a->diff( $b )->format( '%a' ) );
-	}//end diff_days()
-
-	/*
-	private function print_query( $q ) {
-		$q = wp_remote_request(
-			'https://codebeautify.org/Ql/formateQL',
-			array(
-				'method' => 'POST',
-				'body'   => array( 'data' => $q ),
-			)
-		)['body'];
-
-		$q = preg_replace( '/([A-Z])/', '<b>$1</b>', $q );
-		$q = preg_replace( '/({{[^}]*}})/', '<b style="color:green">$1</b>', $q );
-		$q = preg_replace( "/('[^']*')/", '<span style="color:darkred">$1</span>', $q );
-		$q = str_replace( '<b>I</b><b>D</b>', 'ID', $q );
-		$q = preg_replace( '/\.([a-zA-Z_]+)/', '.<span style="color:#66f">$1</span>', $q );
-		echo "<pre>$q</pre>";
-	}//end print_query()
-	*/
-
-}//end class
+	}
+}

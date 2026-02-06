@@ -8,9 +8,7 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class represents a checkbox setting.
@@ -26,7 +24,6 @@ class Nelio_Content_Checkbox_Setting extends Nelio_Content_Abstract_Setting {
 	 * Whether this checkbox is checked or not.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    boolean
 	 */
 	protected $checked;
@@ -36,12 +33,13 @@ class Nelio_Content_Checkbox_Setting extends Nelio_Content_Abstract_Setting {
 	 *
 	 * @param string $option_name The name of an option to sanitize and save.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_option_name( $option_name ) {
 		$this->option_name = $option_name;
-	}//end set_option_name()
+	}
 
 	/**
 	 * Sets whether this checkbox is checked or not.
@@ -49,16 +47,15 @@ class Nelio_Content_Checkbox_Setting extends Nelio_Content_Abstract_Setting {
 	 * @param boolean $value Whether this checkbox is checked or not.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_value( $value ) {
 
 		$this->checked = $value;
-	}//end set_value()
+	}
 
 	// @Implements
 	/** . @SuppressWarnings( PHPMD.UnusedLocalVariable, PHPMD.ShortVariableName ) */
-	public function display() { // phpcs:ignore
+	public function display() {
 
 		// Preparing data for the partial.
 		$id      = str_replace( '_', '-', $this->name );
@@ -66,11 +63,11 @@ class Nelio_Content_Checkbox_Setting extends Nelio_Content_Abstract_Setting {
 		$desc    = $this->desc;
 		$more    = $this->more;
 		$checked = $this->checked;
-		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-checkbox-setting.php';
-	}//end display()
+		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-content-checkbox-setting.php';
+	}
 
 	// @Implements
-	public function sanitize( $input ) { // phpcs:ignore
+	public function sanitize( $input ) {
 
 		$value = false;
 
@@ -80,17 +77,17 @@ class Nelio_Content_Checkbox_Setting extends Nelio_Content_Abstract_Setting {
 				$value = true;
 			} elseif ( true === $input[ $this->name ] ) {
 				$value = true;
-			}//end if
-		}//end if
+			}
+		}
 
 		$input[ $this->name ] = $value;
 
 		return $input;
-	}//end sanitize()
+	}
 
 	// @Override
-	protected function generate_label() { // phpcs:ignore
+	protected function generate_label() {
 
 		return $this->label;
-	}//end generate_label()
-}//end class
+	}
+}

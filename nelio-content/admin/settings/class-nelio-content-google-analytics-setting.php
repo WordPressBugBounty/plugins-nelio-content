@@ -9,9 +9,7 @@
  * @since      1.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class represents the setting for connecting Google Analytics with
@@ -25,34 +23,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Nelio_Content_Google_Analytics_Setting extends Nelio_Content_Abstract_React_Setting {
 
 	public function __construct() {
-		parent::__construct( 'ga4_property_id', 'GoogleAnalyticsSetting' );
-	}//end __construct()
+		parent::__construct( 'google_analytics_data', 'GoogleAnalyticsSetting' );
+	}
 
 	// @Overrides
-	// phpcs:ignore
 	protected function get_field_attributes() {
-		$has_value = ! empty( trim( $this->value ) );
-		return array(
-			'mode' => $has_value ? 'ga4-property-id' : 'init',
-		);
-	}//end get_field_attributes()
+		$settings = Nelio_Content_Settings::instance();
+		$value    = $settings->get( 'google_analytics_data' );
+		return $value;
+	}
 
 	// @Implements
-	// phpcs:ignore
 	public function sanitize( $input ) {
 
-		$value = false;
-		if ( isset( $input[ $this->name ] ) ) {
-			$value = $input[ $this->name ];
-		}//end if
-
-		if ( ! empty( $value ) ) {
-			$value = sanitize_text_field( $value );
-		} else {
-			$value = '';
-		}//end if
+		$value = isset( $input[ $this->name ] ) ? $input[ $this->name ] : '';
+		$value = is_string( $value ) ? $value : '';
+		$value = sanitize_text_field( $value );
+		$value = json_decode( $value, true );
+		$value = is_array( $value ) ? $value : array();
+		$value = wp_parse_args(
+			$value,
+			array(
+				'id'   => '',
+				'name' => '',
+			)
+		);
 
 		$input[ $this->name ] = $value;
 		return $input;
-	}//end sanitize()
-}//end class
+	}
+}

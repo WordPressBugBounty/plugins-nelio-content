@@ -8,66 +8,95 @@
  * @since      1.4.2
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class implements notifications-related functions.
  */
 class Nelio_Content_Notifications {
 
+	/**
+	 * This instance.
+	 *
+	 * @var Nelio_Content_Notifications|null
+	 */
 	protected static $instance;
 
+	/**
+	 * Returns this instance.
+	 *
+	 * @return Nelio_Content_Notifications
+	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 
 		add_action( 'init', array( $this, 'add_hooks_if_notifications_are_enabled' ) );
 		add_action( 'delete_user', array( $this, 'delete_follower' ) );
-	}//end init()
+	}
 
+	/**
+	 * Hooks into WordPress if notifications are enabled.
+	 *
+	 * @return void
+	 */
 	public function add_hooks_if_notifications_are_enabled() {
 
 		// Post status change actions.
 		if ( $this->should_followers_be_notified() ) {
 			add_action( 'nelio_content_notify_post_followers', array( $this, 'maybe_notify_post_followers' ), 10, 4 );
-		}//end if
+		}
 
 		// Editorial comments change actions.
 		if ( $this->are_comment_notifications_enabled() ) {
 			add_action( 'nelio_content_after_create_editorial_comment', array( $this, 'maybe_send_comment_creation_notification' ) );
-		}//end if
+		}
 
 		// Editorial tasks change actions.
 		if ( $this->are_task_notifications_enabled() ) {
 			add_action( 'nelio_content_after_create_editorial_task', array( $this, 'maybe_send_task_creation_notification' ) );
 			add_action( 'nelio_content_after_update_editorial_task', array( $this, 'maybe_send_task_update_notification' ) );
-		}//end if
-	}//end add_hooks_if_notifications_are_enabled()
+		}
+	}
 
+	/**
+	 * Callback to notify post followers.
+	 *
+	 * @param int       $post_id       Post ID.
+	 * @param list<int> $followers     Followers.
+	 * @param string    $old_status    Old status.
+	 * @param list<int> $old_followers Old followers.
+	 *
+	 * @return void
+	 */
 	public function maybe_notify_post_followers( $post_id, $followers, $old_status, $old_followers ) {
 
 		$post = get_post( $post_id );
 		if ( empty( $post ) ) {
 			return;
-		}//end if
+		}
 
 		if ( ! $this->should_followers_be_notified( $post->post_type ) ) {
 			return;
-		}//end if
+		}
 
 		/**
 		 * Filters the status that shouldn’t trigger a notification email.
 		 *
-		 * @param array $statuses Statuses that shouldn’t trigger a notification email. Default: [ `inherit`, `auto-draft` ].
+		 * @param array  $statuses  Statuses that shouldn’t trigger a notification email. Default: [ `inherit`, `auto-draft` ].
+		 * @param string $post_type Post type.
 		 *
 		 * @since 1.4.2
 		 */
@@ -81,7 +110,7 @@ class Nelio_Content_Notifications {
 			$email = $this->get_post_status_change_email_data( $post, $old_status );
 			$this->send_email( $email, $followers, $post );
 			return;
-		}//end if
+		}
 
 		// If it didn’t, but there are new followers, let’s them know.
 		$new_followers = array_values( array_diff( $followers, $old_followers ) );
@@ -89,132 +118,174 @@ class Nelio_Content_Notifications {
 			$email = $this->get_post_following_email_data( $post );
 			$this->send_email( $email, $new_followers, $post );
 			return;
-		}//end if
-	}//end maybe_notify_post_followers()
+		}
+	}
 
+	/**
+	 * Callback to send comment creation notification.
+	 *
+	 * @param TEditorial_Comment $comment Comment.
+	 *
+	 * @return void
+	 */
 	public function maybe_send_comment_creation_notification( $comment ) {
 
-		$post = get_post( $comment['post'] );
+		$post = get_post( $comment['postId'] );
 		if ( empty( $post ) ) {
 			return;
-		}//end if
+		}
 
 		if ( ! $this->are_comment_notifications_enabled( $post->post_type ) ) {
 			return;
-		}//end if
+		}
 
 		/**
 		 *  Kill switch for comment creation notification.
 		 *
-		 *  @param array   $comment The comment.
-		 *  @param WP_Post $post    The related post.
+		 *  @param TEditorial_Comment|false $comment The comment.
+		 *  @param WP_Post                  $post    The related post.
 		 *
 		 * @since 1.4.2
 		 */
 		if ( ! apply_filters( 'nelio_content_notification_editorial_comment', $comment, $post ) ) {
 			return;
-		}//end if
+		}
 
 		$helper     = Nelio_Content_Post_Helper::instance();
 		$followers  = $this->should_followers_be_notified( $post->post_type )
-			? $helper->get_post_followers( $comment['post'] )
+			? $helper->get_post_followers( $comment['postId'] )
 			: array();
-		$recipients = array_values( array_unique( array_merge( $followers, array( $comment['author'] ) ) ) );
+		$recipients = array_values( array_unique( array_merge( $followers, array( $comment['authorId'] ) ) ) );
 
 		$email = $this->get_comment_in_post_email_data( $post, $comment );
 		$this->send_email( $email, $recipients, $comment );
-	}//end maybe_send_comment_creation_notification()
+	}
 
+	/**
+	 * Callback to send task creation notification.
+	 *
+	 * @param TEditorial_Task $task Task.
+	 *
+	 * @return void
+	 */
 	public function maybe_send_task_creation_notification( $task ) {
 
-		$post    = null;
-		$post_id = $task['postId'];
-		if ( ! empty( $post_id ) ) {
-			$post = get_post( $post_id );
+		$post = null;
+		if ( ! empty( $task['postId'] ) ) {
+			$post = get_post( $task['postId'] );
 			if ( empty( $post ) ) {
 				return;
-			}//end if
-		}//end if
+			}
+		}
 
-		if ( ! $this->are_task_notifications_enabled( $post->post_type ) ) {
+		$post_type = ! empty( $post ) ? $post->post_type : null;
+		if ( ! $this->are_task_notifications_enabled( $post_type ) ) {
 			return;
-		}//end if
+		}
 
 		/**
 		 * Kill switch for task creation notification.
 		 *
-		 *  @param array        $task The task.
-		 *  @param WP_Post|null $post The related post (if any).
+		 *  @param TEditorial_Task|false $task The task.
+		 *  @param WP_Post|null          $post The related post (if any).
 		 *
 		 * @since 1.4.2
 		 */
 		if ( ! apply_filters( 'nelio_content_notification_editorial_task', $task, $post ) ) {
 			return;
-		}//end if
+		}
 
 		$helper     = Nelio_Content_Post_Helper::instance();
-		$followers  = $this->should_followers_be_notified( $post->post_type )
+		$followers  = ! empty( $task['postId'] ) && $this->should_followers_be_notified( $post_type )
 			? $helper->get_post_followers( $task['postId'] )
 			: array();
 		$recipients = array_values( array_unique( array_merge( $followers, array( $task['assignerId'], $task['assigneeId'] ) ) ) );
 
 		$email = $this->get_task_creation_email_data( $task, $post );
 		$this->send_email( $email, $recipients, $task );
-	}//end maybe_send_task_creation_notification()
+	}
 
+	/**
+	 * Callback to send task update notification.
+	 *
+	 * @param TEditorial_Task $task Task.
+	 *
+	 * @return void
+	 */
 	public function maybe_send_task_update_notification( $task ) {
 
-		$post    = null;
-		$post_id = $task['postId'];
-		if ( ! empty( $post_id ) ) {
-			$post = get_post( $post_id );
+		$post = null;
+		if ( ! empty( $task['postId'] ) ) {
+			$post = get_post( $task['postId'] );
 			if ( empty( $post ) ) {
 				return;
-			}//end if
-		}//end if
+			}
+		}
 
-		if ( ! $this->are_task_notifications_enabled( $post->post_type ) ) {
+		$post_type = ! empty( $post ) ? $post->post_type : null;
+		if ( ! $this->are_task_notifications_enabled( $post_type ) ) {
 			return;
-		}//end if
+		}
 
 		/**
 		 * Kill switch for task update notification.
 		 *
-		 *  @param array        $task The task.
-		 *  @param WP_Post|null $post The related post (if any).
+		 *  @param TEditorial_Task|false $task The task.
+		 *  @param WP_Post|null          $post The related post (if any).
 		 *
 		 * @since 1.4.2
 		 */
 		if ( ! apply_filters( 'nelio_content_notification_editorial_task', $task, $post ) ) {
 			return;
-		}//end if
+		}
 
 		$helper     = Nelio_Content_Post_Helper::instance();
-		$followers  = $this->should_followers_be_notified( $post->post_type )
+		$followers  = ! empty( $task['postId'] ) && $this->should_followers_be_notified( $post_type )
 			? $helper->get_post_followers( $task['postId'] )
 			: array();
 		$recipients = array_values( array_unique( array_merge( $followers, array( $task['assignerId'], $task['assigneeId'] ) ) ) );
 
 		$email = $this->get_task_updated_email_data( $task, $post );
 		$this->send_email( $email, $recipients, $task );
-	}//end maybe_send_task_update_notification()
+	}
 
+	/**
+	 * Callback to delete follower.
+	 *
+	 * @param int $id User ID.
+	 *
+	 * @return void
+	 */
 	public function delete_follower( $id ) {
 
 		if ( ! $id ) {
 			return;
-		}//end if
+		}
 
+		/** @var wpdb $wpdb */
 		global $wpdb;
-		return $wpdb->delete( // phpcs:ignore
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->delete(
 			$wpdb->postmeta,
 			array(
-				'meta_key'   => '_nc_following_users', // phpcs:ignore
-				'meta_value' => $id,                   // phpcs:ignore
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'   => '_nc_following_users',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_value' => $id,
 			)
 		);
-	}//end delete_follower()
+	}
 
+	/**
+	 * Sends email.
+	 *
+	 * @param array{type:string,subject:string,message:string} $email      Email.
+	 * @param list<int>                                        $recipients Recipients.
+	 * @param WP_Post|TEditorial_Comment|TEditorial_Task       $item       Item.
+	 *
+	 * @return bool
+	 */
 	private function send_email( $email, $recipients, $item ) {
 
 		$recipients = $this->get_email_addresses( $recipients );
@@ -222,23 +293,23 @@ class Nelio_Content_Notifications {
 		/**
 		 * Filters the recipients of the email.
 		 *
-		 * @param array         $recipients emails of the recipients
-		 * @param string        $type       type of email we’re about to send. Values can be: `status-change`, `new-post-follower`, `comment`, `task-creation`, or `task-completed`.
-		 * @param WP_Post|array $item       item that triggered the notification. Either a WordPress post, a task, or a comment.
+		 * @param list<string>                               $recipients emails of the recipients
+		 * @param string                                     $type       type of email we’re about to send. Values can be: `status-change`, `new-post-follower`, `comment`, `task-creation`, or `task-completed`.
+		 * @param WP_Post|TEditorial_Comment|TEditorial_Task $item       item that triggered the notification. Either a WordPress post, a task, or a comment.
 		 *
 		 * @since 2.0.0
 		 */
 		$recipients = apply_filters( 'nelio_content_notification_send_email_recipients', $recipients, $email['type'], $item );
 		if ( empty( $recipients ) ) {
-			return;
-		}//end if
+			return false;
+		}
 
 		/**
 		 * Filters the subject of the email.
 		 *
-		 * @param string        $subject    the subject of the email.
-		 * @param string        $type       type of email we’re about to send. Values can be: `status-change`, `new-post-follower`, `comment`, `task-creation`, or `task-completed`.
-		 * @param WP_Post|array $item       item that triggered the notification. Either a WordPress post, a task, or a comment.
+		 * @param string                                     $subject    the subject of the email.
+		 * @param string                                     $type       type of email we’re about to send. Values can be: `status-change`, `new-post-follower`, `comment`, `task-creation`, or `task-completed`.
+		 * @param WP_Post|TEditorial_Comment|TEditorial_Task $item       item that triggered the notification. Either a WordPress post, a task, or a comment.
 		 *
 		 * @since 1.4.2
 		 */
@@ -247,9 +318,9 @@ class Nelio_Content_Notifications {
 		/**
 		 * Filters the message of the email.
 		 *
-		 * @param string        $message    the message of the email.
-		 * @param string        $type       type of email we’re about to send. Values can be: `status-change`, `new-post-follower`, `comment`, `task-creation`, or `task-completed`.
-		 * @param WP_Post|array $item       item that triggered the notification. Either a WordPress post, a task, or a comment.
+		 * @param string                                     $message    the message of the email.
+		 * @param string                                     $type       type of email we’re about to send. Values can be: `status-change`, `new-post-follower`, `comment`, `task-creation`, or `task-completed`.
+		 * @param WP_Post|TEditorial_Comment|TEditorial_Task $item       item that triggered the notification. Either a WordPress post, a task, or a comment.
 		 *
 		 * @since 1.4.2
 		 */
@@ -258,18 +329,24 @@ class Nelio_Content_Notifications {
 		/**
 		 * Filters the headers of the email.
 		 *
-		 * @param string        $headers    the headers of the email.
-		 * @param string        $type       type of email we’re about to send. Values can be: `status-change`, `new-post-follower`, `comment`, `task-creation`, or `task-completed`.
-		 * @param WP_Post|array $item       item that triggered the notification. Either a WordPress post, a task, or a comment.
+		 * @param string                                     $headers    the headers of the email.
+		 * @param string                                     $type       type of email we’re about to send. Values can be: `status-change`, `new-post-follower`, `comment`, `task-creation`, or `task-completed`.
+		 * @param WP_Post|TEditorial_Comment|TEditorial_Task $item       item that triggered the notification. Either a WordPress post, a task, or a comment.
 		 *
 		 * @since 1.4.2
 		 */
 		$message_headers = apply_filters( 'nelio_content_notification_send_email_message_headers', '', $email['type'], $item );
 
-		// phpcs:ignore
 		return wp_mail( $recipients, $subject, $message, $message_headers );
-	}//end send_email()
+	}
 
+	/**
+	 * Returns email addresses.
+	 *
+	 * @param list<int> $user_ids User IDs.
+	 *
+	 * @return list<string>
+	 */
 	private function get_email_addresses( $user_ids ) {
 
 		if ( in_array( get_current_user_id(), $user_ids, true ) ) {
@@ -282,19 +359,19 @@ class Nelio_Content_Notifications {
 			 */
 			if ( ! apply_filters( 'nelio_content_notification_email_current_user', false ) ) {
 				$user_ids = array_values( array_diff( $user_ids, array( get_current_user_id() ) ) );
-			}//end if
-		}//end if
+			}
+		}
 
 		$emails = array_map(
 			function ( $user_id ) {
 				if ( ! is_user_member_of_blog( $user_id ) ) {
 					return false;
-				}//end if
+				}
 
 				$info = get_userdata( $user_id );
 				if ( empty( $info ) ) {
 					return false;
-				}//end if
+				}
 
 				return $info->user_email;
 			},
@@ -302,14 +379,22 @@ class Nelio_Content_Notifications {
 		);
 
 		return array_values( array_unique( array_filter( $emails ) ) );
-	}//end get_email_addresses()
+	}
 
+	/**
+	 * Gets post status change email data.
+	 *
+	 * @param WP_Post $post       Post.
+	 * @param string  $old_status Status.
+	 *
+	 * @return array{type:'status-change',subject:string,message:string}
+	 */
 	private function get_post_status_change_email_data( $post, $old_status ) {
 
 		$post_id     = $post->ID;
-		$post_author = get_userdata( $post->post_author );
+		$post_author = get_userdata( absint( $post->post_author ) );
 		$post_status = $post->post_status;
-		$post_type   = get_post_type_object( $post->post_type )->labels->singular_name;
+		$post_type   = $this->get_post_type_label( $post );
 		$post_title  = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
 
 		$blog_name = get_option( 'blogname' );
@@ -320,7 +405,7 @@ class Nelio_Content_Notifications {
 			$username_and_email = sprintf( _x( '%1$s (%2$s)', 'text', 'nelio-content' ), $current_user->display_name, $current_user->user_email );
 		} else {
 			$username_and_email = _x( 'WordPress Scheduler', 'text', 'nelio-content' );
-		}//end if
+		}
 
 		$message = '';
 
@@ -460,7 +545,7 @@ class Nelio_Content_Notifications {
 				$username_and_email
 			) . "\r\n";
 
-		}//end if
+		}
 
 		$message .= sprintf(
 			/* translators: %1$s: Date. %2$s: Time. %3$s: Timezone. */
@@ -500,7 +585,7 @@ class Nelio_Content_Notifications {
 				$post_author->user_email
 			) . "\r\n";
 
-		}//end if
+		}
 
 		$message .= $this->get_email_footer( $post );
 		return array(
@@ -508,13 +593,20 @@ class Nelio_Content_Notifications {
 			'subject' => $subject,
 			'message' => $message,
 		);
-	}//end get_post_status_change_email_data()
+	}
 
+	/**
+	 * Gets post following email data.
+	 *
+	 * @param WP_Post $post Post.
+	 *
+	 * @return array{type:'new-post-follower',subject:string,message:string}
+	 */
 	private function get_post_following_email_data( $post ) {
 
-		$post_type   = get_post_type_object( $post->post_type )->labels->singular_name;
+		$post_type   = $this->get_post_type_label( $post );
 		$post_title  = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
-		$post_author = get_userdata( $post->post_author );
+		$post_author = get_userdata( absint( $post->post_author ) );
 
 		$blog_name = get_option( 'blogname' );
 
@@ -557,7 +649,7 @@ class Nelio_Content_Notifications {
 				$post_author->user_email
 			) . "\r\n";
 
-		}//end if
+		}
 
 		$message .= sprintf(
 			/* translators: %s: Post status. */
@@ -572,12 +664,20 @@ class Nelio_Content_Notifications {
 			'subject' => $subject,
 			'message' => $message,
 		);
-	}//end get_post_following_email_data()
+	}
 
+	/**
+	 * Gets comment in post email data.
+	 *
+	 * @param WP_Post            $post Post.
+	 * @param TEditorial_Comment $comment Comment.
+	 *
+	 * @return array{type:'comment',subject:string,message:string}
+	 */
 	private function get_comment_in_post_email_data( $post, $comment ) {
 
 		$post_id    = $post->ID;
-		$post_type  = get_post_type_object( $post->post_type )->labels->singular_name;
+		$post_type  = $this->get_post_type_label( $post );
 		$post_title = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
 
 		$current_user       = wp_get_current_user();
@@ -621,8 +721,16 @@ class Nelio_Content_Notifications {
 			'subject' => $subject,
 			'message' => $message,
 		);
-	}//end get_comment_in_post_email_data()
+	}
 
+	/**
+	 * Gets task creation email data.
+	 *
+	 * @param TEditorial_Task $task Task.
+	 * @param WP_Post|null    $post Post.
+	 *
+	 * @return array{type:'task-creation',subject:string,message:string}
+	 */
 	private function get_task_creation_email_data( $task, $post ) {
 
 		$current_user       = wp_get_current_user();
@@ -633,7 +741,7 @@ class Nelio_Content_Notifications {
 
 		if ( $post ) {
 			$post_id    = $post->ID;
-			$post_type  = get_post_type_object( $post->post_type )->labels->singular_name;
+			$post_type  = $this->get_post_type_label( $post );
 			$post_title = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
 
 			$subject = sprintf(
@@ -657,7 +765,7 @@ class Nelio_Content_Notifications {
 			$subject = sprintf( _x( '[%s] New Editorial Task', 'text', 'nelio-content' ), $blog_name );
 			$message = _x( 'A new editorial task was added.', 'text', 'nelio-content' ) . "\r\n\r\n";
 
-		}//end if
+		}
 
 		$message .= sprintf(
 			/* translators: %1$s: Task author. %2$s: Task author email. */
@@ -674,8 +782,16 @@ class Nelio_Content_Notifications {
 			'subject' => $subject,
 			'message' => $message,
 		);
-	}//end get_task_creation_email_data()
+	}
 
+	/**
+	 * Gets task updated email data.
+	 *
+	 * @param TEditorial_Task $task Task.
+	 * @param WP_Post|null    $post Post.
+	 *
+	 * @return array{type:'task-completed'|'task-updated',subject:string,message:string}
+	 */
 	private function get_task_updated_email_data( $task, $post ) {
 
 		$current_user       = wp_get_current_user();
@@ -686,7 +802,7 @@ class Nelio_Content_Notifications {
 
 		if ( $post ) {
 			$post_id    = $post->ID;
-			$post_type  = get_post_type_object( $post->post_type )->labels->singular_name;
+			$post_type  = $this->get_post_type_label( $post );
 			$post_title = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
 
 			$subject = sprintf(
@@ -724,7 +840,7 @@ class Nelio_Content_Notifications {
 				? _x( 'An editorial task was completed.', 'text', 'nelio-content' ) . "\r\n\r\n"
 				: _x( 'An editorial task was updated.', 'text', 'nelio-content' ) . "\r\n\r\n";
 
-		}//end if
+		}
 
 		$message .= sprintf(
 			! empty( $task['completed'] )
@@ -744,8 +860,15 @@ class Nelio_Content_Notifications {
 			'subject' => $subject,
 			'message' => $message,
 		);
-	}//end get_task_updated_email_data()
+	}
 
+	/**
+	 * Gets task information.
+	 *
+	 * @param TEditorial_Task $task Task.
+	 *
+	 * @return string
+	 */
 	private function get_task_information( $task ) {
 
 		$assignee       = get_userdata( $task['assigneeId'] );
@@ -754,7 +877,7 @@ class Nelio_Content_Notifications {
 		if ( $assignee ) {
 			$assignee_name  = $assignee->display_name;
 			$assignee_email = $assignee->user_email;
-		}//end if
+		}
 
 		$assigner       = get_userdata( $task['assignerId'] );
 		$assigner_name  = _x( 'Unknown Assignee', 'text', 'nelio-content' );
@@ -762,7 +885,7 @@ class Nelio_Content_Notifications {
 		if ( $assigner ) {
 			$assigner_name  = $assigner->display_name;
 			$assigner_email = $assigner->user_email;
-		}//end if
+		}
 
 		/* translators: %s: Task description. */
 		$info = ' - ' . sprintf( _x( 'Task: %s', 'text', 'nelio-content' ), $task['task'] ) . "\r\n";
@@ -775,19 +898,19 @@ class Nelio_Content_Notifications {
 			$task_due_date = mysql2date( get_option( 'date_format' ), $task['dateDue'] );
 			/* translators: %s: Date. */
 			$info .= ' - ' . sprintf( _x( 'Due Date: %s', 'text', 'nelio-content' ), $task_due_date ) . "\r\n";
-		}//end if
+		}
 
 		return $info;
-	}//end get_task_information()
+	}
 
 	/**
 	 * Returns the email footer.
 	 *
-	 * @param WP_Post|false $post the post.
+	 * @param WP_Post|null $post the post. Optional.
 	 *
-	 * @return string Email footer.
+	 * @return string
 	 */
-	private function get_email_footer( $post = false ) {
+	private function get_email_footer( $post = null ) {
 
 		$blog_name = get_option( 'blogname' );
 		$blog_url  = get_bloginfo( 'url' );
@@ -797,22 +920,32 @@ class Nelio_Content_Notifications {
 
 		if ( $post ) {
 
-			$post_title       = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
-			$edit_link        = htmlspecialchars_decode( get_edit_post_link( $post->ID ) );
-			$post_type_labels = get_post_type_object( $post->post_type )->labels;
+			$post_type        = get_post_type_object( $post->post_type );
+			$post_type_labels = ! empty( $post_type ) ? $post_type->labels : null;
+
+			$post_title = ! empty( $post->post_title ) ? $post->post_title : _x( '(no title)', 'text', 'nelio-content' );
+			$edit_link  = get_edit_post_link( $post->ID );
+			$edit_link  = is_string( $edit_link ) ? $edit_link : '';
+			$edit_link  = htmlspecialchars_decode( $edit_link );
+
+			$edit_label = $post_type_labels->edit_item ?? _x( 'Edit', 'command', 'nelio-content' );
+			$edit_label = is_string( $edit_label ) ? $edit_label : _x( 'Edit', 'command', 'nelio-content' );
 
 			if ( 'publish' !== $post->post_status ) {
 				$view_link = add_query_arg( array( 'preview' => 'true' ), wp_get_shortlink( $post->ID ) );
 			} else {
-				$view_link = htmlspecialchars_decode( get_permalink( $post->ID ) );
-			}//end if
+				$view_link = get_permalink( $post->ID );
+				$view_link = is_string( $view_link ) ? $view_link : '';
+				$view_link = htmlspecialchars_decode( $view_link );
+			}
+
+			$view_label = $post_type_labels->view_item ?? _x( 'View', 'command', 'nelio-content' );
+			$view_label = is_string( $view_label ) ? $view_label : _x( 'View', 'command', 'nelio-content' );
 
 			$footer .= "\r\n";
 			$footer .= _x( '== Actions ==', 'title', 'nelio-content' ) . "\r\n";
-			/* translators: %1$s: "Edit" command, as in "Edit Post". %2$s: Edit link. */
-			$footer .= sprintf( _x( '%1$s: %2$s', 'command (edit)', 'nelio-content' ), $post_type_labels->edit_item, $edit_link ) . "\r\n";
-			/* translators: %1$s: "View" command, as in "View Post". %2$s: View link. */
-			$footer .= sprintf( _x( '%1$s: %2$s', 'command (view)', 'nelio-content' ), $post_type_labels->view_item, $view_link ) . "\r\n";
+			$footer .= sprintf( '%1$s: %2$s', $edit_label, $edit_link ) . "\r\n";
+			$footer .= sprintf( '%1$s: %2$s', $view_label, $view_link ) . "\r\n";
 
 			$footer .= "\r\n--------------------\r\n";
 			/* translators: %s: Post title. */
@@ -824,14 +957,21 @@ class Nelio_Content_Notifications {
 			/* translators: %s: Blog URL. */
 			$footer .= sprintf( _x( 'You are receiving this email because you are registered to %s.', 'user', 'nelio-content' ), $blog_url );
 
-		}//end if
+		}
 
 		$footer .= "\r\n\r\n";
 		$footer .= $blog_name . ' | ' . $blog_url . ' | ' . $admin_url . "\r\n";
 
 		return $footer;
-	}//end get_email_footer()
+	}
 
+	/**
+	 * Returns post’s scheduled datetime.
+	 *
+	 * @param WP_Post $post Post.
+	 *
+	 * @return string
+	 */
 	private function get_scheduled_datetime( $post ) {
 
 		$scheduled_timestatmp = strtotime( $post->post_date );
@@ -841,46 +981,105 @@ class Nelio_Content_Notifications {
 
 		/* translators: %1$s: Post scheduled date. %2$s: Post scheduled time. */
 		return sprintf( _x( '%1$s at %2$s', 'text', 'nelio-content' ), $date, $time );
-	}//end get_scheduled_datetime()
+	}
 
+	/**
+	 * Returns post type label.
+	 *
+	 * @param WP_Post $post Post.
+	 *
+	 * @return string
+	 */
+	private function get_post_type_label( $post ) {
+		$post_type = get_post_type_object( $post->post_type );
+		if ( empty( $post_type ) ) {
+			return $post->post_type;
+		}
+
+		$labels = $post_type->labels;
+		if ( empty( $labels->singular_name ) ) {
+			return $post->post_type;
+		}
+
+		if ( ! is_string( $labels->singular_name ) ) {
+			return $post->post_type;
+		}
+
+		return $labels->singular_name;
+	}
+
+	/**
+	 * Returns post status label.
+	 *
+	 * @param string $status Status.
+	 *
+	 * @return string
+	 */
 	private function get_post_status_label( $status ) {
 		$status_object = get_post_status_object( $status );
-		return empty( $status_object ) ? $status : $status_object->label;
-	}//end get_post_status_label()
+		return ! empty( $status_object ) && is_string( $status_object->label ) ? $status_object->label : $status;
+	}
 
-	private function should_followers_be_notified( $post_type = false ) {
+	/**
+	 * Whether followers should be notified.
+	 *
+	 * If a post type is provided, it returns whether notifications are enabled for said post type.
+	 *
+	 * @param string $post_type Post type.
+	 *
+	 * @return bool
+	 */
+	private function should_followers_be_notified( $post_type = null ) {
 		$post_types = nelio_content_get_post_types( 'notifications' );
 		if ( empty( $post_types ) ) {
 			return false;
-		}//end if
+		}
 		return empty( $post_type ) || in_array( $post_type, $post_types, true );
-	}//end should_followers_be_notified()
+	}
 
-	private function are_comment_notifications_enabled( $post_type = false ) {
+	/**
+	 * Whether comment notifications are enabled.
+	 *
+	 * If a post type is provided, it returns whether they’re enabled for said post type.
+	 *
+	 * @param string $post_type Post type.
+	 *
+	 * @return bool
+	 */
+	private function are_comment_notifications_enabled( $post_type = null ) {
 		$settings = Nelio_Content_Settings::instance();
 		if ( empty( $settings->get( 'use_comment_notifications' ) ) ) {
 			return false;
-		}//end if
+		}
 
 		$post_types = nelio_content_get_post_types( 'comments' );
 		if ( empty( $post_types ) ) {
 			return false;
-		}//end if
+		}
 
 		return empty( $post_type ) || in_array( $post_type, $post_types, true );
-	}//end are_comment_notifications_enabled()
+	}
 
-	private function are_task_notifications_enabled( $post_type = false ) {
+	/**
+	 * Whether task notifications are enabled.
+	 *
+	 * If a post type is provided, it returns whether they’re enabled for said post type.
+	 *
+	 * @param string $post_type Post type.
+	 *
+	 * @return bool
+	 */
+	private function are_task_notifications_enabled( $post_type = null ) {
 		$settings = Nelio_Content_Settings::instance();
 		if ( empty( $settings->get( 'use_task_notifications' ) ) ) {
 			return false;
-		}//end if
+		}
 
 		$post_types = nelio_content_get_post_types( 'tasks' );
 		if ( empty( $post_types ) ) {
 			return false;
-		}//end if
+		}
 
 		return empty( $post_type ) || in_array( $post_type, $post_types, true );
-	}//end are_task_notifications_enabled()
-}//end class
+	}
+}

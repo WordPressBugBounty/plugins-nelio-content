@@ -4,25 +4,43 @@ namespace Nelio_Content\Zod;
 
 class LiteralSchema extends Schema {
 
+	/** @var string|bool|number */
 	private $value;
 
-	public static function make( $value ): LiteralSchema {
+	/**
+	 * Creates a literal schema.
+	 *
+	 * @param string|bool|number $value Value.
+	 *
+	 * @return LiteralSchema
+	 */
+	public static function make( $value ) {
 		$instance        = new self();
 		$instance->value = $value;
 		return $instance;
-	}//end make()
+	}
 
 	public function parse_value( $value ) {
+		if ( gettype( $value ) !== gettype( $this->value ) ) {
+			throw new \Exception(
+				sprintf(
+					'Expected %1$s, but %2$s found.',
+					esc_html( gettype( $this->value ) ),
+					esc_html( gettype( $value ) )
+				)
+			);
+		}
+
 		if ( $value !== $this->value ) {
 			throw new \Exception(
 				sprintf(
-					'Expected %1$s but %2$s found.',
-					esc_html( $this->value ),
-					esc_html( $value )
+					'Expected %1$s, but %2$s found.',
+					esc_html( (string) $this->value ),
+					esc_html( (string) $value )
 				)
 			);
-		}//end if
+		}
 
 		return $value;
-	}//end parse_value()
-}//end class
+	}
+}

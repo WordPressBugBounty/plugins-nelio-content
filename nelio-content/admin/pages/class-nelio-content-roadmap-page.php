@@ -20,37 +20,21 @@ class Nelio_Content_Roadmap_Page extends Nelio_Content_Abstract_Page {
 			'nelio-content',
 			'nelio-content-roadmap',
 			_x( 'Roadmap', 'text', 'nelio-content' ),
-			nc_can_current_user_use_plugin()
+			nelio_content_can_current_user_use_plugin()
 		);
-	}//end __construct()
-
-	// @Overrides
-	// phpcs:ignore
-	public function add_page() {
-
-		parent::add_page();
-
-		global $submenu;
-		if ( isset( $submenu['nelio-content'] ) ) {
-			$count = count( $submenu['nelio-content'] );
-			for ( $i = 0; $i < $count; ++$i ) {
-				if ( 'nelio-content-roadmap' === $submenu['nelio-content'][ $i ][2] ) {
-					$submenu['nelio-content'][ $i ][2] = 'https://trello.com/b/xzRPgkP2'; // phpcs:ignore
-					break;
-				}//end if
-			}//end for
-		}//end if
-	}//end add_page()
+	}
 
 	// @Implements
-	// phpcs:ignore
 	public function enqueue_assets() {
-		// Nothing to be done.
-	}//end enqueue_assets()
+		$help_url = 'https://trello.com/b/xzRPgkP2';
+		printf(
+			'<meta http-equiv="refresh" content="0; url=%s" />',
+			esc_url( $help_url )
+		);
+	}
 
 	// @Overwrites
-	// phpcs:ignore
 	public function display() {
 		// Nothing to be done.
-	}//end display()
-}//end class
+	}
+}

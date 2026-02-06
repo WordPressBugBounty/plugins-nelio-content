@@ -22,9 +22,9 @@ class Nelio_Content_Reusable_Message {
 	/**
 	 * Attribures in this reusable message.
 	 *
-	 * @var array
+	 * @var TReusable_Social_Message
 	 */
-	private $attrs = array();
+	private $attrs;
 
 	/**
 	 * Creates a new instance of this class.
@@ -46,16 +46,22 @@ class Nelio_Content_Reusable_Message {
 
 		if ( ! empty( $preset ) ) {
 			$this->ID    = $preset->ID;
+			$this->attrs = $this->defaults( $preset->ID );
+
 			$content     = json_decode( base64_decode( $preset->post_content ) );
-			$attrs       = self::schema()->safe_parse( $content );
-			$this->attrs = ! empty( $attrs['success'] ) ? $attrs['data'] : $this->defaults( $preset->ID );
-		}//end if
-	}//end __construct()
+			$parsed_data = self::schema()->safe_parse( $content );
+			if ( true === $parsed_data['success'] ) {
+				/** @var TReusable_Social_Message $parsed_data */
+				$parsed_data = $parsed_data['data'];
+				$this->attrs = $parsed_data;
+			}
+		}
+	}
 
 	/**
 	 * Parses the given JSON and converts it into an instance of this class.
 	 *
-	 * @param string|array $json Reusable message as JSON.
+	 * @param string|array<mixed> $json Reusable message as JSON.
 	 *
 	 * @return Nelio_Content_Reusable_Message|WP_Error an instance of this class or error.
 	 *
@@ -66,20 +72,21 @@ class Nelio_Content_Reusable_Message {
 		$json = is_array( $json ) ? $json : array();
 
 		$parsed = self::schema()->safe_parse( $json );
-		if ( empty( $parsed['success'] ) ) {
+		if ( false === $parsed['success'] ) {
 			return new WP_Error( 'parsing-error', $parsed['error'] );
-		}//end if
+		}
 
+		/** @var TReusable_Social_Message */
 		$parsed = $parsed['data'];
-		if ( 0 < $parsed['id'] && 'nc_reusable_social' !== get_post_type( $parsed['id'] ) ) {
+		if ( ! empty( $parsed['id'] ) && 'nc_reusable_social' !== get_post_type( absint( $parsed['id'] ) ) ) {
 			return new WP_Error( 'invalid-id', sprintf( 'Post %d is not a Reusable Message', $parsed['id'] ) );
-		}//end if
+		}
 
 		$result        = new self();
 		$result->ID    = $parsed['id'] < 0 ? 0 : $parsed['id'];
 		$result->attrs = $parsed;
 		return $result;
-	}//end parse()
+	}
 
 	/**
 	 * Saves the reusable message to the database.
@@ -89,9 +96,12 @@ class Nelio_Content_Reusable_Message {
 	 * @since 3.2.0
 	 */
 	public function save() {
+		$body = wp_json_encode( $this->attrs );
+		assert( ! empty( $body ) );
+
 		$args = array(
-			'post_content' => base64_encode( wp_json_encode( $this->attrs ) ),
-			'post_excerpt' => $this->attrs['textComputed'],
+			'post_content' => base64_encode( $body ),
+			'post_excerpt' => $this->attrs['textComputed'] ?? '',
 			'post_type'    => 'nc_reusable_social',
 			'post_status'  => 'draft',
 		);
@@ -102,16 +112,16 @@ class Nelio_Content_Reusable_Message {
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
-		}//end if
+		}
 
 		$this->ID = $result;
 		return $this;
-	}//end save()
+	}
 
 	/**
 	 * Converts this class into JSON.
 	 *
-	 * @return array this class into JSON.
+	 * @return TReusable_Social_Message
 	 *
 	 * @since 3.2.0
 	 */
@@ -120,12 +130,13 @@ class Nelio_Content_Reusable_Message {
 			$this->attrs,
 			array( 'id' => $this->ID )
 		);
-	}//end json()
+	}
 
-	private static $schema = null; // phpcs:ignore
 	public static function schema(): Schema {
-		if ( empty( self::$schema ) ) {
-			self::$schema = Z::object(
+		/** @var Nelio_Content\Zod\Schema|null $schema */
+		static $schema;
+		if ( empty( $schema ) ) {
+			$schema = Z::object(
 				array(
 					'id'           => Z::number()->optional(),
 					'image'        => Z::string()->optional(),
@@ -133,13 +144,16 @@ class Nelio_Content_Reusable_Message {
 					'network'      => Z::enum(
 						array(
 							'band',
+							'blogger',
 							'bluesky',
 							'facebook',
 							'gmb',
 							'instagram',
 							'linkedin',
 							'mastodon',
+							'ok',
 							'pinterest',
+							'plurk',
 							'reddit',
 							'telegram',
 							'tiktok',
@@ -149,6 +163,7 @@ class Nelio_Content_Reusable_Message {
 							'medium',
 							'slack',
 							'threads',
+							'vk',
 						)
 					),
 					'postAuthor'   => Z::number()->optional(),
@@ -172,10 +187,17 @@ class Nelio_Content_Reusable_Message {
 					'videoId'      => Z::number()->optional(),
 				)
 			);
-		}//end if
-		return self::$schema;
-	}//end schema()
+		}
+		return $schema;
+	}
 
+	/**
+	 * Returns default values.
+	 *
+	 * @param int $id ID.
+	 *
+	 * @return TReusable_Social_Message
+	 */
 	private function defaults( $id ) {
 		return array(
 			'id'           => $id,
@@ -187,5 +209,5 @@ class Nelio_Content_Reusable_Message {
 			'timeValue'    => 'morning',
 			'type'         => 'text',
 		);
-	}//end defaults()
-}//end class
+	}
+}

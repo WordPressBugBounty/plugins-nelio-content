@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit1585dcb9d318ec9093e456911ba192d1
+class ComposerStaticInitc0e0424f5c04a842b2093f148ebe2b86
 {
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
@@ -33,7 +33,6 @@ class ComposerStaticInit1585dcb9d318ec9093e456911ba192d1
         'Nelio_Content_Auto_Sharer' => __DIR__ . '/../..' . '/includes/utils/class-nelio-content-auto-sharer.php',
         'Nelio_Content_Board_Page' => __DIR__ . '/../..' . '/admin/pages/class-nelio-content-board-page.php',
         'Nelio_Content_Calendar_Page' => __DIR__ . '/../..' . '/admin/pages/class-nelio-content-calendar-page.php',
-        'Nelio_Content_Checkbox_Set_Setting' => __DIR__ . '/../..' . '/includes/lib/settings/class-nelio-content-checkbox-set-setting.php',
         'Nelio_Content_Checkbox_Setting' => __DIR__ . '/../..' . '/includes/lib/settings/class-nelio-content-checkbox-setting.php',
         'Nelio_Content_Classic_Editor' => __DIR__ . '/../..' . '/admin/editors/class-nelio-content-classic-editor.php',
         'Nelio_Content_Cloud' => __DIR__ . '/../..' . '/includes/utils/class-nelio-content-cloud.php',
@@ -54,6 +53,7 @@ class ComposerStaticInit1585dcb9d318ec9093e456911ba192d1
         'Nelio_Content_Input_Setting' => __DIR__ . '/../..' . '/includes/lib/settings/class-nelio-content-input-setting.php',
         'Nelio_Content_Install' => __DIR__ . '/../..' . '/includes/utils/class-nelio-content-install.php',
         'Nelio_Content_Internal_Events_REST_Controller' => __DIR__ . '/../..' . '/includes/rest/class-nelio-content-internal-events-rest-controller.php',
+        'Nelio_Content_Link_Shortener_Setting' => __DIR__ . '/../..' . '/admin/settings/class-nelio-content-link-shortener-setting.php',
         'Nelio_Content_Meta_Tags' => __DIR__ . '/../..' . '/public/class-nelio-content-meta-tags.php',
         'Nelio_Content_Missed_Schedule_Handler' => __DIR__ . '/../..' . '/includes/utils/class-nelio-content-missed-schedule-handler.php',
         'Nelio_Content_Notifications' => __DIR__ . '/../..' . '/includes/utils/class-nelio-content-notifications.php',
@@ -90,12 +90,13 @@ class ComposerStaticInit1585dcb9d318ec9093e456911ba192d1
         'Nelio_Content_Task_Presets_REST_Controller' => __DIR__ . '/../..' . '/includes/post-types/task-presets/class-nelio-content-task-presets-rest-controller.php',
         'Nelio_Content_Text_Area_Setting' => __DIR__ . '/../..' . '/includes/lib/settings/class-nelio-content-text-area-setting.php',
         'Nelio_Content_Welcome_Page' => __DIR__ . '/../..' . '/admin/pages/class-nelio-content-welcome-page.php',
+        'Nelio_Content_Wizard_Page' => __DIR__ . '/../..' . '/admin/pages/class-nelio-content-wizard-page.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInit1585dcb9d318ec9093e456911ba192d1::$classMap;
+            $loader->classMap = ComposerStaticInitc0e0424f5c04a842b2093f148ebe2b86::$classMap;
 
         }, null, ClassLoader::class);
     }

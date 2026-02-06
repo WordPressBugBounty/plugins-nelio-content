@@ -8,9 +8,7 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class represents an input setting.
@@ -36,7 +34,6 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 	 * The specific type of this HTML input element.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $type;
@@ -45,7 +42,6 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 	 * The concrete value of this field.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $value;
@@ -54,7 +50,6 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 	 * A placeholder text to be displayed when the field is empty.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $placeholder;
@@ -70,13 +65,12 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 	 * @param string $placeholder A placeholder text to be displayed when the field is empty.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function __construct( $name, $desc, $more, $type, $placeholder = '' ) {
 		parent::__construct( $name, $desc, $more );
 		$this->type        = $type;
 		$this->placeholder = $placeholder;
-	}//end __construct()
+	}
 
 	/**
 	 * Sets the value of this field to the given string.
@@ -84,15 +78,14 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 	 * @param string $value The value of this field.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_value( $value ) {
 		$this->value = $value;
-	}//end set_value()
+	}
 
 	// @Implements
 	/** . @SuppressWarnings( PHPMD.UnusedLocalVariable, PHPMD.ShortVariableName ) */
-	public function display() { // phpcs:ignore
+	public function display() {
 
 		// Preparing data for the partial.
 		$id          = str_replace( '_', '-', $this->name );
@@ -102,17 +95,17 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 		$value       = $this->value;
 		$type        = $this->type;
 		$placeholder = $this->placeholder;
-		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-input-setting.php';
-	}//end display()
+		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-content-input-setting.php';
+	}
 
 	// @Implements
-	public function sanitize( $input ) { // phpcs:ignore
+	public function sanitize( $input ) {
 
 		if ( ! isset( $input[ $this->name ] ) ) {
 			$input[ $this->name ] = $this->value;
-		}//end if
+		}
 
-		$value = $input[ $this->name ];
+		$value = is_string( $input[ $this->name ] ) ? $input[ $this->name ] : $this->value;
 		switch ( $this->type ) {
 			case 'text':
 				$value = $this->sanitize_text( $value );
@@ -126,12 +119,12 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 			case 'number':
 				$value = $this->sanitize_number( $value );
 				break;
-		}//end switch
+		}
 
 		$input[ $this->name ] = $value;
 
 		return $input;
-	}//end sanitize()
+	}
 
 	/**
 	 * This function sanitizes the input value.
@@ -142,11 +135,10 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 	 *
 	 * @see    sanitize_text_field
 	 * @since  1.0.0
-	 * @access private
 	 */
 	private function sanitize_text( $value ) {
 		return sanitize_text_field( wp_unslash( $value ) );
-	}//end sanitize_text()
+	}
 
 	/**
 	 * This function checks that the password is strong enough and sanitizes the value.
@@ -156,11 +148,10 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 	 * @return string The input text properly sanitized.
 	 *
 	 * @since  1.0.0
-	 * @access private
 	 */
 	private function sanitize_password( $value ) {
 		return $this->sanitize_text( $value );
-	}//end sanitize_password()
+	}
 
 	/**
 	 * This function checks that the input value is a number and converts it to an actual integer.
@@ -170,9 +161,8 @@ class Nelio_Content_Input_Setting extends Nelio_Content_Abstract_Setting {
 	 * @return int The input text converted into a number.
 	 *
 	 * @since  1.0.0
-	 * @access private
 	 */
 	private function sanitize_number( $value ) {
 		return intval( $value );
-	}//end sanitize_number()
-}//end class
+	}
+}

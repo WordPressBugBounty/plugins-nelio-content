@@ -4,40 +4,85 @@ namespace Nelio_Content\Zod;
 
 class StringSchema extends Schema {
 
+	/** @var int|null */
 	private $min;
+
+	/** @var int|null */
 	private $max;
+
+	/** @var string|null */
 	private $regex;
+
+	/** @var bool */
 	private $should_trim = false;
 
-	public static function make(): StringSchema {
+	/**
+	 * Creates a string schema.
+	 *
+	 * @return StringSchema
+	 */
+	public static function make() {
 		return new self();
-	}//end make()
+	}
 
-	public function min( int $min ): StringSchema {
+	/**
+	 * Sets the min length.
+	 *
+	 * @param int $min Min length.
+	 *
+	 * @return static
+	 */
+	public function min( $min ) {
 		$this->min = $min;
 		return $this;
-	}//end min()
+	}
 
-	public function max( int $max ): StringSchema {
+	/**
+	 * Sets the max length.
+	 *
+	 * @param int $max Max length.
+	 *
+	 * @return static
+	 */
+	public function max( $max ) {
 		$this->max = $max;
 		return $this;
-	}//end max()
+	}
 
-	public function length( int $length ): StringSchema {
+	/**
+	 * Sets the length.
+	 *
+	 * @param int $length Length.
+	 *
+	 * @return static
+	 */
+	public function length( $length ) {
 		$this->min = $length;
 		$this->max = $length;
 		return $this;
-	}//end length()
+	}
 
-	public function regex( string $regex ): StringSchema {
+	/**
+	 * Sets the regex.
+	 *
+	 * @param string $regex Regular expression.
+	 *
+	 * @return static
+	 */
+	public function regex( $regex ) {
 		$this->regex = $regex;
 		return $this;
-	}//end regex()
+	}
 
-	public function trim(): StringSchema {
+	/**
+	 * Sets the schema to trim string after successful parsing.
+	 *
+	 * @return static
+	 */
+	public function trim() {
 		$this->should_trim = true;
 		return $this;
-	}//end trim()
+	}
 
 	public function parse_value( $value ) {
 		if ( ! is_string( $value ) ) {
@@ -47,11 +92,11 @@ class StringSchema extends Schema {
 					esc_html( gettype( $value ) )
 				)
 			);
-		}//end if
+		}
 
 		if ( $this->should_trim ) {
 			$value = trim( $value );
-		}//end if
+		}
 
 		if (
 			! is_null( $this->min ) &&
@@ -65,27 +110,27 @@ class StringSchema extends Schema {
 					esc_html( (string) mb_strlen( $value ) )
 				)
 			);
-		}//end if
+		}
 
 		if ( ! is_null( $this->min ) && mb_strlen( $value ) < $this->min ) {
 			throw new \Exception(
 				sprintf(
 					'Expected a string with length greater than or equal to %1$s, but string is %2$s characters long.',
-					esc_html( $this->min ),
+					esc_html( "$this->min" ),
 					esc_html( (string) mb_strlen( $value ) )
 				)
 			);
-		}//end if
+		}
 
 		if ( ! is_null( $this->max ) && $this->max < mb_strlen( $value ) ) {
 			throw new \Exception(
 				sprintf(
 					'Expected a string with length less than or equal to %1$s, but string is %2$s characters long.',
-					esc_html( $this->max ),
+					esc_html( "$this->max" ),
 					esc_html( (string) mb_strlen( $value ) )
 				)
 			);
-		}//end if
+		}
 
 		if ( ! is_null( $this->regex ) && 1 !== preg_match( $this->regex, $value ) ) {
 			throw new \Exception(
@@ -94,8 +139,8 @@ class StringSchema extends Schema {
 					esc_html( $this->regex )
 				)
 			);
-		}//end if
+		}
 
 		return $value;
-	}//end parse_value()
-}//end class
+	}
+}

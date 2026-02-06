@@ -32,7 +32,6 @@ return array(
     'Nelio_Content_Auto_Sharer' => $baseDir . '/includes/utils/class-nelio-content-auto-sharer.php',
     'Nelio_Content_Board_Page' => $baseDir . '/admin/pages/class-nelio-content-board-page.php',
     'Nelio_Content_Calendar_Page' => $baseDir . '/admin/pages/class-nelio-content-calendar-page.php',
-    'Nelio_Content_Checkbox_Set_Setting' => $baseDir . '/includes/lib/settings/class-nelio-content-checkbox-set-setting.php',
     'Nelio_Content_Checkbox_Setting' => $baseDir . '/includes/lib/settings/class-nelio-content-checkbox-setting.php',
     'Nelio_Content_Classic_Editor' => $baseDir . '/admin/editors/class-nelio-content-classic-editor.php',
     'Nelio_Content_Cloud' => $baseDir . '/includes/utils/class-nelio-content-cloud.php',
@@ -53,6 +52,7 @@ return array(
     'Nelio_Content_Input_Setting' => $baseDir . '/includes/lib/settings/class-nelio-content-input-setting.php',
     'Nelio_Content_Install' => $baseDir . '/includes/utils/class-nelio-content-install.php',
     'Nelio_Content_Internal_Events_REST_Controller' => $baseDir . '/includes/rest/class-nelio-content-internal-events-rest-controller.php',
+    'Nelio_Content_Link_Shortener_Setting' => $baseDir . '/admin/settings/class-nelio-content-link-shortener-setting.php',
     'Nelio_Content_Meta_Tags' => $baseDir . '/public/class-nelio-content-meta-tags.php',
     'Nelio_Content_Missed_Schedule_Handler' => $baseDir . '/includes/utils/class-nelio-content-missed-schedule-handler.php',
     'Nelio_Content_Notifications' => $baseDir . '/includes/utils/class-nelio-content-notifications.php',
@@ -89,4 +89,5 @@ return array(
     'Nelio_Content_Task_Presets_REST_Controller' => $baseDir . '/includes/post-types/task-presets/class-nelio-content-task-presets-rest-controller.php',
     'Nelio_Content_Text_Area_Setting' => $baseDir . '/includes/lib/settings/class-nelio-content-text-area-setting.php',
     'Nelio_Content_Welcome_Page' => $baseDir . '/admin/pages/class-nelio-content-welcome-page.php',
+    'Nelio_Content_Wizard_Page' => $baseDir . '/admin/pages/class-nelio-content-wizard-page.php',
 );

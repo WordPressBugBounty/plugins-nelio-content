@@ -1,14 +1,12 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 return array(
 
 	array(
 		'type'     => 'custom',
 		'name'     => 'task_post_types',
-		'label'    => nc_make_settings_title( esc_html_x( 'Editorial Tasks', 'text', 'nelio-content' ), 'flag' ),
+		'label'    => nelio_content_make_settings_title( esc_html_x( 'Editorial Tasks', 'text', 'nelio-content' ), 'flag' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(
 			array(
 				'name' => 'task_post_types',
@@ -33,7 +31,7 @@ return array(
 	array(
 		'type'     => 'custom',
 		'name'     => 'comment_post_types',
-		'label'    => nc_make_settings_title( esc_html_x( 'Editorial Comments', 'text', 'nelio-content' ), 'admin-comments' ),
+		'label'    => nelio_content_make_settings_title( esc_html_x( 'Editorial Comments', 'text', 'nelio-content' ), 'admin-comments' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(
 			array(
 				'name' => 'comment_post_types',
@@ -58,7 +56,7 @@ return array(
 	array(
 		'type'     => 'custom',
 		'name'     => 'quality_check_post_types',
-		'label'    => nc_make_settings_title( esc_html_x( 'Quality Checks', 'text', 'nelio-content' ), 'saved' ),
+		'label'    => nelio_content_make_settings_title( esc_html_x( 'Quality Checks', 'text', 'nelio-content' ), 'saved' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(
 			array(
 				'name' => 'quality_check_post_types',
@@ -75,7 +73,7 @@ return array(
 	array(
 		'type'     => 'custom',
 		'name'     => 'future_action_post_types',
-		'label'    => nc_make_settings_title( esc_html_x( 'Future Actions', 'text', 'nelio-content' ), 'admin-tools' ),
+		'label'    => nelio_content_make_settings_title( esc_html_x( 'Future Actions', 'text', 'nelio-content' ), 'admin-tools' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(
 			array(
 				'name' => 'future_action_post_types',
@@ -92,7 +90,7 @@ return array(
 	array(
 		'type'     => 'custom',
 		'name'     => 'duplicate_post_types',
-		'label'    => nc_make_settings_title( esc_html_x( 'Duplicate', 'text', 'nelio-content' ), 'welcome-add-page' ),
+		'label'    => nelio_content_make_settings_title( esc_html_x( 'Duplicate', 'text', 'nelio-content' ), 'welcome-add-page' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(
 			array(
 				'name' => 'duplicate_post_types',
@@ -109,7 +107,7 @@ return array(
 	array(
 		'type'     => 'custom',
 		'name'     => 'rewrite_post_types',
-		'label'    => nc_make_settings_title( esc_html_x( 'Rewrite & Republish', 'text', 'nelio-content' ), 'update' ),
+		'label'    => nelio_content_make_settings_title( esc_html_x( 'Rewrite & Republish', 'text', 'nelio-content' ), 'update' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(
 			array(
 				'name' => 'rewrite_post_types',
@@ -126,7 +124,7 @@ return array(
 	array(
 		'type'     => 'custom',
 		'name'     => 'series_post_types',
-		'label'    => nc_make_settings_title( esc_html_x( 'Series', 'text', 'nelio-content' ), 'book' ),
+		'label'    => nelio_content_make_settings_title( esc_html_x( 'Series', 'text', 'nelio-content' ), 'book' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(
 			array(
 				'name' => 'series_post_types',
@@ -143,7 +141,7 @@ return array(
 	array(
 		'type'     => 'custom',
 		'name'     => 'reference_post_types',
-		'label'    => nc_make_settings_title( esc_html_x( 'Editorial References', 'text', 'nelio-content' ), 'admin-links' ),
+		'label'    => nelio_content_make_settings_title( esc_html_x( 'Editorial References', 'text', 'nelio-content' ), 'admin-links' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(
 			array(
 				'name' => 'reference_post_types',
@@ -160,7 +158,7 @@ return array(
 	array(
 		'type'     => 'custom',
 		'name'     => 'notification_post_types',
-		'label'    => nc_make_settings_title( esc_html_x( 'Notification Emails', 'text', 'nelio-content' ), 'email' ),
+		'label'    => nelio_content_make_settings_title( esc_html_x( 'Notification Emails', 'text', 'nelio-content' ), 'email' ),
 		'instance' => new Nelio_Content_Post_Type_Setting(
 			array(
 				'name' => 'notification_post_types',

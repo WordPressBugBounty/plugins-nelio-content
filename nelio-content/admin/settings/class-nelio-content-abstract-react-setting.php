@@ -8,9 +8,7 @@
  * @since      2.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Helper class to add react-based components.
@@ -22,25 +20,56 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 abstract class Nelio_Content_Abstract_React_Setting extends Nelio_Content_Abstract_Setting {
 
+	/**
+	 * Value.
+	 *
+	 * @var mixed
+	 */
 	protected $value;
+
+	/**
+	 * JS component.
+	 *
+	 * @var string
+	 */
 	protected $component;
 
+	/**
+	 * Creates a new instance of this class.
+	 *
+	 * @param string $name      Field name.
+	 * @param string $component JS component.
+	 *
+	 * @return void
+	 */
 	public function __construct( $name, $component ) {
 		parent::__construct( $name );
 		$this->component = $component;
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-	}//end __construct()
+	}
 
+	/**
+	 * Sets value.
+	 *
+	 * @param mixed $value Value.
+	 *
+	 * @return void
+	 */
 	public function set_value( $value ) {
 		$this->value = $value;
-	}//end set_value()
+	}
 
+	/**
+	 * Callback to enqueue assets.
+	 *
+	 * @return void
+	 */
 	public function enqueue_assets() {
 
 		$screen = get_current_screen();
-		if ( 'nelio-content_page_nelio-content-settings' !== $screen->id ) {
+		if ( empty( $screen ) || 'nelio-content_page_nelio-content-settings' !== $screen->id ) {
 			return;
-		}//end if
+		}
 
 		$settings = array(
 			'component'  => $this->component,
@@ -53,10 +82,10 @@ abstract class Nelio_Content_Abstract_React_Setting extends Nelio_Content_Abstra
 		wp_enqueue_style(
 			'nelio-content-settings-page',
 			nelio_content()->plugin_url . '/assets/dist/css/settings-page.css',
-			array( 'nelio-content-components' ),
-			nc_get_script_version( 'settings-page' )
+			array( 'nelio-content-components', 'nelio-content-social-profiles-manager' ),
+			nelio_content_get_script_version( 'settings-page' )
 		);
-		nc_enqueue_script_with_auto_deps( 'nelio-content-settings-page', 'settings-page', true );
+		nelio_content_enqueue_script_with_auto_deps( 'nelio-content-settings-page', 'settings-page', true );
 
 		wp_add_inline_script(
 			'nelio-content-settings-page',
@@ -66,19 +95,28 @@ abstract class Nelio_Content_Abstract_React_Setting extends Nelio_Content_Abstra
 				wp_json_encode( $settings )
 			)
 		);
-	}//end enqueue_assets()
+	}
 
 	// @Implements
-	// phpcs:ignore
 	public function display() {
 		printf( '<div id="%s"></div>', esc_attr( $this->get_field_id() ) );
-	}//end display()
+	}
 
+	/**
+	 * Gets field ID.
+	 *
+	 * @return string
+	 */
 	private function get_field_id() {
 		return str_replace( '_', '-', $this->name );
-	}//end get_field_id()
+	}
 
+	/**
+	 * Gets field attributes.
+	 *
+	 * @return array<string,mixed>
+	 */
 	protected function get_field_attributes() {
 		return array();
-	}//end get_field_attributes()
-}//end class
+	}
+}

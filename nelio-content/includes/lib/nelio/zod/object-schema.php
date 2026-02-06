@@ -4,34 +4,52 @@ namespace Nelio_Content\Zod;
 
 class ObjectSchema extends Schema {
 
+	/** @var array<string,Schema> */
 	protected array $schema;
 
-	public static function make( array $schema ): ObjectSchema {
+	/**
+	 * Creates an object schema.
+	 *
+	 * @param array<string,Schema> $schema Schema definition.
+	 *
+	 * @return ObjectSchema
+	 */
+	public static function make( $schema ) {
 		$instance         = new self();
 		$instance->schema = $schema;
 		return $instance;
-	}//end make()
+	}
 
-	public function partial(): ObjectSchema {
+	/**
+	 * Sets all keys in the schema as optional.
+	 *
+	 * @return static
+	 */
+	public function partial() {
 		$this->schema = array_map(
 			fn( $s ) => $s->optional(),
 			$this->schema
 		);
 		return $this;
-	}//end partial()
+	}
 
-	public function required(): ObjectSchema {
+	/**
+	 * Sets all keys in the schema as required.
+	 *
+	 * @return static
+	 */
+	public function required() {
 		$this->schema = array_map(
 			fn( $s ) => $s->required(),
 			$this->schema
 		);
 		return $this;
-	}//end required()
+	}
 
 	public function parse_value( $value ) {
 		if ( is_object( $value ) ) {
 			$value = get_object_vars( $value );
-		}//end if
+		}
 
 		if ( ! is_array( $value ) ) {
 			throw new \Exception(
@@ -40,7 +58,7 @@ class ObjectSchema extends Schema {
 					esc_html( gettype( $value ) )
 				)
 			);
-		}//end if
+		}
 
 		$result = array();
 		foreach ( $this->schema as $prop => $schema ) {
@@ -48,8 +66,8 @@ class ObjectSchema extends Schema {
 				$result[ $prop ] = $schema->parse( isset( $value[ $prop ] ) ? $value[ $prop ] : null );
 			} catch ( \Exception $e ) {
 				throw new \Exception( esc_html( $this->add_path( $e->getMessage(), "{$prop}" ) ) );
-			}//end try
-		}//end foreach
+			}
+		}
 		return array_filter( $result, fn( $p ) => ! is_null( $p ) );
-	}//end parse_value()
-}//end class
+	}
+}

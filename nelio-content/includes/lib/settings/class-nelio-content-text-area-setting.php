@@ -8,9 +8,7 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class represents a text area setting.
@@ -26,7 +24,6 @@ class Nelio_Content_Text_Area_Setting extends Nelio_Content_Abstract_Setting {
 	 * The concrete value of this field.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $value;
@@ -35,7 +32,6 @@ class Nelio_Content_Text_Area_Setting extends Nelio_Content_Abstract_Setting {
 	 * A placeholder text to be displayed when the field is empty.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $placeholder;
@@ -49,12 +45,11 @@ class Nelio_Content_Text_Area_Setting extends Nelio_Content_Abstract_Setting {
 	 * @param string $placeholder A placeholder text to be displayed when the field is empty.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function __construct( $name, $desc, $more, $placeholder = '' ) {
 		parent::__construct( $name, $desc, $more );
 		$this->placeholder = $placeholder;
-	}//end __construct()
+	}
 
 	/**
 	 * Sets the value of this field to the given string.
@@ -62,15 +57,14 @@ class Nelio_Content_Text_Area_Setting extends Nelio_Content_Abstract_Setting {
 	 * @param string $value The value of this field.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_value( $value ) {
 		$this->value = $value;
-	}//end set_value()
+	}
 
 	// @Implements
 	/** . @SuppressWarnings( PHPMD.UnusedLocalVariable, PHPMD.ShortVariableName ) */
-	public function display() { // phpcs:ignore
+	public function display() {
 
 		// Preparing data for the partial.
 		$id          = str_replace( '_', '-', $this->name );
@@ -79,21 +73,22 @@ class Nelio_Content_Text_Area_Setting extends Nelio_Content_Abstract_Setting {
 		$more        = $this->more;
 		$value       = $this->value;
 		$placeholder = $this->placeholder;
-		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-textarea-setting.php';
-	}//end display()
+		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-content-textarea-setting.php';
+	}
 
 	// @Implements
-	public function sanitize( $input ) { // phpcs:ignore
+	public function sanitize( $input ) {
 
 		if ( ! isset( $input[ $this->name ] ) ) {
 			$input[ $this->name ] = $this->value;
-		}//end if
+		}
 
-		$value                = $this->sanitize_text( $input[ $this->name ] );
+		$value                = is_string( $input[ $this->name ] ) ? $input[ $this->name ] : $this->value;
+		$value                = $this->sanitize_text( $value );
 		$input[ $this->name ] = $value;
 
 		return $input;
-	}//end sanitize()
+	}
 
 	/**
 	 * This function sanitizes the input value.
@@ -104,9 +99,8 @@ class Nelio_Content_Text_Area_Setting extends Nelio_Content_Abstract_Setting {
 	 *
 	 * @see    sanitize_text_field
 	 * @since  1.0.0
-	 * @access private
 	 */
 	private function sanitize_text( $value ) {
 		return sanitize_textarea_field( wp_unslash( $value ) );
-	}//end sanitize_text()
-}//end class
+	}
+}

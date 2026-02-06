@@ -8,9 +8,7 @@
  * @since      2.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class implements calendar-related helper functions.
@@ -38,38 +36,59 @@ class Nelio_Content_Ics_Calendar {
 	 */
 	public $total_weeks = 6;
 
+	/**
+	 * This instance.
+	 *
+	 * @var Nelio_Content_Ics_Calendar|null
+	 */
 	protected static $instance;
 
+	/**
+	 * Returns this instance.
+	 *
+	 * @return Nelio_Content_Ics_Calendar
+	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 
 		add_action( 'init', array( $this, 'do_init' ) );
-	}//end init()
+	}
 
+	/**
+	 * Adds more hooks on init.
+	 *
+	 * @return void
+	 */
 	public function do_init() {
 
 		$settings = Nelio_Content_Settings::instance();
 		if ( ! $settings->get( 'use_ics_subscription' ) ) {
 			return;
-		}//end if
+		}
 
 		add_action( 'wp_ajax_nelio_content_calendar_ics_subscription', array( $this, 'handle_ics_subscription' ) );
 		add_action( 'wp_ajax_nopriv_nelio_content_calendar_ics_subscription', array( $this, 'handle_ics_subscription' ) );
-	}//end do_init()
+	}
 
 	/**
 	 * After checking that the request is valid, do an .ics file.
 	 *
+	 * @return void
+	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public function handle_ics_subscription() {
 
@@ -77,34 +96,37 @@ class Nelio_Content_Ics_Calendar {
 		$settings = Nelio_Content_Settings::instance();
 		if ( ! $settings->get( 'use_ics_subscription' ) ) {
 			wp_die( esc_html__( 'Invalid request', 'nelio-content' ) );
-		}//end if
+		}
 
 		// Confirm all of the arguments are present.
-		if ( ! isset( $_GET['key'] ) ) { // phpcs:ignore
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['key'] ) ) {
 			wp_die( esc_html__( 'Invalid request', 'nelio-content' ) );
-		}//end if
+		}
 
 		$post_query_args = array();
 
-		if ( isset( $_GET['user'] ) ) { // phpcs:ignore
-
-			$username = sanitize_user( wp_unslash( $_GET['user'] ) ); // phpcs:ignore
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['user'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$username = sanitize_user( wp_unslash( $_GET['user'] ) );
 			$user     = get_user_by( 'login', $username );
 			if ( $user ) {
 				$post_query_args['author'] = $user->ID;
 			} else {
 				wp_die( esc_html__( 'Invalid request', 'nelio-content' ) );
-			}//end if
+			}
 		} else {
 			$username = 'all';
-		}//end if
+		}
 
 		// Confirm this is a valid request.
-		$key            = sanitize_user( wp_unslash( $_GET['key'] ) ); // phpcs:ignore
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$key            = sanitize_user( wp_unslash( $_GET['key'] ) );
 		$ics_secret_key = get_option( 'nc_ics_key', false );
 		if ( ! $ics_secret_key || md5( $username . $ics_secret_key ) !== $key ) {
 			wp_die( esc_html__( 'Invalid request', 'nelio-content' ) );
-		}//end if
+		}
 
 		/**
 		 * Filters the date of the first day of the current week.
@@ -139,14 +161,16 @@ class Nelio_Content_Ics_Calendar {
 			foreach ( $week_posts as $day_posts ) {
 				foreach ( $day_posts as $post ) {
 
-					$start_date    = gmdate( 'Ymd', strtotime( $post->post_date_gmt ) ) . 'T' . gmdate( 'His', strtotime( $post->post_date_gmt ) ) . 'Z';
-					$end_date      = gmdate( 'Ymd', strtotime( $post->post_date_gmt ) + ( 5 * 60 ) ) . 'T' . gmdate( 'His', strtotime( $post->post_date_gmt ) + ( 5 * 60 ) ) . 'Z';
-					$last_modified = gmdate( 'Ymd', strtotime( $post->post_modified_gmt ) ) . 'T' . gmdate( 'His', strtotime( $post->post_modified_gmt ) ) . 'Z';
+					/** @var string $title */
+					$title         = apply_filters( 'the_title', $post->post_title, $post->ID ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+					$start_date    = gmdate( 'Ymd', $this->strtotime( $post->post_date_gmt ) ) . 'T' . gmdate( 'His', $this->strtotime( $post->post_date_gmt ) ) . 'Z';
+					$end_date      = gmdate( 'Ymd', $this->strtotime( $post->post_date_gmt ) + ( 5 * 60 ) ) . 'T' . gmdate( 'His', $this->strtotime( $post->post_date_gmt ) + ( 5 * 60 ) ) . 'Z';
+					$last_modified = gmdate( 'Ymd', $this->strtotime( $post->post_modified_gmt ) ) . 'T' . gmdate( 'His', $this->strtotime( $post->post_modified_gmt ) ) . 'Z';
 
 					$formatted_post = array(
 						'BEGIN'         => 'VEVENT',
 						'UID'           => $post->guid,
-						'SUMMARY'       => apply_filters( 'the_title', $post->post_title, $post->ID ) . ' - ' . $this->get_friendly_post_status( $post->ID ),
+						'SUMMARY'       => $title . ' - ' . $this->get_friendly_post_status( $post->ID ),
 						'DTSTAMP'       => $start_date,
 						'DTSTART'       => $start_date,
 						'DTEND'         => $end_date,
@@ -160,17 +184,17 @@ class Nelio_Content_Ics_Calendar {
 					if ( ! empty( $information_fields ) ) {
 						foreach ( $information_fields as $key => $values ) {
 							$formatted_post['DESCRIPTION'] .= $values['label'] . ': ' . $values['value'] . '\n';
-						}//end foreach
+						}
 						$formatted_post['DESCRIPTION'] = rtrim( $formatted_post['DESCRIPTION'] );
-					}//end if
+					}
 
 					$formatted_post['END'] = 'VEVENT';
 
 					$formatted_posts[] = $formatted_post;
 
-				}//end foreach
-			}//end foreach
-		}//end for
+				}
+			}
+		}
 
 		// Other template data.
 		$header = array(
@@ -195,13 +219,13 @@ class Nelio_Content_Ics_Calendar {
 
 					foreach ( $value as $k => $v ) {
 						$this->print_ics_line_folding( $k . ':' . $v );
-					}//end foreach
-				}//end if
-			}//end foreach
-		}//end foreach
+					}
+				}
+			}
+		}
 
 		die();
-	}//end handle_ics_subscription()
+	}
 
 	/**
 	 * Given a day in string format, returns the day at the beginning of that
@@ -215,21 +239,20 @@ class Nelio_Content_Ics_Calendar {
 	 * @param string $format Date format in which the end of the week should be returned.
 	 * @param int    $week Number of weeks we're offsetting the range.
 	 *
-	 * @return string $formatted_start_of_week End of the week
+	 * @return string $formatted_start_of_week
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public function get_beginning_of_week( $date, $format = 'Y-m-d', $week = 1 ) {
 
-		$date                    = strtotime( $date );
-		$start_of_week           = get_option( 'start_of_week' );
-		$day_of_week             = gmdate( 'w', $date );
+		$date                    = $this->strtotime( $date );
+		$start_of_week           = absint( get_option( 'start_of_week' ) );
+		$day_of_week             = absint( gmdate( 'w', $date ) );
 		$date                   += ( ( $start_of_week - $day_of_week - 7 ) % 7 ) * 60 * 60 * 24 * $week;
 		$additional              = 3600 * 24 * 7 * ( $week - 1 );
 		$formatted_start_of_week = gmdate( $format, $date + $additional );
 		return $formatted_start_of_week;
-	}//end get_beginning_of_week()
+	}
 
 	/**
 	 * Given a day in string format, returns the day at the end of that week,
@@ -242,38 +265,39 @@ class Nelio_Content_Ics_Calendar {
 	 * @param string $format Date format in which the end of the week should be returned.
 	 * @param int    $week Number of weeks we're offsetting the range.
 	 *
-	 * @return string End of the week
+	 * @return string
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public function get_ending_of_week( $date, $format = 'Y-m-d', $week = 1 ) {
 
-		$date                  = strtotime( $date );
+		$date                  = $this->strtotime( $date );
 		$date                  = empty( $date ) ? time() : $date;
-		$end_of_week           = get_option( 'start_of_week' ) - 1;
+		$end_of_week           = absint( get_option( 'start_of_week' ) ) - 1;
 		$day_of_week           = absint( gmdate( 'w', $date ) );
 		$date                 += ( ( $end_of_week - $day_of_week + 7 ) % 7 ) * 60 * 60 * 24;
 		$additional            = 3600 * 24 * 7 * ( $week - 1 );
 		$formatted_end_of_week = gmdate( $format, $date + $additional );
 		return $formatted_end_of_week;
-	}//end get_ending_of_week()
+	}
 
 	/**
 	 * Perform line folding according to RFC 5545.
 	 *
 	 * @param string $line The line without trailing CRLF.
 	 *
+	 * @return void
+	 *
 	 * @since  2.0.0
-	 * @access private
 	 */
 	private function print_ics_line_folding( $line ) {
 
 		$len = mb_strlen( $line );
 		if ( $len <= 73 ) {
-			echo $line . "\r\n"; // phpcs:ignore
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo $line . "\r\n";
 			return;
-		}//end if
+		}
 
 		$chunks = array();
 		$start  = 0;
@@ -287,21 +311,21 @@ class Nelio_Content_Ics_Calendar {
 				$chunks[] = $chunk . "\r\n ";
 			} else {
 				$chunks[] = $chunk . "\r\n";
-				echo implode( '', $chunks ); // phpcs:ignore
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo implode( '', $chunks );
 				return;
-			}//end if
-		}//end while
-	}//end print_ics_line_folding()
+			}
+		}
+	}
 
 	/**
 	 * Perform the encoding necessary for ICS feed text.
 	 *
 	 * @param string $text The string that needs to be escaped.
 	 *
-	 * @return string The string after escaping for ICS.
+	 * @return string
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public function do_ics_escaping( $text ) {
 
@@ -310,17 +334,16 @@ class Nelio_Content_Ics_Calendar {
 		$text = str_replace( ';', '\:', $text );
 		$text = str_replace( '\\', '\\\\', $text );
 		return $text;
-	}//end do_ics_escaping()
+	}
 
 	/**
 	 * Query to get all of the calendar posts for a given day.
 	 *
-	 * @param array $args Any filter arguments we want to pass.
+	 * @param array<string,mixed> $args Any filter arguments we want to pass.
 	 *
-	 * @return array $posts All of the posts as an array sorted by date.
+	 * @return array<string,list<WP_Post>>
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	private function get_calendar_posts_for_week( $args = array() ) {
 
@@ -337,14 +360,14 @@ class Nelio_Content_Ics_Calendar {
 		// unset those arguments.
 		if ( ! isset( $args['cat'] ) || '0' === $args['cat'] ) {
 			unset( $args['cat'] );
-		}//end if
+		}
 		if ( '0' === $args['author'] ) {
 			unset( $args['author'] );
-		}//end if
+		}
 
 		if ( empty( $args['post_type'] ) || ! in_array( $args['post_type'], $supported_post_types, true ) ) {
 			$args['post_type'] = $supported_post_types;
-		}//end if
+		}
 
 		/**
 		 * Filters the arguments to retrieve the posts that should be shared in an ICS export.
@@ -361,26 +384,30 @@ class Nelio_Content_Ics_Calendar {
 		$posts = array();
 		while ( $post_results->have_posts() ) {
 			$post_results->the_post();
+			/** @var WP_Post|null $post */
 			global $post;
-			$key_date             = gmdate( 'Y-m-d', strtotime( $post->post_date ) );
+			if ( empty( $post ) ) {
+				continue;
+			}
+			$key_date             = gmdate( 'Y-m-d', $this->strtotime( $post->post_date ) );
 			$posts[ $key_date ][] = $post;
-		}//end while
+		}
 
 		return $posts;
-	}//end get_calendar_posts_for_week()
+	}
 
 	/**
 	 * Filter the WP_Query so we can get a week range of posts.
 	 *
 	 * @param string $where The original WHERE SQL query string.
 	 *
-	 * @return string Our modified WHERE query string.
+	 * @return string
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public function posts_where_week_range( $where = '' ) {
 
+		/** @var wpdb $wpdb */
 		global $wpdb;
 
 		$calendar_helper = self::instance();
@@ -388,21 +415,26 @@ class Nelio_Content_Ics_Calendar {
 		$beginning_date = $calendar_helper->get_beginning_of_week( $calendar_helper->start_date, 'Y-m-d', $calendar_helper->current_week );
 		$ending_date    = $calendar_helper->get_ending_of_week( $calendar_helper->start_date, 'Y-m-d', $calendar_helper->current_week );
 		// Adjust the ending date to account for the entire day of the last day of the week.
-		$ending_date = gmdate( 'Y-m-d', strtotime( '+1 day', strtotime( $ending_date ) ) );
-		$where       = $where . $wpdb->prepare( " AND ($wpdb->posts.post_date_gmt >= %s AND $wpdb->posts.post_date_gmt < %s)", $beginning_date, $ending_date );
+		$ending_date = gmdate( 'Y-m-d', $this->strtotime( '+1 day', $this->strtotime( $ending_date ) ) );
+		$extra       = $wpdb->prepare(
+			' AND (%i.post_date_gmt >= %s AND %i.post_date_gmt < %s)',
+			$wpdb->posts,
+			$beginning_date,
+			$wpdb->posts,
+			$ending_date
+		);
 
-		return $where;
-	}//end posts_where_week_range()
+		return $where . $extra;
+	}
 
 	/**
 	 * Get relevant fields of the post.
 	 *
 	 * @param WP_Post $post Post to gather relevant information fields for.
 	 *
-	 * @return array All of the information fields of the post.
+	 * @return array<string,array{label:string,value:int|string|false,type?:string,editable?:bool}>
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	private function get_post_information_fields( $post ) {
 
@@ -418,11 +450,12 @@ class Nelio_Content_Ics_Calendar {
 		// If the calendar supports more than one post type, show the post type label.
 		$supported_post_types = nelio_content_get_post_types( 'calendar' );
 		if ( count( $supported_post_types ) > 1 ) {
+			$post_type                       = get_post_type_object( $post->post_type );
 			$information_fields['post_type'] = array(
 				'label' => _x( 'Post Type', 'text', 'nelio-content' ),
-				'value' => get_post_type_object( $post->post_type )->labels->singular_name,
+				'value' => ! empty( $post_type ) && is_string( $post_type->labels->singular_name ) ? $post_type->labels->singular_name : $post->post_type,
 			);
-		}//end if
+		}
 
 		// Publication time for published statuses.
 		$published_statuses = array(
@@ -441,8 +474,8 @@ class Nelio_Content_Ics_Calendar {
 					'label' => _x( 'Published', 'text (post status)', 'nelio-content' ),
 					'value' => get_the_time( '', $post->ID ),
 				);
-			}//end if
-		}//end if
+			}
+		}
 
 		// Taxonomies and their values.
 		$args       = array(
@@ -453,12 +486,12 @@ class Nelio_Content_Ics_Calendar {
 			// Sometimes taxonomies skip by, so let's make sure it has a label too.
 			if ( ! $taxonomy->public || ! $taxonomy->label ) {
 				continue;
-			}//end if
+			}
 
 			$terms = get_the_terms( $post->ID, $taxonomy->name );
 			if ( empty( $terms ) || is_wp_error( $terms ) ) {
 				continue;
-			}//end if
+			}
 
 			$key   = 'tax_' . $taxonomy->name;
 			$value = implode( ', ', wp_list_pluck( $terms, 'name' ) );
@@ -468,7 +501,7 @@ class Nelio_Content_Ics_Calendar {
 				$type = 'taxonomy hierarchical';
 			} else {
 				$type = 'taxonomy';
-			}//end if
+			}
 
 			$information_fields[ $key ] = array(
 				'label' => $taxonomy->label,
@@ -480,12 +513,12 @@ class Nelio_Content_Ics_Calendar {
 				$ed_cap = 'edit_page';
 			} else {
 				$ed_cap = 'edit_post';
-			}//end if
+			}
 
 			if ( current_user_can( $ed_cap, $post->ID ) ) {
 				$information_fields[ $key ]['editable'] = true;
-			}//end if
-		}//end foreach
+			}
+		}
 
 		// View/preview links.
 		if ( 'publish' !== $post->post_status ) {
@@ -500,13 +533,13 @@ class Nelio_Content_Ics_Calendar {
 				'label' => _x( 'View', 'command', 'nelio-content' ),
 				'value' => $view_link,
 			);
-		}//end if
+		}
 
 		/**
 		 * Filters the fields of an item.
 		 *
-		 * @param array $fields  the fields of an item.
-		 * @param int   $post_id the ID of the post.
+		 * @param array<string,array{label:string,value:int|string|false,type?:string,editable?:bool}> $fields  the fields of an item.
+		 * @param int                                                                                  $post_id the ID of the post.
 		 *
 		 * @since 2.0.0
 		 */
@@ -536,15 +569,35 @@ class Nelio_Content_Ics_Calendar {
 
 			if ( $hide_field || ( $hide_empty_fields && empty( $values['value'] ) ) ) {
 				unset( $information_fields[ $field ] );
-			}//end if
-		}//end foreach
+			}
+		}
 
 		return $information_fields;
-	}//end get_post_information_fields()
+	}
 
+	/**
+	 * Gets friendly post status.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return string|false
+	 */
 	private function get_friendly_post_status( $post_id ) {
 		$statuses    = get_post_statuses();
 		$post_status = get_post_status( $post_id );
 		return isset( $statuses[ $post_status ] ) ? $statuses[ $post_status ] : $post_status;
-	}//end get_friendly_post_status()
-}//end class
+	}
+
+	/**
+	 * Wraps strtotime function to return `null` instead of `false`.
+	 *
+	 * @param string   $datetime       Datetime.
+	 * @param int|null $base_timestamp Base timestamp.
+	 *
+	 * @return int|null
+	 */
+	private function strtotime( $datetime, $base_timestamp = null ) {
+		$r = strtotime( $datetime, $base_timestamp );
+		return false !== $r ? $r : null;
+	}
+}

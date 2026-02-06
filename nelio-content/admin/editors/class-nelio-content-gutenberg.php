@@ -15,27 +15,47 @@ defined( 'ABSPATH' ) || exit;
  */
 class Nelio_Content_Gutenberg {
 
+	/**
+	 * This instance.
+	 *
+	 * @var Nelio_Content_Gutenberg|null
+	 */
 	protected static $instance;
 
+	/**
+	 * Returns this instance.
+	 *
+	 * @return Nelio_Content_Gutenberg
+	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 		add_action( 'rest_api_init', array( $this, 'register_custom_metas' ) );
-	}//end init()
+	}
 
+	/**
+	 * Callback to register “nelio_content” custom meta.
+	 *
+	 * @return void
+	 */
 	public function register_custom_metas() {
 
 		$post_types = nelio_content_get_post_types( 'editor' );
 		if ( empty( $post_types ) ) {
 			return;
-		}//end if
+		}
 
 		register_rest_field(
 			$post_types,
@@ -45,12 +65,27 @@ class Nelio_Content_Gutenberg {
 				'update_callback' => array( $this, 'save' ),
 			)
 		);
-	}//end register_custom_metas()
+	}
 
-	public function get_values( $object ) { // phpcs:ignore
-		return $this->load_values( $object['id'] );
-	}//end get_values()
+	/**
+	 * Callback to retrieve values.
+	 *
+	 * @param array{id:int} $data Data.
+	 *
+	 * @return array<string,mixed>
+	 */
+	public function get_values( $data ) {
+		return $this->load_values( $data['id'] );
+	}
 
+	/**
+	 * Callback to save new values.
+	 *
+	 * @param array<mixed>|null $values Values.
+	 * @param WP_Post           $post   Post.
+	 *
+	 * @return TNelio_Content_Custom_Meta
+	 */
 	public function save( $values, $post ) {
 		$values = $this->parse_values( $values, $post->ID );
 
@@ -67,44 +102,57 @@ class Nelio_Content_Gutenberg {
 		$post_helper->update_permalink_query_args( $post->ID, $values['permalinkQueryArgs'] );
 		$post_helper->update_network_image_ids( $post->ID, $values['networkImageIds'] );
 		$post_helper->update_series( $post->ID, $values['series'] );
-	}//end save()
 
+		return $values;
+	}
+
+	/**
+	 * Helper function to load post’s custom meta.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return TNelio_Content_Custom_Meta
+	 */
 	private function load_values( $post_id ) {
 		$post_helper = Nelio_Content_Post_Helper::instance();
 
 		$suggested = array_map(
-			function ( $reference ) {
-				return $reference['url'];
-			},
+			fn( $r ) => $r['url'],
 			$post_helper->get_references( $post_id, 'suggested' )
 		);
 
 		$efi_url = get_post_meta( $post_id, '_nelioefi_url', true );
-		$efi_url = ! empty( $efi_url ) ? $efi_url : '';
-
 		$efi_alt = get_post_meta( $post_id, '_nelioefi_alt', true );
-		$efi_alt = ! empty( $efi_alt ) ? $efi_alt : '';
-
 		return array(
-			'isAutoShareEnabled'  => $post_helper->is_auto_share_enabled( $post_id ),
 			'autoShareEndMode'    => $post_helper->get_auto_share_end_mode( $post_id ),
 			'automationSources'   => $post_helper->get_automation_sources( $post_id ),
-			'followers'           => $post_helper->get_post_followers( $post_id ),
-			'suggestedReferences' => $suggested,
-			'efiUrl'              => $efi_url,
 			'efiAlt'              => $efi_alt,
+			'efiUrl'              => $efi_url,
+			'followers'           => $post_helper->get_post_followers( $post_id ),
 			'highlights'          => $post_helper->get_post_highlights( $post_id ),
+			'isAutoShareEnabled'  => $post_helper->is_auto_share_enabled( $post_id ),
+			'networkImageIds'     => $post_helper->get_network_image_ids( $post_id ),
 			'permalinkQueryArgs'  => $post_helper->get_permalink_query_args( $post_id ),
 			'series'              => $post_helper->get_series( $post_id ),
+			'suggestedReferences' => $suggested,
 		);
-	}//end load_values()
+	}
 
+	/**
+	 * Helper function to parse values.
+	 *
+	 * @param array<mixed>|null $values  Values.
+	 * @param int               $post_id Post ID.
+	 *
+	 * @return TNelio_Content_Custom_Meta
+	 */
 	private function parse_values( $values, $post_id ) {
 		if ( ! is_array( $values ) ) {
 			$values = array();
-		}//end if
+		}
 
 		$defaults = $this->load_values( $post_id );
+		/** @var TNelio_Content_Custom_Meta */
 		return wp_parse_args( $values, $defaults );
-	}//end parse_values()
-}//end class
+	}
+}

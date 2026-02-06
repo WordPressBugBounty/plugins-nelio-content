@@ -15,6 +15,11 @@ defined( 'ABSPATH' ) || exit;
  */
 class Nelio_Content_Edit_Post_Page {
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_assets' ), 5 );
@@ -28,27 +33,37 @@ class Nelio_Content_Edit_Post_Page {
 		add_filter( 'mce_external_plugins', array( $this, 'maybe_add_mce_plugin' ) );
 		add_filter( 'mce_buttons', array( $this, 'add_mce_buttons' ) );
 		add_filter( 'tiny_mce_before_init', array( $this, 'add_mce_tags' ) );
-	}//end init()
+	}
 
+	/**
+	 * Callback to register editor assets.
+	 *
+	 * @return void
+	 */
 	public function register_assets() {
 
 		wp_register_style(
 			'nelio-content-edit-post',
 			nelio_content()->plugin_url . '/assets/dist/css/edit-post.css',
 			array( 'nelio-content-components' ),
-			nc_get_script_version( 'edit-post' )
+			nelio_content_get_script_version( 'edit-post' )
 		);
 
-		nc_register_script_with_auto_deps( 'nelio-content-edit-post', 'edit-post', true );
-		nc_register_script_with_auto_deps( 'nelio-content-gutenberg-editor', 'gutenberg-editor', true );
-		nc_register_script_with_auto_deps( 'nelio-content-classic-editor', 'classic-editor', true );
-	}//end register_assets()
+		nelio_content_register_script_with_auto_deps( 'nelio-content-edit-post', 'edit-post', true );
+		nelio_content_register_script_with_auto_deps( 'nelio-content-gutenberg-editor', 'gutenberg-editor', true );
+		nelio_content_register_script_with_auto_deps( 'nelio-content-classic-editor', 'classic-editor', true );
+	}
 
+	/**
+	 * Callback to enqueue gutenberg editor assets.
+	 *
+	 * @return void
+	 */
 	public function maybe_enqueue_gutenberg_assets() {
 
 		if ( ! $this->is_managed_post_type() ) {
 			return;
-		}//end if
+		}
 
 		$this->enqueue_edit_post_style();
 
@@ -57,9 +72,9 @@ class Nelio_Content_Edit_Post_Page {
 				'nelio-content-gutenberg-editor',
 				nelio_content()->plugin_url . '/assets/dist/css/gutenberg-editor.css',
 				array( 'nelio-content-edit-post' ),
-				nc_get_script_version( 'gutenberg-editor' )
+				nelio_content_get_script_version( 'gutenberg-editor' )
 			);
-		}//end if
+		}
 
 		wp_enqueue_script( 'nelio-content-gutenberg-editor' );
 		wp_add_inline_script(
@@ -69,17 +84,22 @@ class Nelio_Content_Edit_Post_Page {
 				wp_json_encode( $this->get_init_args() )
 			)
 		);
-	}//end maybe_enqueue_gutenberg_assets()
+	}
 
+	/**
+	 * Callback to enqueue classic editor assets.
+	 *
+	 * @return void
+	 */
 	public function maybe_enqueue_classic_editor_assets() {
 
 		if ( ! $this->is_classic_editor() ) {
 			return;
-		}//end if
+		}
 
 		if ( ! $this->is_managed_post_type() ) {
 			return;
-		}//end if
+		}
 
 		$this->enqueue_edit_post_style();
 
@@ -91,12 +111,17 @@ class Nelio_Content_Edit_Post_Page {
 				wp_json_encode( $this->get_init_args() )
 			)
 		);
-	}//end maybe_enqueue_classic_editor_assets()
+	}
 
+	/**
+	 * Callback to enqueue translations.
+	 *
+	 * @return void
+	 */
 	public function maybe_add_mce_translations() {
 		if ( ! $this->is_managed_post_type() ) {
 			return;
-		}//end if
+		}
 
 		$translations = array(
 			'pluginUrl'       => 'https://neliosoftware.com/content/',
@@ -113,36 +138,64 @@ class Nelio_Content_Edit_Post_Page {
 				wp_json_encode( $translations )
 			)
 		);
-	}//end maybe_add_mce_translations()
+	}
 
+	/**
+	 * Callback to add our tinymce plugin.
+	 *
+	 * @param array<string,string> $plugins Plugins.
+	 *
+	 * @return array<string,string>
+	 */
 	public function maybe_add_mce_plugin( $plugins ) {
 		if ( ! $this->is_managed_post_type() ) {
 			return $plugins;
-		}//end if
+		}
 
-		$asset = include nelio_content()->plugin_path . '/assets/dist/js/tinymce-actions.asset.php';
+		$asset   = include nelio_content()->plugin_path . '/assets/dist/js/tinymce-actions.asset.php';
+		$asset   = is_array( $asset ) ? $asset : array();
+		$version = ! empty( $asset['version'] ) && is_string( $asset['version'] ) ? $asset['version'] : nelio_content()->plugin_version;
 
 		$plugins['nelio_content'] = add_query_arg(
 			'version',
-			$asset['version'],
+			$version,
 			nelio_content()->plugin_url . '/assets/dist/js/tinymce-actions.js'
 		);
 
 		return $plugins;
-	}//end maybe_add_mce_plugin()
+	}
 
+	/**
+	 * Callback to add new buttons.
+	 *
+	 * @param list<string> $buttons Buttons.
+	 *
+	 * @return list<string>
+	 */
 	public function add_mce_buttons( $buttons ) {
 		$buttons[] = 'nelio_content';
 		return $buttons;
-	}//end add_mce_buttons()
+	}
 
+	/**
+	 * Callback to add MCE tags.
+	 *
+	 * @param array<string,string> $options Options.
+	 *
+	 * @return array<string,string>
+	 */
 	public function add_mce_tags( $options ) {
 		$append = function ( $arr, $key, $value, $sep = ',' ) {
+			/** @var array<string,string> $arr   */
+			/** @var string               $key   */
+			/** @var string               $value */
+			/** @var string               $sep   */
+
 			if ( ! isset( $arr[ $key ] ) || empty( $arr[ $key ] ) ) {
 				$arr[ $key ] = '';
 			} else {
 				$arr[ $key ] .= $sep;
-			}//end if
+			}
 			$arr[ $key ] .= $value;
 			return $arr;
 		};
@@ -154,27 +207,42 @@ class Nelio_Content_Edit_Post_Page {
 		$options = $append( $options, 'content_style', 'ncshare.nc-has-caret ncshare { background: transparent }', ' ' );
 
 		return $options;
-	}//end add_mce_tags()
+	}
 
+	/**
+	 * Whether we’re on the classic editor.
+	 *
+	 * @return bool
+	 */
 	private function is_classic_editor() {
 		if ( ! function_exists( 'get_current_screen' ) ) {
 			return false;
-		}//end if
+		}
 
 		$screen = get_current_screen();
-		if ( method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor() ) {
+		if ( empty( $screen ) || $screen->is_block_editor() ) {
 			return false;
-		}//end if
+		}
 
 		$post_type = $screen->id;
 		return in_array( $post_type, nelio_content_get_post_types( 'editor' ), true );
-	}//end is_classic_editor()
+	}
 
+	/**
+	 * Whether our plugin should work with this post type or not.
+	 *
+	 * @return bool
+	 */
 	private function is_managed_post_type() {
 		$post_type = get_post_type( $this->get_current_post_id() );
 		return in_array( $post_type, nelio_content_get_post_types( 'editor' ), true );
-	}//end is_managed_post_type()
+	}
 
+	/**
+	 * Callback to enqueue styles.
+	 *
+	 * @return void
+	 */
 	public function enqueue_edit_post_style() {
 		wp_enqueue_style( 'nelio-content-edit-post' );
 
@@ -186,21 +254,32 @@ class Nelio_Content_Edit_Post_Page {
 				nelio_content()->plugin_url . '/assets/dist/images/logo.svg'
 			)
 		);
-	}//end enqueue_edit_post_style()
+	}
 
+	/**
+	 * Callback to enqueue ncshare highlight styles.
+	 *
+	 * @return void
+	 */
 	public function maybe_enqueue_ncshare_highlight() {
 		if ( ! is_admin() ) {
 			return;
-		}//end if
+		}
 
-		wp_register_style( 'nelio-content-ncshare-highlight', false ); // phpcs:ignore
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_style( 'nelio-content-ncshare-highlight', false );
 		wp_enqueue_style( 'nelio-content-ncshare-highlight' );
 		wp_add_inline_style(
 			'nelio-content-ncshare-highlight',
 			'.rich-text ncshare { background: #ffa } .rich-text:focus ncshare[data-rich-text-format-boundary] { background: #fe0 }'
 		);
-	}//end maybe_enqueue_ncshare_highlight()
+	}
 
+	/**
+	 * Gets initial query args.
+	 *
+	 * @return TPost_Editor_Args
+	 */
 	public function get_init_args() {
 		$post_id     = $this->get_current_post_id();
 		$settings    = Nelio_Content_Settings::instance();
@@ -221,26 +300,39 @@ class Nelio_Content_Edit_Post_Page {
 					'isYoastIntegrated' => $this->is_yoast_integrated(),
 					'supportsFeatImage' => current_theme_supports( 'post-thumbnails' ),
 				),
-				'autoShareEndModes'      => nc_get_auto_share_end_modes(),
+				'autoShareEndModes'      => nelio_content_get_auto_share_end_modes(),
 				/** This filter is documented in includes/utils/class-nelio-content-post-saving.php */
-				'shouldAuthorBeFollower' => apply_filters( 'nelio_content_notification_auto_subscribe_post_author', true ),
+				'shouldAuthorBeFollower' => ! empty( apply_filters( 'nelio_content_notification_auto_subscribe_post_author', true ) ),
 			),
 		);
-	}//end get_init_args()
+	}
 
+	/**
+	 * Returns current post ID.
+	 *
+	 * @return int
+	 */
 	private function get_current_post_id() {
-		if ( isset( $_GET['post'] ) ) { //phpcs:ignore
-			return absint( $_GET['post'] ); //phpcs:ignore
-		}//end if
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['post'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return absint( $_GET['post'] );
+		}
 
+		/** @var WP_Post|null $post */
 		global $post;
 		if ( ! empty( $post ) ) {
 			return absint( $post->ID );
-		}//end if
+		}
 
 		return 0;
-	}//end get_current_post_id()
+	}
 
+	/**
+	 * Whether quality analysis is integrated in publish meta box (classic editor) or uses its own meta.
+	 *
+	 * @return bool
+	 */
 	private function is_quality_analysis_fully_integrated() {
 		/**
 		 * Returns whether the quality analysis should be fully integrated with WordPress or not,
@@ -248,36 +340,48 @@ class Nelio_Content_Edit_Post_Page {
 		 *
 		 * If it isn’t, Nelio Content will only use its own areas to display QA.
 		 *
-		 * @param $is_visible boolean whether the quality analysis is fully integrated with WP.
+		 * @param boolean $is_visible whether the quality analysis is fully integrated with WP.
 		 *                            Default: `true`.
 		 *
 		 * @since 2.0.0
 		 */
 		return apply_filters( 'nelio_content_is_quality_analysis_fully_integrated', true );
-	}//end is_quality_analysis_fully_integrated()
+	}
 
+	/**
+	 * Whether Yoast analysis is integrated into our own analysis.
+	 *
+	 * @return bool
+	 */
 	private function is_yoast_integrated() {
 		if (
 			! is_plugin_active( 'wordpress-seo/wp-seo.php' ) &&
 			! is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' )
 		) {
 			return false;
-		}//end if
+		}
 
 		/**
 		 * Whether Yoast should be integrated with Nelio Content’s quality analysis or not.
 		 *
-		 * @param $integrated boolean Default: true.
+		 * @param boolean $integrated Default: true.
 		 *
 		 * @since 2.0.0
 		 */
 		return apply_filters( 'nelio_content_is_yoast_integrated_in_quality_analysis', true );
-	}//end is_yoast_integrated()
+	}
 
+	/**
+	 * Gets external featured image.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return array{url:string, alt:string}
+	 */
 	private function get_external_featured_image( $post_id ) {
 		return array(
 			'url' => get_post_meta( $post_id, '_nelioefi_url', true ),
 			'alt' => get_post_meta( $post_id, '_nelioefi_alt', true ),
 		);
-	}//end get_external_featured_image()
-}//end class
+	}
+}

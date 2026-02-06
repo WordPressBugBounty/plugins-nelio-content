@@ -15,30 +15,35 @@ defined( 'ABSPATH' ) || exit;
  */
 class Nelio_Content_Install {
 
+	/**
+	 * This instance.
+	 *
+	 * @var Nelio_Content_Install|null
+	 */
 	protected static $instance;
 
 	/**
-	 * Returns the single instance of this class.
+	 * Returns this instance.
 	 *
-	 * @return Nelio_Content_Install the single instance of this class.
+	 * @return Nelio_Content_Install
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
 	/**
-	 * Hook in tabs.
+	 * Hooks into WordPress.
+	 *
+	 * @return void
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function init() {
 
@@ -48,32 +53,35 @@ class Nelio_Content_Install {
 		add_action( 'init', array( $this, 'allow_ncshare_tags' ) );
 		add_action( 'admin_init', array( $this, 'maybe_update' ), 5 );
 
-		add_action( 'nelio_content_installed', array( $this, 'notify_to_cloud' ), 10, 2 );
+		add_action( 'nelio_content_installed', array( $this, 'notify_to_cloud' ) );
 
 		add_action( 'nelio_content_installed', array( $this, 'update_to_nc2' ), 10, 2 );
 		add_action( 'nelio_content_updated', array( $this, 'update_to_nc2' ), 10, 2 );
 
 		add_action( 'nelio_content_installed', array( $this, 'update_to_nc3_6' ), 10, 2 );
 		add_action( 'nelio_content_updated', array( $this, 'update_to_nc3_6' ), 10, 2 );
-	}//end init()
+	}
 
 	/**
-	 * Adds the ncshare tag to the list of valid tags in post content.
+	 * Callback to add the ncshare tag to the list of valid tags in post content.
+	 *
+	 * @return void
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public function allow_ncshare_tags() {
-
+		/** @var array<string,array<string,true>> */
 		global $allowedposttags;
-		$allowedposttags['ncshare'] = array( 'class' => true ); // phpcs:ignore
-	}//end allow_ncshare_tags()
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$allowedposttags['ncshare'] = array( 'class' => true );
+	}
 
 	/**
-	 * Checks the currently-installed version and, if it's old, installs the new one.
+	 * Callback to check the currently-installed version and, if it's old, installs the new one.
+	 *
+	 * @return void
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public function maybe_update() {
 
@@ -81,7 +89,7 @@ class Nelio_Content_Install {
 		$this_version = nelio_content()->plugin_version;
 		if ( defined( 'IFRAME_REQUEST' ) || ( $last_version === $this_version ) ) {
 			return;
-		}//end if
+		}
 
 		$this->install();
 
@@ -91,21 +99,22 @@ class Nelio_Content_Install {
 		 * @since 1.0.0
 		 */
 		do_action( 'nelio_content_updated', $this_version, $last_version );
-	}//end maybe_update()
+	}
 
 	/**
-	 * Install Nelio Content.
+	 * Callback to install Nelio Content.
 	 *
 	 * This function registers new post types, adds a few capabilities, and more.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function install() {
 
 		if ( defined( 'NELIO_CONTENT_INSTALLING' ) ) {
 			return;
-		}//end if
+		}
 		define( 'NELIO_CONTENT_INSTALLING', true );
 
 		// Installation actions here.
@@ -119,47 +128,52 @@ class Nelio_Content_Install {
 		// Check if the user has social profiles.
 		update_option( 'nc_has_social_profiles', $this->has_social_profiles() );
 
-
 		/**
 		 * Fires once the plugin has been installed.
 		 *
 		 * @since 1.0.0
 		 */
 		do_action( 'nelio_content_installed', $this_version, $last_version );
-	}//end install()
+	}
 
+	/**
+	 * Whether we have social profiles or not.
+	 *
+	 * @return bool
+	 */
 	private function has_social_profiles() {
 
-		if ( ! nc_get_site_id() ) {
+		if ( ! nelio_content_get_site_id() ) {
 			return false;
-		}//end if
+		}
 
 		$data = array(
 			'method'    => 'GET',
-			'timeout'   => apply_filters( 'nelio_content_request_timeout', 30 ),
-			'sslverify' => ! nc_does_api_use_proxy(),
+			'timeout'   => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+			'sslverify' => ! nelio_content_does_api_use_proxy(),
 			'headers'   => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
 		);
 
-		$url      = nc_get_api_url( '/site/' . nc_get_site_id() . '/profiles', 'wp' );
+		$url      = nelio_content_get_api_url( '/site/' . nelio_content_get_site_id() . '/profiles', 'wp' );
 		$response = wp_remote_request( $url, $data );
-
-		if ( is_wp_error( $response ) ) {
+		$profiles = nelio_content_extract_response_body( $response );
+		if ( is_wp_error( $profiles ) ) {
 			return false;
-		}//end if
+		}
 
-		$profiles = array();
-		if ( ! empty( $response['body'] ) ) {
-			$profiles = json_decode( $response['body'] );
-		}//end if
-
+		/** @var list<TSocial_Profile> $profiles */
 		return count( $profiles ) > 0;
-	}//end has_social_profiles()
+	}
 
+	/**
+	 * Sets proper permissions.
+	 *
+	 * @return void
+	 */
 	private function set_proper_permissions() {
 
 		$contributor_caps = array(
@@ -197,8 +211,8 @@ class Nelio_Content_Install {
 		if ( $role ) {
 			foreach ( $editor_caps as $cap ) {
 				$role->add_cap( $cap );
-			}//end foreach
-		}//end if
+			}
+		}
 
 		if ( is_multisite() ) {
 			$super_admins = get_super_admins();
@@ -207,95 +221,121 @@ class Nelio_Content_Install {
 				if ( $user ) {
 					foreach ( $editor_caps as $cap ) {
 						$user->add_cap( $cap );
-					}//end foreach
-				}//end if
-			}//end foreach
-		}//end if
+					}
+				}
+			}
+		}
 
 		$role = get_role( 'editor' );
 		if ( $role ) {
 			foreach ( $editor_caps as $cap ) {
 				$role->add_cap( $cap );
-			}//end foreach
-		}//end if
+			}
+		}
 
 		$role = get_role( 'author' );
 		if ( $role ) {
 			foreach ( $author_caps as $cap ) {
 				$role->add_cap( $cap );
-			}//end foreach
-		}//end if
+			}
+		}
 
 		$role = get_role( 'contributor' );
 		if ( $role ) {
 			foreach ( $contributor_caps as $cap ) {
 				$role->add_cap( $cap );
-			}//end foreach
-		}//end if
-	}//end set_proper_permissions()
+			}
+		}
+	}
 
+	/**
+	 * Callback to notify cloud.
+	 *
+	 * @return void
+	 */
 	public function notify_to_cloud() {
-		if ( ! nc_get_site_id() ) {
-			return false;
-		}//end if
+		if ( ! nelio_content_get_site_id() ) {
+			return;
+		}
+
+		$body = wp_json_encode(
+			array(
+				'url'              => home_url(),
+				'timezone'         => nelio_content_get_timezone(),
+				'language'         => nelio_content_get_language(),
+				'isPluginInactive' => false,
+			)
+		);
+		assert( ! empty( $body ) );
 
 		$data = array(
 			'method'  => 'PUT',
-			'timeout' => apply_filters( 'nelio_content_request_timeout', 30 ),
+			'timeout' => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
 			'headers' => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
-			'body'    => wp_json_encode(
-				array(
-					'url'              => home_url(),
-					'timezone'         => nc_get_timezone(),
-					'language'         => nc_get_language(),
-					'isPluginInactive' => false,
-				)
-			),
+			'body'    => $body,
 		);
 
-		$url = nc_get_api_url( '/site/' . nc_get_site_id(), 'wp' );
+		$url = nelio_content_get_api_url( '/site/' . nelio_content_get_site_id(), 'wp' );
 		wp_remote_request( $url, $data );
-	}//end notify_to_cloud()
+	}
 
-	// phpcs:ignore
+	/** @var bool */
 	private $did_migrate_to_nc2 = false;
-	public function update_to_nc2( $_, $prev_version ) {
+
+	/**
+	 * Updates to Nelio Content 3.6.
+	 *
+	 * @param string $current_version Current version.
+	 * @param string $prev_version    Previous version.
+	 *
+	 * @return void
+	 */
+	public function update_to_nc2( $current_version, $prev_version ) {
 		if ( $this->did_migrate_to_nc2 ) {
 			return;
-		}//end if
+		}
 		$this->did_migrate_to_nc2 = true;
 
 		if (
 			! version_compare( $prev_version, '2.0', '<' ) ||
-			empty( nc_get_site_id() )
+			empty( nelio_content_get_site_id() )
 		) {
 			return;
-		}//end if
+		}
 
 		$this->migrate_post_statuses();
 		$this->update_auto_sharing_fields();
 	}//end update_to_nc2()
 
-	// phpcs:ignore
+	/** @var bool */
 	private $did_migrate_to_nc3_6 = false;
-	public function update_to_nc3_6( $_, $prev_version ) {
+
+	/**
+	 * Updates to Nelio Content 3.6.
+	 *
+	 * @param string $current_version Current version.
+	 * @param string $prev_version    Previous version.
+	 *
+	 * @return void
+	 */
+	public function update_to_nc3_6( $current_version, $prev_version ) {
 		if ( $this->did_migrate_to_nc3_6 ) {
 			return;
-		}//end if
+		}
 		$this->did_migrate_to_nc3_6 = true;
 
 		if (
 			! version_compare( $prev_version, '3.6', '<' ) ||
-			empty( nc_get_site_id() )
+			empty( nelio_content_get_site_id() )
 		) {
 			return;
-		}//end if
+		}
 
-		$options             = get_option( 'nelio-content_settings' );
+		$options             = $this->get_settings();
 		$calendar_post_types = empty( $options['calendar_post_types'] ) ? array( 'post' ) : $options['calendar_post_types'];
 		$options             = wp_parse_args(
 			$options,
@@ -321,45 +361,75 @@ class Nelio_Content_Install {
 		update_option( 'nelio-content_settings', $options );
 	}//end update_to_nc3_6()
 
+	/**
+	 * Migrates post statuses.
+	 *
+	 * @return void
+	 */
 	private function migrate_post_statuses() {
-
+		/** @var wpdb $wpdb */
 		global $wpdb;
-		$settings = Nelio_Content_Settings::instance();
-		$settings = get_option( $settings->get_name(), array() );
-		$types    = isset( $settings['calendar_post_types'] ) && ! empty( $settings['calendar_post_types'] )
-				? $settings['calendar_post_types']
-				: array( 'post' );
 
-		$escape_array = function ( $arr ) {
-			$values = array_map( 'esc_sql', $arr );
-			$values = array_values( array_filter( $values, fn( $v ) => is_string( $v ) ) );
-			return "'" . implode( "', '", $values ) . "'";
-		};
+		$settings = $this->get_settings();
+
+		/** @var non-empty-list<string> */
+		$types = ! empty( $settings['calendar_post_types'] ) ? $settings['calendar_post_types'] : array( 'post' );
 
 		$query = sprintf(
 			"UPDATE %s SET post_status = 'draft' WHERE post_type IN (%s) AND post_status IN (%s)",
 			$wpdb->posts,
-			$escape_array( $types ),
-			$escape_array( array( 'idea', 'assigned', 'in-progress' ) )
+			$this->escape_array( $types ),
+			$this->escape_array( array( 'idea', 'assigned', 'in-progress' ) )
 		);
 
-		$wpdb->query( $query ); // phpcs:ignore
-	}//end migrate_post_statuses()
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$wpdb->query( $query );
+	}
 
+	/**
+	 * Updates auto sharing fields.
+	 *
+	 * @return void
+	 */
 	private function update_auto_sharing_fields() {
-
+		/** @var wpdb $wpdb */
 		global $wpdb;
+
 		$query = "UPDATE {$wpdb->postmeta} SET meta_key = '_nc_exclude_from_auto_share' WHERE meta_key = '_nc_exclude_from_reshare'";
-		$wpdb->query( $query ); // phpcs:ignore
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query( $query );
 
 		$query = "UPDATE {$wpdb->postmeta} SET meta_key = '_nc_include_in_auto_share' WHERE meta_key = '_nc_include_in_reshare'";
-		$wpdb->query( $query ); // phpcs:ignore
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query( $query );
 
-		$settings = get_option( 'nelio-content_settings', false );
-		if ( ! empty( $settings ) && isset( $settings['auto_reshare_default_mode'] ) ) {
+		$settings = $this->get_settings();
+		if ( isset( $settings['auto_reshare_default_mode'] ) && is_string( $settings['auto_reshare_default_mode'] ) ) {
 			$settings['auto_share_default_mode'] = str_replace( 'reshare', 'auto-share', $settings['auto_reshare_default_mode'] );
 			unset( $settings['auto_reshare_default_mode'] );
 			update_option( 'nelio-content_settings', $settings );
-		}//end if
-	}//end update_auto_sharing_fields()
-}//end class
+		}
+	}
+
+	/**
+	 * Escapes array.
+	 *
+	 * @param non-empty-list<string> $arr Array.
+	 *
+	 * @return string
+	 */
+	private function escape_array( $arr ) {
+		$values = array_map( fn( $v ) => esc_sql( $v ), $arr );
+		return "'" . implode( "', '", $values ) . "'";
+	}
+
+	/**
+	 * Gets settings.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function get_settings() {
+		/** @var array<string,mixed> */
+		return get_option( 'nelio-content_settings', array() );
+	}
+}

@@ -15,46 +15,59 @@ use function Nelio_Content\Helpers\flow;
 class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 
 	/**
-	 * The single instance of this class.
+	 * This instance.
 	 *
 	 * @since  2.0.0
-	 * @access protected
 	 * @var    Nelio_Content_Generic_REST_Controller|null
 	 */
-	protected static $instance = null;
+	protected static $instance;
 
 	/**
-	 * Returns the single instance of this class.
+	 * Returns this instance.
 	 *
-	 * @return Nelio_Content_Generic_REST_Controller the single instance of this class.
+	 * @return Nelio_Content_Generic_REST_Controller
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
 	/**
 	 * Hooks into WordPress.
 	 *
+	 * @return void
+	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-	}//end init()
+	}
 
 	/**
 	 * Register the routes for the objects of the controller.
+	 *
+	 * @return void
 	 */
 	public function register_routes() {
+
+		register_rest_route(
+			nelio_content()->rest_namespace,
+			'/wizard/end',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'finish_wizard' ),
+					'permission_callback' => 'nelio_content_can_current_user_manage_plugin',
+				),
+			)
+		);
 
 		register_rest_route(
 			nelio_content()->rest_namespace,
@@ -63,7 +76,7 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'reset_auto_social_messages' ),
-					'permission_callback' => 'nc_can_current_user_manage_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_manage_plugin',
 				),
 			)
 		);
@@ -75,13 +88,13 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'pause_publication' ),
-					'permission_callback' => 'nc_can_current_user_manage_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_manage_plugin',
 					'args'                => array(
 						'paused' => array(
 							'required'          => true,
 							'type'              => 'boolean',
-							'validate_callback' => 'nc_can_be_bool',
-							'sanitize_callback' => 'nc_bool',
+							'validate_callback' => 'nelio_content_can_be_bool',
+							'sanitize_callback' => 'nelio_content_bool',
 						),
 					),
 				),
@@ -95,12 +108,12 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'run_new_comment_action' ),
-					'permission_callback' => 'nc_can_current_user_use_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
 					'args'                => array(
 						'authorId' => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'comment'  => array(
@@ -111,12 +124,12 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 						'date'     => array(
 							'required'          => true,
 							'type'              => 'date',
-							'validate_callback' => 'nc_is_datetime',
+							'validate_callback' => 'nelio_content_is_datetime',
 						),
 						'postId'   => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 					),
@@ -131,41 +144,41 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'run_update_task_action' ),
-					'permission_callback' => 'nc_can_current_user_use_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
 					'args'                => array(
 						'assigneeId' => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'assignerId' => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'completed'  => array(
 							'required'          => true,
 							'type'              => 'boolean',
-							'validate_callback' => 'nc_can_be_bool',
-							'sanitize_callback' => 'nc_bool',
+							'validate_callback' => 'nelio_content_can_be_bool',
+							'sanitize_callback' => 'nelio_content_bool',
 						),
 						'dateDue'    => array(
 							'required'          => true,
 							'type'              => 'date',
-							'validate_callback' => 'nc_is_datetime',
+							'validate_callback' => 'nelio_content_is_datetime',
 						),
 						'isNewTask'  => array(
 							'required'          => true,
 							'type'              => 'boolean',
-							'validate_callback' => 'nc_can_be_bool',
-							'sanitize_callback' => 'nc_bool',
+							'validate_callback' => 'nelio_content_can_be_bool',
+							'sanitize_callback' => 'nelio_content_bool',
 						),
 						'postId'     => array(
 							'required'          => false,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'task'       => array(
@@ -185,13 +198,13 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_profiles' ),
-					'permission_callback' => 'nc_can_current_user_manage_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_manage_plugin',
 					'args'                => array(
 						'profiles' => array(
 							'required'          => true,
 							'type'              => 'boolean',
-							'validate_callback' => 'nc_can_be_bool',
-							'sanitize_callback' => 'nc_bool',
+							'validate_callback' => 'nelio_content_can_be_bool',
+							'sanitize_callback' => 'nelio_content_bool',
 						),
 					),
 				),
@@ -210,7 +223,7 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 						'_nonce' => array(
 							'required'          => true,
 							'type'              => 'string',
-							'validate_callback' => flow( 'trim', 'nc_is_not_empty' ),
+							'validate_callback' => flow( 'trim', 'nelio_content_is_not_empty' ),
 							'sanitize_callback' => flow( 'sanitize_text_field', 'trim' ),
 						),
 					),
@@ -230,132 +243,176 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 						'_nonce' => array(
 							'required'          => true,
 							'type'              => 'string',
-							'validate_callback' => flow( 'trim', 'nc_is_not_empty' ),
+							'validate_callback' => flow( 'trim', 'nelio_content_is_not_empty' ),
 							'sanitize_callback' => flow( 'sanitize_text_field', 'trim' ),
 						),
 					),
 				),
 			)
 		);
-	}//end register_routes()
+	}
 
+	/**
+	 * Callback to check if user can deactivate plugin.
+	 *
+	 * @return bool
+	 */
 	public function check_if_user_can_deactivate_plugin() {
 		return current_user_can( 'deactivate_plugin', nelio_content()->plugin_file );
-	}//end check_if_user_can_deactivate_plugin()
+	}
+
+	/**
+	 * Finishes the wizard.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function finish_wizard() {
+		nelio_content()->finish_wizard();
+		return new WP_REST_Response( true, 200 );
+	}
 
 	/**
 	 * Pauses or resumes social publication.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response
 	 */
 	public function reset_auto_social_messages() {
 		$sharer = Nelio_Content_Auto_Sharer::instance();
 		$sharer->reset();
 		return new WP_REST_Response( true, 200 );
-	}//end reset_auto_social_messages()
+	}
 
 	/**
 	 * Pauses or resumes social publication.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{paused:bool}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response.
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function pause_publication( $request ) {
 
-		$is_paused = $request['paused'];
+		$is_paused = ! empty( $request['paused'] );
 
 		$body = array(
 			'url'                        => home_url(),
-			'timezone'                   => nc_get_timezone(),
-			'language'                   => nc_get_language(),
+			'timezone'                   => nelio_content_get_timezone(),
+			'language'                   => nelio_content_get_language(),
 			'isMessagePublicationPaused' => $is_paused,
 		);
 
 		if ( ! $is_paused ) {
 			$body['isPluginInactive'] = false;
-		}//end if
+		}
+
+		$body = wp_json_encode( $body );
+		assert( ! empty( $body ) );
 
 		// Note. Use error_logs for logging this function or you won't see anything.
 		$data = array(
 			'method'  => 'PUT',
-			'timeout' => apply_filters( 'nelio_content_request_timeout', 30 ),
+			'timeout' => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
 			'headers' => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
-			'body'    => wp_json_encode( $body ),
+			'body'    => $body,
 		);
 
-		$url    = nc_get_api_url( '/site/' . nc_get_site_id(), 'wp' );
-		$result = wp_remote_request( $url, $data );
+		$url      = nelio_content_get_api_url( '/site/' . nelio_content_get_site_id(), 'wp' );
+		$response = wp_remote_request( $url, $data );
+		$result   = nelio_content_extract_response_body( $response );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
 
-		// If the response is an error, leave.
-		$error = nc_extract_error_from_response( $result );
-		if ( ! empty( $error ) ) {
-			return $error;
-		}//end if
-
-		$result    = json_decode( $result['body'] );
-		$is_paused = $result->isMessagePublicationPaused; // phpcs:ignore
+		/** @var array{isMessagePublicationPaused:bool} $result */
+		$is_paused = ! empty( $result['isMessagePublicationPaused'] );
 
 		return new WP_REST_Response( $is_paused, 200 );
-	}//end pause_publication()
+	}
 
 	/**
 	 * Runs an action so that post followers can be notified when a new comment has been added to a post.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array<mixed>> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response
 	 */
 	public function run_new_comment_action( $request ) {
 
+		assert( is_string( $request['id'] ) );
+		assert( is_int( $request['authorId'] ) );
+		assert( is_string( $request['comment'] ) );
+		assert( is_string( $request['date'] ) );
+		assert( is_int( $request['postId'] ) );
+
 		$comment = array(
+			'id'      => $request['id'],
 			'author'  => $request['authorId'],
 			'comment' => $request['comment'],
 			'date'    => $request['date'],
 			'post'    => $request['postId'],
 		);
 
+		$key = 'nc_new_comment_notify_' . $request['id'];
+		if ( get_transient( $key ) ) {
+			return new WP_REST_Response( array( 'deduped' => true ), 200 );
+		}
+		set_transient( $key, 1, 1 * HOUR_IN_SECONDS );
+
 		/**
 		 * It runs when an editorial comment has been created.
 		 *
-		 * @param array $comment the comment.
-		 * @param int   $user    the user who created the comment.
+		 * @param array{id:string,author:int,comment:string,date:string,post:int} $comment the comment.
+		 * @param int                                                             $user    the user who created the comment.
 		 *
 		 * @since 2.0.0
 		 */
 		do_action( 'nelio_content_after_create_editorial_comment', $comment, get_current_user_id() );
 
 		return new WP_REST_Response( true, 200 );
-	}//end run_new_comment_action()
+	}
 
 	/**
 	 * Runs an action so that users related to a task can know it’s been created or updated.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array<mixed>> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response
 	 */
 	public function run_update_task_action( $request ) {
 
+		assert( is_string( $request['id'] ) );
+		assert( is_int( $request['assigneeId'] ) );
+		assert( is_int( $request['assignerId'] ) );
+		assert( is_string( $request['dateDue'] ) );
+		assert( is_string( $request['task'] ) );
+		assert( is_int( $request['postId'] ?? 0 ) );
+
 		$task = array(
+			'id'         => $request['id'],
 			'assigneeId' => $request['assigneeId'],
 			'assignerId' => $request['assignerId'],
-			'completed'  => $request['completed'],
+			'completed'  => ! empty( $request['completed'] ),
 			'dateDue'    => $request['dateDue'],
-			'postId'     => isset( $request['postId'] ) ? $request['postId'] : 0,
+			'postId'     => $request['postId'] ?? 0,
 			'task'       => $request['task'],
 		);
 
-		if ( $request['isNewTask'] ) {
+		if ( ! empty( $request['isNewTask'] ) ) {
+
+			$key = 'nc_new_task_notify_' . $request['id'];
+			if ( get_transient( $key ) ) {
+				return new WP_REST_Response( array( 'deduped' => true ), 200 );
+			}
+			set_transient( $key, 1, 1 * HOUR_IN_SECONDS );
+
 			/**
 			 * It runs when an editorial task has been created.
 			 *
-			 * @param array $task the task.
-			 * @param int   $user the user who created the task.
+			 * @param array{assigneeId:int,assignerId:int,completed:bool,dateDue:string,postId:int,task:string} $task the task.
+			 * @param int                                                                                       $user the user who created the task.
 			 *
 			 * @since 2.0.0
 			 */
@@ -364,122 +421,129 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 			/**
 			 * It runs when an editorial task has been updated.
 			 *
-			 * @param array $task the task.
-			 * @param int   $user the user who updated the task.
-			 * @param array $task the task.
+			 * @param array{assigneeId:int,assignerId:int,completed:bool,dateDue:string,postId:int,task:string} $task the task.
+			 * @param int                                                                                       $user the user who updated the task.
 			 *
 			 * @since 2.0.0
 			 */
 			do_action( 'nelio_content_after_update_editorial_task', $task, get_current_user_id() );
-		}//end if
+		}
 
 		return new WP_REST_Response( true, 200 );
-	}//end run_update_task_action()
+	}
 
 	/**
 	 * Updates the setting that track whether the site has any connected social profiles.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{profiles:bool}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response
 	 */
 	public function update_profiles( $request ) {
 
-		$has_profiles = $request['profiles'];
+		$has_profiles = ! empty( $request['profiles'] );
 		update_option( 'nc_has_social_profiles', $has_profiles );
 		return new WP_REST_Response( $has_profiles, 200 );
-	}//end update_profiles()
+	}
 
 	/**
 	 * Deactivates the plugin. It tells our cloud to pause the calendar.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{_nonce:string}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function deactivate_plugin( $request ) {
 
+		/** @var string */
 		$nonce = $request['_nonce'];
 		if ( ! wp_verify_nonce( $nonce, 'nelio_content_clean_plugin_data_' . get_current_user_id() ) ) {
 			return new WP_Error( 'invalid-nonce' );
-		}//end if
+		}
+
+		$body = wp_json_encode(
+			array(
+				'url'              => home_url(),
+				'timezone'         => nelio_content_get_timezone(),
+				'language'         => nelio_content_get_language(),
+				'isPluginInactive' => true,
+			)
+		);
+		assert( ! empty( $body ) );
 
 		$data = array(
 			'method'  => 'PUT',
-			'timeout' => apply_filters( 'nelio_content_request_timeout', 30 ),
+			'timeout' => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
 			'headers' => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
-			'body'    => wp_json_encode(
-				array(
-					'url'              => home_url(),
-					'timezone'         => nc_get_timezone(),
-					'language'         => nc_get_language(),
-					'isPluginInactive' => true,
-				)
-			),
+			'body'    => $body,
 		);
 
-		$url    = nc_get_api_url( '/site/' . nc_get_site_id(), 'wp' );
-		$result = wp_remote_request( $url, $data );
-
-		// If the response is an error, leave.
-		$error = nc_extract_error_from_response( $result );
-		if ( ! empty( $error ) ) {
-			return $error;
-		}//end if
+		$url      = nelio_content_get_api_url( '/site/' . nelio_content_get_site_id(), 'wp' );
+		$response = wp_remote_request( $url, $data );
+		$response = nelio_content_extract_response_body( $response );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 
 		return new WP_REST_Response( true, 200 );
-	}//end deactivate_plugin()
+	}
 
 	/**
 	 * Cleans the plugin. If a reason is provided, it tells our cloud what happened.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{_nonce:string,reason?:string}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function clean_plugin( $request ) {
 
+		/** @var string */
 		$nonce = $request['_nonce'];
 		if ( ! wp_verify_nonce( $nonce, 'nelio_content_clean_plugin_data_' . get_current_user_id() ) ) {
 			return new WP_Error( 'invalid-nonce' );
-		}//end if
+		}
 
 		// 1. Clean cloud.
+		/** @var string */
 		$reason = ! empty( $request['reason'] ) ? $request['reason'] : 'none';
-		$data   = array(
+		$body   = wp_json_encode( array( 'reason' => $reason ) );
+		assert( ! empty( $body ) );
+
+		$data = array(
 			'method'    => 'DELETE',
-			'timeout'   => apply_filters( 'nelio_content_request_timeout', 30 ),
-			'sslverify' => ! nc_does_api_use_proxy(),
-			'body'      => wp_json_encode( array( 'reason' => $reason ) ),
+			'timeout'   => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+			'sslverify' => ! nelio_content_does_api_use_proxy(),
+			'body'      => $body,
 			'headers'   => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
 		);
 
-		$url      = nc_get_api_url( '/site/' . nc_get_site_id(), 'wp' );
+		$url      = nelio_content_get_api_url( '/site/' . nelio_content_get_site_id(), 'wp' );
 		$response = wp_remote_request( $url, $data );
-
-		// If the response is an error, leave.
-		$error = nc_extract_error_from_response( $response );
-		if ( ! empty( $error ) ) {
-			return $error;
-		}//end if
+		$response = nelio_content_extract_response_body( $response );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 
 		// Clean database.
+		/** @var wpdb */
 		global $wpdb;
 
-		$wpdb->query( // phpcs:ignore
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
 			"DELETE FROM $wpdb->postmeta
 			WHERE meta_key LIKE '_nc_%'"
 		);
 
-		$wpdb->query( // phpcs:ignore
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
 			"DELETE FROM $wpdb->posts
 			WHERE post_type IN (
 				'nc_reference',
@@ -489,7 +553,8 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 			)"
 		);
 
-		$wpdb->query( // phpcs:ignore
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
 			"DELETE FROM $wpdb->options
 			WHERE option_name LIKE 'nc_%' OR
 			      option_name LIKE 'nelio_content_%' OR
@@ -497,5 +562,5 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 		);
 
 		return new WP_REST_Response( true, 200 );
-	}//end clean_plugin()
-}//end class
+	}
+}

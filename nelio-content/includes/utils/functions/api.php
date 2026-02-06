@@ -8,14 +8,16 @@
  * @since      2.0.0
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Whether to use Nelio’s proxy instead of accessing AWS directly or not.
  *
  * @return boolean whether to use Nelio’s proxy instead of accessing AWS directly or not.
  *
- * @since 2.0.0
+ * @since 4.0.8
  */
-function nc_does_api_use_proxy() {
+function nelio_content_does_api_use_proxy() {
 
 	/**
 	 * Whether the plugin should use Nelio’s proxy instead of accessing AWS directly.
@@ -25,7 +27,7 @@ function nc_does_api_use_proxy() {
 	 * @since 2.0.0
 	 */
 	return apply_filters( 'nelio_content_use_nelio_proxy', false );
-}//end nc_does_api_use_proxy()
+}
 
 /**
  * Returns the API url for the specified method.
@@ -37,20 +39,20 @@ function nc_does_api_use_proxy() {
  *
  * @return string the API url for the specified method.
  *
- * @since 1.1.0
+ * @since 4.0.8
  */
-function nc_get_api_url( $method, $context ) {
+function nelio_content_get_api_url( $method, $context ) {
 
 	if ( 'browser' === $context ) {
 		return 'https://api.neliocontent.com/v2' . $method;
-	}//end if
+	}
 
-	if ( nc_does_api_use_proxy() ) {
+	if ( nelio_content_does_api_use_proxy() ) {
 		return 'https://neliosoftware.com/proxy/content-api/v2' . $method;
 	} else {
 		return 'https://api.neliocontent.com/v2' . $method;
-	}//end if
-}//end nc_get_api_url()
+	}
+}
 
 /**
  * Returns a new token for accessing the API.
@@ -58,120 +60,126 @@ function nc_get_api_url( $method, $context ) {
  * @param string $mode Either 'regular' or 'skip-errors'. If the latter is used, the function
  *                     won't generate any HTML errors.
  *
- * @return string|false a new token for accessing the API.
+ * @return string a new token for accessing the API.
  *
- * @since 1.0.0
+ * @since 4.0.8
  */
-function nc_generate_api_auth_token( $mode = 'regular' ) {
+function nelio_content_generate_api_auth_token( $mode = 'regular' ) {
 
+	/** @var string */
 	static $token;
 
-	if ( ! nc_get_site_id() ) {
-		return false;
-	}//end if
+	if ( ! nelio_content_get_site_id() ) {
+		return '';
+	}
 
 	// If we already have a token, return it.
 	if ( ! empty( $token ) ) {
 		return $token;
-	}//end if
+	}
 
 	// If we don't, let's see if there's a transient.
-	$transient_name = 'nc_api_token_' . get_current_user_id();
-	$token          = get_transient( $transient_name );
+	$transient_name     = 'nc_api_token_' . get_current_user_id();
+	$token              = get_transient( $transient_name );
+	$transient_exp_date = get_option( '_transient_timeout_' . $transient_name );
 
-	if ( ! empty( $token ) ) {
+	if ( ! empty( $transient_exp_date ) && ! empty( $token ) && is_string( $token ) ) {
 		return $token;
-	}//end if
+	}
 
-	// If we don't have a token, let's get a new one!
+	// If we don't have a token, let's get a new one.
 	$uid    = get_current_user_id();
-	$role   = 'plugin-user';
-	$secret = get_option( 'nc_api_secret', false );
-	$token  = '';
+	$role   = nelio_content_get_current_user_role();
+	$secret = nelio_content_get_api_secret();
+
+	$token = '';
+
+	$body = wp_json_encode(
+		array(
+			'id'   => "$uid",
+			'role' => $role,
+			'auth' => md5( $uid . $role . $secret ),
+		)
+	);
+	assert( ! empty( $body ) );
 
 	$data = array(
 		'method'    => 'POST',
-		'timeout'   => apply_filters( 'nelio_content_request_timeout', 30 ),
-		'sslverify' => ! nc_does_api_use_proxy(),
+		'timeout'   => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+		'sslverify' => ! nelio_content_does_api_use_proxy(),
 		'headers'   => array(
 			'accept'       => 'application/json',
 			'content-type' => 'application/json',
 		),
-		'body'      => wp_json_encode(
-			array(
-				'id'   => "$uid",
-				'role' => $role,
-				'auth' => md5( "{$uid}{$role}{$secret}" ),
-			)
-		),
+		'body'      => $body,
 	);
 
 	// Iterate to obtain the token, or else things will go wrong.
+	$url = nelio_content_get_api_url( '/site/' . nelio_content_get_site_id() . '/key', 'wp' );
 	for ( $i = 0; $i < 3; ++$i ) {
 
-		$url      = nc_get_api_url( '/site/' . get_option( 'nc_site_id' ) . '/key', 'wp' );
 		$response = wp_remote_request( $url, $data );
-
-		if ( ! nc_is_response_valid( $response ) ) {
+		$response = nelio_content_extract_response_body( $response );
+		if ( is_wp_error( $response ) ) {
 			sleep( 3 );
 			continue;
-		}//end if
+		}
+
+		/** @var array{token:string, activePromos?:list<string>}|null $response */
+		if ( empty( $response ) ) {
+			sleep( 3 );
+			continue;
+		}
 
 		// Save the new token.
-		$response = json_decode( $response['body'], true );
-		if ( isset( $response['token'] ) ) {
-			$token = $response['token'];
-		}//end if
+		$token = $response['token'];
 
 		// Save active promos.
 		if ( isset( $response['activePromos'] ) ) {
 			set_transient( 'nc_active_promos', $response['activePromos'], 5 * DAY_IN_SECONDS );
-		}//end if
+		}
 
 		if ( ! empty( $token ) ) {
 			break;
-		}//end if
+		}
 
 		sleep( 3 );
 
-	}//end for
+	}
 
 	if ( ! empty( $token ) ) {
 		set_transient( $transient_name, $token, 150 * MINUTE_IN_SECONDS );
-	}//end if
+	}
 
 	// Send error if we couldn't get an API key.
 	if ( 'skip-errors' !== $mode ) {
 
-		$error_message = _x( 'There was an error while accessing Nelio Content’s API.', 'error', 'nelio-content' );
-
 		if ( empty( $token ) ) {
 
-			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			if ( wp_doing_ajax() ) {
 				header( 'HTTP/1.1 500 Internal Server Error' );
-				wp_send_json( $error_message );
+				wp_send_json( _x( 'There was an error while accessing Nelio Content’s API.', 'error', 'nelio-content' ) );
 			} else {
-				return false;
-			}//end if
-		}//end if
-	}//end if
+				return '';
+			}
+		}
+	}
 
 	return $token;
-}//end nc_generate_api_auth_token()
+}
 
 
 /**
- * Returns the reference whose ID is the given ID.
+ * Returns the error message associated to the given code.
  *
- * @param string         $code    API error code.
- * @param string|boolean $default_value Optional. Default error message.
+ * @param string       $code          API error code.
+ * @param string|false $default_value Optional. Default error message.
  *
- * @return string Error message associated to the given error code.
+ * @return string|false
  *
- * @since  1.0.0
- * @access public
+ * @since 4.0.8
  */
-function nc_get_error_message( $code, $default_value = false ) {
+function nelio_content_get_error_message( $code, $default_value = false ) {
 
 	switch ( $code ) {
 
@@ -181,101 +189,80 @@ function nc_get_error_message( $code, $default_value = false ) {
 		default:
 			return $default_value;
 
-	}//end switch
-}//end nc_get_error_message()
+	}
+}
 
 /**
- * This function checks whether the response of a `wp_remote_*` call is valid
- * or not. A response is valid if it's not a WP_Error and the response code is
- * 200.
+ * This function converts a remote request response into either a WP_Error
+ * object (if something failed) or whatever the original response had in its body.
  *
- * @param array|WP_Error $response the response of a `wp_remote_*` call.
+ * @param array<string,mixed>|WP_Error $response the response of a `wp_remote_*` call.
  *
- * @return boolean Whether the response is valid (i.e. not a WP_Error and a 200
- *                 response code) or not.
+ * @return mixed|WP_Error
  *
- * @since 1.0.0
+ * @since 4.0.8
  */
-function nc_is_response_valid( $response ) {
-
-	if ( is_wp_error( $response ) ) {
-		return false;
-	}//end if
-
-	if ( isset( $response['body'] ) ) {
-		$body = json_decode( $response['body'], true );
-		$body = ! empty( $body ) ? $body : array();
-		if ( isset( $body['errorType'] ) && isset( $body['errorMessage'] ) ) {
-			return false;
-		}//end if
-	}//end if
-
-	if ( ! isset( $response['response'] ) ) {
-		return true;
-	}//end if
-
-	$response = $response['response'];
-	if ( ! isset( $response['code'] ) ) {
-		return true;
-	}//end if
-
-	if ( 200 === $response['code'] ) {
-		return true;
-	}//end if
-
-	return false;
-}//end nc_is_response_valid()
-
-/**
- * This function checks if the given response is valid or not. If it isn't,
- * it'll return a WP_Error (forwarding the original error code or
- * generating a new `500 Internal Server Error`) and a message describing the
- * error.
- *
- * @param array|WP_Error $response the response of a `wp_remote_*` call.
- *
- * @return WP_Error|false false if response is valid, a WP_Error otherwise.
- *
- * @since 2.0.0
- */
-function nc_extract_error_from_response( $response ) {
-
-	if ( nc_is_response_valid( $response ) ) {
-		return false;
-	}//end if
-
+function nelio_content_extract_response_body( $response ) {
 	// If we couldn't open the page, let's return an empty result object.
 	if ( is_wp_error( $response ) ) {
-		return $response;
-	}//end if
+		return new WP_Error(
+			'server-error',
+			_x( 'Unable to access Nelio Content’s API.', 'text', 'nelio-content' )
+		);
+	}
 
 	// Extract body and response.
-	$body     = json_decode( $response['body'], true );
-	$response = $response['response'];
-
-	// If the error is not an Unauthorized request, let's forward it to the user.
-	$summary = $response['code'] . ' ' . $response['message'];
-	if ( false === preg_match( '/^HTTP\/1.1 [0-9][0-9][0-9]( [A-Z][a-z]+)+$/', 'HTTP/1.1 ' . $summary ) ) {
-		$summary = '500 Internal Server Error';
-	}//end if
+	$body = is_string( $response['body'] ) ? $response['body'] : '{}';
+	$body = json_decode( $body, true );
+	$body = ! empty( $body ) ? $body : array();
 
 	// Check if the API returned an error code and error message.
-	$error_message = false;
-	if ( ! empty( $body['errorType'] ) && ! empty( $body['errorMessage'] ) ) {
-		$error_message = nc_get_error_message( $body['errorType'], $body['errorMessage'] );
-	}//end if
+	if ( is_array( $body ) && isset( $body['errorType'] ) && isset( $body['errorMessage'] ) ) {
+		$error_type    = is_string( $body['errorType'] ) && ! empty( $body['errorType'] ) ? $body['errorType'] : 'unknown-error';
+		$error_message = is_string( $body['errorMessage'] ) && ! empty( $body['errorMessage'] ) ? $body['errorMessage'] : false;
+		$error_message = nelio_content_get_error_message( $error_type, $error_message );
+		$error_message = ! empty( $error_message ) ? $error_message : _x( 'There was an error while accessing Nelio Content’s API.', 'error', 'nelio-content' );
+		return new WP_Error( $error_type, $error_message );
+	}
 
-	if ( empty( $error_message ) ) {
-		$error_message = sprintf(
+	// If we timed out, let the user know.
+	$message = is_array( $body ) ? ( $body['message'] ?? '' ) : '';
+	if ( 'Endpoint request timed out' === $message ) {
+		return new WP_Error( 'nelio-api-timeout', _x( 'Nelio’s API timed out', 'text', 'nelio-content' ) );
+	}
+
+	// If the error is not an Unauthorized request, let's forward it to the user.
+	$response = $response['response'];
+	$response = is_array( $response ) ? $response : array();
+
+	$code    = isset( $response['code'] ) ? absint( $response['code'] ) : 0;
+	$message = isset( $response['message'] ) && is_string( $response['message'] ) ? $response['message'] : '';
+	$summary = "{$code} {$message}";
+	if ( false === preg_match( '/^HTTP\/1.1 [0-9][0-9][0-9]( [A-Z][a-z]+)+$/', 'HTTP/1.1 ' . $summary ) ) {
+		$summary = '500 Internal Server Error';
+	}
+
+	if ( 200 !== $code ) {
+		return new WP_Error(
+			'server-error',
+			sprintf(
 			/* translators: %s: The placeholder is a string explaining the error returned by the API. */
-			_x( 'There was an error while accessing Nelio Content’s API: %s.', 'error', 'nelio-content' ),
-			$summary
+				_x( 'There was an error while accessing Nelio Content’s API: %s.', 'error', 'nelio-content' ),
+				$summary
+			)
 		);
-	}//end if
+	}
 
-	// Send code.
-	return new WP_Error(
-		'server-error',
-		$error_message
-	);
-}//end nc_extract_error_from_response()
+	return $body;
+}
+
+/**
+ * Returns the API secret.
+ *
+ * @return string the API secret.
+ *
+ * @since 4.0.8
+ */
+function nelio_content_get_api_secret() {
+	return get_option( 'nc_api_secret', '' );
+}

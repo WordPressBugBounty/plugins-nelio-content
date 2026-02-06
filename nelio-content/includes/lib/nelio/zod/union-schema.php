@@ -4,13 +4,21 @@ namespace Nelio_Content\Zod;
 
 class UnionSchema extends Schema {
 
+	/** @var list<Schema> */
 	private array $schemas;
 
-	public static function make( array $schemas ): UnionSchema {
+	/**
+	 * Creates a union schema.
+	 *
+	 * @param non-empty-list<Schema> $schemas Schemas.
+	 *
+	 * @return UnionSchema
+	 */
+	public static function make( $schemas ) {
 		$instance          = new self();
 		$instance->schemas = $schemas;
 		return $instance;
-	}//end make()
+	}
 
 	public function parse_value( $value ) {
 		$result = array( 'success' => false );
@@ -21,10 +29,11 @@ class UnionSchema extends Schema {
 					'data'    => $schema->parse( $value ),
 				);
 				break;
-			} catch ( \Exception $e ) { // phpcs:ignore
+			// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			} catch ( \Exception $e ) {
 				// As soon as one element of the union successfully parses, there’s no need to continue.
-			}//end try
-		}//end foreach
+			}
+		}
 
 		if ( empty( $result['success'] ) ) {
 			throw new \Exception(
@@ -33,8 +42,8 @@ class UnionSchema extends Schema {
 					esc_html( gettype( $value ) )
 				)
 			);
-		}//end if
+		}
 
 		return $result['data'];
-	}//end parse_value()
-}//end class
+	}
+}

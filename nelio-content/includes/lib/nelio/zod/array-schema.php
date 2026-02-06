@@ -4,36 +4,74 @@ namespace Nelio_Content\Zod;
 
 class ArraySchema extends Schema {
 
+	/** @var int|null */
 	private $min;
-	private $max;
-	private Schema $schema;
 
-	public static function make( Schema $schema ): ArraySchema {
+	/** @var int|null */
+	private $max;
+
+	/** @var Schema */
+	private $schema;
+
+	/**
+	 * Creates an array schema.
+	 *
+	 * @param Schema $schema Schema of the items inside the array.
+	 *
+	 * @return ArraySchema
+	 */
+	public static function make( $schema ) {
 		$instance         = new self();
 		$instance->schema = $schema;
 		return $instance;
-	}//end make()
+	}
 
-	public function min( int $min ): ArraySchema {
+	/**
+	 * Sets the min number of items.
+	 *
+	 * @param int $min Min number of items.
+	 *
+	 * @return static
+	 */
+	public function min( $min ) {
 		$this->min = $min;
 		return $this;
-	}//end min()
+	}
 
-	public function max( int $max ): ArraySchema {
+	/**
+	 * Sets the max number of items.
+	 *
+	 * @param int $max Max number of items.
+	 *
+	 * @return static
+	 */
+	public function max( $max ) {
 		$this->max = $max;
 		return $this;
-	}//end max()
+	}
 
-	public function nonempty(): ArraySchema {
+	/**
+	 * Sets the array as non empty (i.e. min items is 1).
+	 *
+	 * @return static
+	 */
+	public function nonempty() {
 		$this->min = 1;
 		return $this;
-	}//end nonempty()
+	}
 
-	public function length( int $length ): ArraySchema {
+	/**
+	 * Sets the expected array length.
+	 *
+	 * @param int $length Length.
+	 *
+	 * @return static
+	 */
+	public function length( $length ) {
 		$this->min = $length;
 		$this->max = $length;
 		return $this;
-	}//end length()
+	}
 
 	public function parse_value( $value ) {
 		if ( ! is_array( $value ) ) {
@@ -43,7 +81,7 @@ class ArraySchema extends Schema {
 					esc_html( gettype( $value ) )
 				)
 			);
-		}//end if
+		}
 
 		if (
 			! is_null( $this->min ) &&
@@ -57,27 +95,27 @@ class ArraySchema extends Schema {
 					count( $value )
 				)
 			);
-		}//end if
+		}
 
 		if ( ! is_null( $this->min ) && count( $value ) < $this->min ) {
 			throw new \Exception(
 				sprintf(
 					'Expected an array with at least %1$s elements, but array has %2$s elements.',
-					esc_html( $this->min ),
+					esc_html( "$this->min" ),
 					count( $value )
 				)
 			);
-		}//end if
+		}
 
 		if ( ! is_null( $this->max ) && $this->max < count( $value ) ) {
 			throw new \Exception(
 				sprintf(
 					'Expected an array with up to %1$s elements, but array has %2$s elements.',
-					esc_html( $this->max ),
+					esc_html( "$this->max" ),
 					count( $value )
 				)
 			);
-		}//end if
+		}
 
 		$result = array();
 		foreach ( $value as $index => $item ) {
@@ -85,8 +123,8 @@ class ArraySchema extends Schema {
 				$result[] = $this->schema->parse( $item );
 			} catch ( \Exception $e ) {
 				throw new \Exception( esc_html( $this->add_path( $e->getMessage(), "{$index}" ) ) );
-			}//end try
-		}//end foreach
+			}
+		}
 		return $result;
-	}//end parse_value()
-}//end class
+	}
+}

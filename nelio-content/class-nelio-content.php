@@ -1,25 +1,73 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Main class.
  */
 class Nelio_Content {
 
-	private static $instance = null;
+	/**
+	 * This instance.
+	 *
+	 * @var Nelio_Content|null
+	 */
+	private static $instance;
 
+	/**
+	 * Plugin’s main file.
+	 *
+	 * @var string
+	 */
 	public $plugin_file;
-	public $plugin_path;
-	public $plugin_url;
+
+	/**
+	 * Plugin name.
+	 *
+	 * @var string
+	 */
 	public $plugin_name;
-	public $plugin_version;
+
+	/**
+	 * Plugin path.
+	 *
+	 * @var string
+	 */
+	public $plugin_path;
+
+	/**
+	 * Plugin slug.
+	 *
+	 * @var string
+	 */
 	public $plugin_slug;
-	public $plugin_name_sanitized;
+
+	/**
+	 * Plugin URL.
+	 *
+	 * @var string
+	 */
+	public $plugin_url;
+
+	/**
+	 * Plugin version.
+	 *
+	 * @var string
+	 */
+	public $plugin_version;
+
+	/**
+	 * Plugin’s REST namespace.
+	 *
+	 * @var string
+	 */
 	public $rest_namespace;
 
+	/**
+	 * Returns this instance.
+	 *
+	 * @return Nelio_Content
+	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
@@ -27,11 +75,18 @@ class Nelio_Content {
 			self::$instance->load_dependencies();
 			self::$instance->install();
 			self::$instance->init();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
+	/**
+	 * Loads plugin’s basic dependencies.
+	 *
+	 * This includes the autoloader, helper functions, and all hooks.
+	 *
+	 * @return void
+	 */
 	private function load_dependencies() {
 
 		$this->plugin_path    = untrailingslashit( plugin_dir_path( __FILE__ ) );
@@ -43,17 +98,21 @@ class Nelio_Content {
 		require_once $this->plugin_path . '/includes/lib/nelio/helpers/index.php';
 		require_once $this->plugin_path . '/includes/lib/nelio/zod/index.php';
 		require_once $this->plugin_path . '/includes/utils/functions/index.php';
-	}//end load_dependencies()
+	}
 
+	/**
+	 * Initializes main classes, regardless of plugin’s status.
+	 *
+	 * @return void
+	 */
 	private function install() {
 
-		add_action( 'init', array( $this, 'load_i18n_strings' ), 1 );
 		add_action( 'plugins_loaded', array( $this, 'plugin_data_init' ), 1 );
 
-		if ( nc_is_staging() ) {
+		if ( nelio_content_is_staging() ) {
 			add_action( 'after_plugin_row_nelio-content/nelio-content.php', array( $this, 'add_staging_warning' ) );
-			return;
-		}//end if
+			add_action( 'nelio_content_after_settings_title', array( $this, 'add_staging_warning' ) );
+		}
 
 		$aux = Nelio_Content_Install::instance();
 		$aux->init();
@@ -76,14 +135,19 @@ class Nelio_Content {
 		if ( is_admin() ) {
 			$aux = Nelio_Content_Overview_Widget::instance();
 			$aux->init();
-		}//end if
-	}//end install()
+		}
+	}
 
+	/**
+	 * Loads remaining dependencies, if plugin is ready.
+	 *
+	 * @return void
+	 */
 	private function init() {
 
 		if ( ! $this->is_ready() ) {
 			return;
-		}//end if
+		}
 
 		$this->init_common_helpers();
 		$this->init_rest_controllers();
@@ -96,17 +160,46 @@ class Nelio_Content {
 
 			$aux = Nelio_Content_Meta_Tags::instance();
 			$aux->init();
-		}//end if
+		}
 
 		$aux = Nelio_Content_External_Featured_Image_Public::instance();
 		$aux->init();
-	}//end init()
+	}
 
+	/**
+	 * Returns whether the plugin is properly configured or not (i.e. it has a site id).
+	 *
+	 * @return boolean
+	 */
 	public function is_ready() {
 
-		return ! nc_is_staging() && ! empty( nc_get_site_id() );
-	}//end is_ready()
+		return ! empty( nelio_content_get_site_id() );
+	}
 
+	/**
+	 * Returns whether the wizard is requested.
+	 *
+	 * @return boolean
+	 */
+	public function is_wizard_requested() {
+
+		return ! empty( get_option( 'nc_wizard_requested', '' ) );
+	}
+
+	/**
+	 * Finishes the wizard.
+	 *
+	 * @return void
+	 */
+	public function finish_wizard() {
+		delete_option( 'nc_wizard_requested' );
+	}
+
+	/**
+	 * Inits all common helpers.
+	 *
+	 * @return void
+	 */
 	private function init_common_helpers() {
 
 		$aux = Nelio_Content_Classic_Editor::instance();
@@ -135,8 +228,13 @@ class Nelio_Content {
 
 		$aux = Nelio_Content_Ics_Calendar::instance();
 		$aux->init();
-	}//end init_common_helpers()
+	}
 
+	/**
+	 * Inits REST controllers.
+	 *
+	 * @return void
+	 */
 	private function init_rest_controllers() {
 
 		$aux = Nelio_Content_Analytics_REST_Controller::instance();
@@ -177,8 +275,14 @@ class Nelio_Content {
 
 		$aux = Nelio_Content_Task_Presets_REST_Controller::instance();
 		$aux->init();
-	}//end init_rest_controllers()
+	}
 
+
+	/**
+	 * Registers post types.
+	 *
+	 * @return void
+	 */
 	private function register_post_types() {
 		$aux = Nelio_Content_Reference_Post_Type_Register::instance();
 		$aux->init();
@@ -188,28 +292,38 @@ class Nelio_Content {
 
 		$aux = Nelio_Content_Task_Preset_Post_Type_Register::instance();
 		$aux->init();
-	}//end register_post_types()
+	}
 
+
+	/**
+	 * Initializes compatibility fixes.
+	 *
+	 * @return void
+	 */
 	private function init_compat_fixes() {
 
 		require_once nelio_content()->plugin_path . '/includes/compat/index.php';
-	}//end init_compat_fixes()
+	}
 
-	public function load_i18n_strings() {
-
-		load_plugin_textdomain( 'nelio-content' );
-	}//end load_i18n_strings()
-
+	/**
+	 * Callback to initialize plugin data.
+	 *
+	 * @return void
+	 */
 	public function plugin_data_init() {
 
 		$data = get_file_data( untrailingslashit( __DIR__ ) . '/nelio-content.php', array( 'Plugin Name', 'Version' ), 'plugin' );
 
-		$this->plugin_name           = $data[0];
-		$this->plugin_version        = $data[1];
-		$this->plugin_slug           = plugin_basename( __FILE__ );
-		$this->plugin_name_sanitized = basename( __FILE__, '.php' );
-	}//end plugin_data_init()
+		$this->plugin_name    = $data[0];
+		$this->plugin_version = $data[1];
+		$this->plugin_slug    = plugin_basename( __FILE__ );
+	}
 
+	/**
+	 * Callback to add a warning when plugin is being used in a staging site.
+	 *
+	 * @return void
+	 */
 	public function add_staging_warning() {
 		echo '<tr class="plugin-update-tr active" id="nelio-content-staging-warning" data-slug="nelio-content" data-plugin="nelio-content.php">';
 		echo '<td colspan="4" class="plugin-update colspanchange">';
@@ -217,20 +331,31 @@ class Nelio_Content {
 		echo '<p>';
 
 		printf(
-			/* translators: %s: URL. */
-			_x( '<strong>Warning!</strong> This site has been identified as a <strong>staging site</strong> and, as a result, you can’t use any of Nelio Content’s features. If this is not correct and you want to use Nelio Content normally, please <a href="%s">follow these instructions</a>.', 'user', 'nelio-content' ), // phpcs:ignore
-			add_query_arg( // phpcs:ignore
+			wp_kses(
+				/* translators: %s: URL. */
+				_x( '<strong>Warning!</strong> This site has been identified as a <strong>staging site</strong> and, as a result, you can’t use any of Nelio Content’s social sharing features. If this is not correct and you want to use Nelio Content normally, please <a href="%s" target="_blank">follow these instructions</a>.', 'user', 'nelio-content' ),
 				array(
-					'utm_source'   => 'nelio-content',
-					'utm_medium'   => 'plugin',
-					'utm_campaign' => 'support',
-					'utm_content'  => 'staging-warning',
-				),
-				'https://neliosoftware.com/content/help/modify-list-of-staging-urls/'
+					'strong' => array(),
+					'a'      => array(
+						'href'   => true,
+						'target' => true,
+					),
+				)
+			),
+			esc_url(
+				add_query_arg(
+					array(
+						'utm_source'   => 'nelio-content',
+						'utm_medium'   => 'plugin',
+						'utm_campaign' => 'support',
+						'utm_content'  => 'staging-warning',
+					),
+					'https://neliosoftware.com/content/help/modify-list-of-staging-urls/'
+				)
 			)
 		);
 
 		echo '</p></div></td></tr>';
 		echo '<script>(function(){document.getElementById("nelio-content-staging-warning").previousElementSibling.classList.add("update");})();</script>';
-	}//end add_staging_warning()
-}//end class
+	}
+}

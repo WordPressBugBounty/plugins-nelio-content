@@ -8,9 +8,7 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class represents a Range setting.
@@ -29,7 +27,6 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 	 * The current value of this field.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    int
 	 */
 	protected $value;
@@ -38,7 +35,6 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 	 * Minimum value for the range.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    int
 	 */
 	protected $min;
@@ -47,7 +43,6 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 	 * Maximum value for the range.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    int
 	 */
 	protected $max;
@@ -56,7 +51,6 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 	 * The value in which the range decrements or increments
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    int
 	 */
 	protected $step;
@@ -65,7 +59,6 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 	 * Additional text that describes the range value
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $verbose_value;
@@ -73,13 +66,12 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 	/**
 	 * Creates a new instance of this class.
 	 *
-	 * @param string $name The name that identifies this setting.
-	 * @param string $desc A text that describes this field.
-	 * @param string $more A link pointing to more information about this field.
-	 * @param array  $args A set of specific attributes for the range.
+	 * @param string                                       $name The name that identifies this setting.
+	 * @param string                                       $desc A text that describes this field.
+	 * @param string                                       $more A link pointing to more information about this field.
+	 * @param array{label:string,min:int,max:int,step:int} $args A set of specific attributes for the range.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function __construct( $name, $desc, $more, $args ) {
 
@@ -88,7 +80,7 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 		$this->min           = $args['min'];
 		$this->max           = $args['max'];
 		$this->step          = $args['step'];
-	}//end __construct()
+	}
 
 	/**
 	 * Sets the value of this field to the given number.
@@ -96,15 +88,14 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 	 * @param integer $value The current value of this field.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_value( $value ) {
 		$this->value = $value;
-	}//end set_value()
+	}
 
 	// @Implements
 	/** . @SuppressWarnings( PHPMD.UnusedLocalVariable, PHPMD.ShortVariableName ) */
-	public function display() { // phpcs:ignore
+	public function display() {
 
 		// Preparing data for the partial.
 		$id            = str_replace( '_', '-', $this->name );
@@ -116,17 +107,17 @@ class Nelio_Content_Range_Setting extends Nelio_Content_Abstract_Setting {
 		$min           = $this->min;
 		$max           = $this->max;
 		$step          = $this->step;
-		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-range-setting.php';
-	}//end display()
+		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-content-range-setting.php';
+	}
 
 	// @Implements
-	public function sanitize( $input ) { // phpcs:ignore
+	public function sanitize( $input ) {
 
-		if ( ! isset( $input[ $this->name ] ) ) {
+		if ( ! isset( $input[ $this->name ] ) || ! is_numeric( $input[ $this->name ] ) ) {
 			$input[ $this->name ] = $this->value;
 		} else {
 			$input[ $this->name ] = intval( $input[ $this->name ] );
-		}//end if
+		}
 		return $input;
-	}//end sanitize()
-}//end class
+	}
+}

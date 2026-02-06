@@ -1,54 +1,65 @@
 <?php
+namespace Nelio_Content\Compat\Elementor;
+
+defined( 'ABSPATH' ) || exit;
+
 /**
- * Compatibility with Elementor Page Builder.
+ * Hooks into WordPress.
  *
- * @package    Nelio_Content
- * @subpackage Nelio_Content/includes/compat
- * @author     Antonio Villegas <antonio.villegas@neliosoftware.com>
- * @since      3.6.0
+ * @return void
  */
+function admin_init() {
+	if ( ! did_action( 'elementor/loaded' ) ) {
+		return;
+	}
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+	$settings   = \Nelio_Content_Settings::instance();
+	$post_types = $settings->get( 'calendar_post_types' );
+	if ( empty( $post_types ) ) {
+		return;
+	}
 
-add_action(
-	'admin_init',
-	function () {
-		if ( ! did_action( 'elementor/loaded' ) ) {
-			return;
-		}//end if
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	if ( ! isset( $_REQUEST['post'] ) && ( ! isset( $_REQUEST['action'] ) || 'elementor' !== $_REQUEST['action'] ) ) {
+		return;
+	}
 
-		$settings   = Nelio_Content_Settings::instance();
-		$post_types = $settings->get( 'calendar_post_types', array() );
-		$post_types = is_array( $post_types ) ? $post_types : array();
-		if ( empty( $post_types ) ) {
-			return;
-		}//end if
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$post_id = absint( $_REQUEST['post'] );
+	if ( ! in_array( get_post_type( $post_id ), $post_types, true ) ) {
+		return;
+	}
 
-		if ( ! isset( $_REQUEST['post'] ) && ( ! isset( $_REQUEST['action'] ) || $_REQUEST['action'] !== 'elementor' ) ) { // phpcs:ignore
-			return;
-		}//end if
-
-		$post_id = absint( $_REQUEST['post'] ); // phpcs:ignore
-		if ( ! in_array( get_post_type( $post_id ), $post_types, true ) ) {
-			return;
-		}//end if
-
-		add_action(
-			'elementor/editor/footer',
-			function () {
-				nelio_content_require_wp_file( '/wp-admin/includes/class-wp-filesystem-base.php' );
-				nelio_content_require_wp_file( '/wp-admin/includes/class-wp-filesystem-direct.php' );
-				$filesystem = new \WP_Filesystem_Direct( true );
-				$icon       = $filesystem->get_contents( nelio_content()->plugin_path . '/assets/dist/images/logo.svg' );
-				$icon       = str_replace( 'fill="inherit"', 'fill="currentColor"', $icon );
-				?>
+	add_action(
+		'elementor/editor/footer',
+		function () {
+			nelio_content_require_wp_file( '/wp-admin/includes/class-wp-filesystem-base.php' );
+			nelio_content_require_wp_file( '/wp-admin/includes/class-wp-filesystem-direct.php' );
+			$filesystem = new \WP_Filesystem_Direct( true );
+			$icon       = $filesystem->get_contents( nelio_content()->plugin_path . '/assets/dist/images/logo.svg' );
+			$icon       = is_string( $icon ) ? $icon : '';
+			$icon       = str_replace( 'fill="inherit"', 'fill="currentColor"', $icon );
+			?>
 				<span id="elementor-panel-footer-nelio-content" class="MuiBox-root css-0" data-mui-internal-clone-element="true">
 					<button id="elementor-panel-footer-nelio-content-button" class="elementor-panel-footer-tool tooltip-target" data-tooltip-offset="15" data-tooltip="<?php echo esc_attr_x( 'Nelio Content', 'text', 'nelio-content' ); ?>" original-title="">
 						<span id="elementor-panel-footer-nelio-content-label">
 						<?php
-							echo $icon; // phpcs:ignore
+							echo wp_kses(
+								$icon,
+								array(
+									'svg'  => array(
+										'version' => true,
+										'xmlns'   => true,
+										'viewbox' => true,
+										'width'   => true,
+										'height'  => true,
+									),
+									'path' => array(
+										'd'    => true,
+										'fill' => true,
+									),
+								)
+							);
 						?>
 						</span>
 						<span class="elementor-screen-only"><?php echo esc_html_x( 'Nelio Content', 'text', 'nelio-content' ); ?></span>
@@ -59,9 +70,24 @@ add_action(
 					<div id="elementor-nelio-content__inner">
 						<div id="elementor-nelio-content__header" class="ui-draggable-handle">
 							<span id="elementor-nelio-content__header__icon">
-							<?php
-								echo $icon; // phpcs:ignore
-							?>
+								<?php
+									echo wp_kses(
+										$icon,
+										array(
+											'svg'  => array(
+												'version' => true,
+												'xmlns'   => true,
+												'viewbox' => true,
+												'width'   => true,
+												'height'  => true,
+											),
+											'path' => array(
+												'd'    => true,
+												'fill' => true,
+											),
+										)
+									);
+								?>
 								</span>
 							<h2 id="elementor-nelio-content__header__title"><?php echo esc_html_x( 'Nelio Content', 'text', 'nelio-content' ); ?></h2>
 							<button id="elementor-nelio-content__close">
@@ -79,73 +105,74 @@ add_action(
 					</div>
 				</aside>
 				<?php
-			},
-			100
-		);
+		},
+		100
+	);
 
-		$aux = Nelio_Content_Admin::instance();
-		add_action(
-			'elementor/editor/before_enqueue_scripts',
-			array( $aux, 'register_assets' )
-		);
-		add_action(
-			'elementor/editor/before_enqueue_scripts',
-			function () {
-				$url   = nelio_content()->plugin_url;
-				$files = array( 'post-quick-editor', 'social-message-editor', 'task-editor', 'social-timeline' );
-				foreach ( $files as $file ) {
-					wp_enqueue_style(
-						"nelio-content-{$file}",
-						"{$url}/assets/dist/css/{$file}.css",
-						array( 'nelio-content-components' ),
-						nc_get_script_version( $file )
-					);
-				}//end foreach
-				wp_enqueue_media();
-			}
-		);
-
-		$aux = new Nelio_Content_Edit_Post_Page();
-		add_action(
-			'elementor/editor/before_enqueue_scripts',
-			array( $aux, 'register_assets' )
-		);
-
-		add_action(
-			'elementor/editor/after_enqueue_scripts',
-			function () {
-				wp_enqueue_style( 'nelio-content-edit-post' );
+	$aux = \Nelio_Content_Admin::instance();
+	add_action(
+		'elementor/editor/before_enqueue_scripts',
+		array( $aux, 'register_assets' )
+	);
+	add_action(
+		'elementor/editor/before_enqueue_scripts',
+		function () {
+			$url   = nelio_content()->plugin_url;
+			$files = array( 'post-quick-editor', 'social-message-editor', 'task-editor', 'social-timeline' );
+			foreach ( $files as $file ) {
 				wp_enqueue_style(
-					'nelio-content-elementor-editor',
-					nelio_content()->plugin_url . '/assets/dist/css/elementor-editor.css',
+					"nelio-content-{$file}",
+					"{$url}/assets/dist/css/{$file}.css",
 					array( 'nelio-content-components' ),
-					nc_get_script_version( 'elementor-editor' )
-				);
-				nc_enqueue_script_with_auto_deps( 'nelio-content-elementor-editor', 'elementor-editor', true );
-
-				$aux = new Nelio_Content_Edit_Post_Page();
-				$aux->enqueue_edit_post_style();
-				wp_add_inline_script(
-					'nelio-content-elementor-editor',
-					sprintf(
-						'NelioContent.initPage( %s );',
-						wp_json_encode( $aux->get_init_args() )
-					)
+					nelio_content_get_script_version( $file )
 				);
 			}
-		);
+			wp_enqueue_media();
+		}
+	);
+
+	$aux = new \Nelio_Content_Edit_Post_Page();
+	add_action(
+		'elementor/editor/before_enqueue_scripts',
+		array( $aux, 'register_assets' )
+	);
+
+	add_action(
+		'elementor/editor/after_enqueue_scripts',
+		function () {
+			wp_enqueue_style( 'nelio-content-edit-post' );
+			wp_enqueue_style(
+				'nelio-content-elementor-editor',
+				nelio_content()->plugin_url . '/assets/dist/css/elementor-editor.css',
+				array( 'nelio-content-components' ),
+				nelio_content_get_script_version( 'elementor-editor' )
+			);
+			nelio_content_enqueue_script_with_auto_deps( 'nelio-content-elementor-editor', 'elementor-editor', true );
+
+			$aux = new \Nelio_Content_Edit_Post_Page();
+			$aux->enqueue_edit_post_style();
+			wp_add_inline_script(
+				'nelio-content-elementor-editor',
+				sprintf(
+					'NelioContent.initPage( %s );',
+					wp_json_encode( $aux->get_init_args() )
+				)
+			);
+		}
+	);
+}
+add_action( 'admin_init', __NAMESPACE__ . '\admin_init' );
+
+/**
+ * Callback to fix DnD issue on calendar when Elementor is active due to its overwriting of “.screen-reader-text” CSS rules.
+ *
+ * @return void
+ */
+function fix_dnd_issue() {
+	if ( ! did_action( 'elementor/loaded' ) ) {
+		return;
 	}
-);
 
-// Fix DnD issue on calendar when Elementor is active due to its overwriting of “.screen-reader-text” CSS rules.
-add_action(
-	'admin_head',
-	function () {
-		if ( ! did_action( 'elementor/loaded' ) ) {
-			return;
-		}//end if
-
-		echo '<style>*[draggable="true"] .screen-reader-text { top: auto !important; }</style>';
-	},
-	9999
-);
+	echo '<style>*[draggable="true"] .screen-reader-text { top: auto !important; }</style>';
+}
+add_action( 'admin_head', __NAMESPACE__ . '\fix_dnd_issue', 9999 );

@@ -21,22 +21,20 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 			'nelio-content',
 			'nelio-content',
 			_x( 'Calendar', 'text', 'nelio-content' ),
-			nc_can_current_user_use_plugin()
+			nelio_content_can_current_user_use_plugin()
 		);
-	}//end __construct()
+	}
 
 	// @Overrides
-	// phpcs:ignore
 	protected function add_page_specific_hooks() {
 
 		remove_all_filters( 'admin_notices' );
 
 		add_filter( 'admin_footer_text', '__return_empty_string', 99 );
 		add_filter( 'update_footer', '__return_empty_string', 99 );
-	}//end add_page_specific_hooks()
+	}
 
 	// @Implements
-	// phpcs:ignore
 	public function enqueue_assets() {
 
 		$script   = 'NelioContent.initPage( "nelio-content-page", %s );';
@@ -54,25 +52,30 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 			'nelio-content-calendar-page',
 			nelio_content()->plugin_url . '/assets/dist/css/calendar-page.css',
 			array( 'nelio-content-components' ),
-			nc_get_script_version( 'calendar-page' )
+			nelio_content_get_script_version( 'calendar-page' )
 		);
-		nc_enqueue_script_with_auto_deps( 'nelio-content-calendar-page', 'calendar-page', true );
+		nelio_content_enqueue_script_with_auto_deps( 'nelio-content-calendar-page', 'calendar-page', true );
 
 		wp_add_inline_script(
 			'nelio-content-calendar-page',
 			sprintf(
 				$script,
-				wp_json_encode( $settings ) // phpcs:ignore
+				wp_json_encode( $settings )
 			)
 		);
-	}//end enqueue_assets()
+	}
 
+	/**
+	 * Helper function to get ICS links.
+	 *
+	 * @return array{all:string, user:string}|false
+	 */
 	private function get_ics_links() {
 
 		$ics_secret_key = get_option( 'nc_ics_key', false );
-		if ( ! $ics_secret_key ) {
+		if ( empty( $ics_secret_key ) ) {
 			return false;
-		}//end if
+		}
 
 		$all_link = add_query_arg(
 			array(
@@ -95,14 +98,17 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 			'all'  => $all_link,
 			'user' => $user_link,
 		);
-	}//end get_ics_links()
+	}
 
+	/**
+	 * Gets day to focus on.
+	 *
+	 * @return string
+	 */
 	private function get_focus_day() {
 
-		$date = '';
-		if ( isset( $_GET['date'] ) ) { // phpcs:ignore
-			$date = sanitize_text_field( $_GET['date'] ); // phpcs:ignore
-		}//end if
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$date = sanitize_text_field( wp_unslash( $_GET['date'] ?? '' ) );
 
 		$year  = '[0-9]{4}';
 		$month = '(0[0-9])|(1[012])';
@@ -110,59 +116,75 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 
 		if ( preg_match( "/^($year)-($month)$/", $date ) ) {
 			$date .= '-01';
-		}//end if
+		}
 
 		if ( ! preg_match( "/^($year)-($month)(-($day))?$/", $date ) ) {
 			$date = date_i18n( 'Y-m-d' );
-		}//end if
+		}
 
 		return $date;
-	}//end get_focus_day()
+	}
 
+	/**
+	 * Returns the number of non collapsable messages.
+	 *
+	 * @return int
+	 */
 	private function get_number_of_non_collapsable_messages() {
 		/**
 		 * Filters the number of messages that can’t never be collapsed in any given day in the Editorial Calendar.
 		 *
-		 * @param number $count number the number of non collapsable messages. Default: 6.
+		 * @param int $count number the number of non collapsable messages. Default: 6.
 		 */
-		return apply_filters( 'nelio_content_number_of_non_collapsable_messages_in_calendar', 6 );
-	}//end get_number_of_non_collapsable_messages()
+		return absint( apply_filters( 'nelio_content_number_of_non_collapsable_messages_in_calendar', 6 ) );
+	}
 
+	/**
+	 * Returns list of external calendars.
+	 *
+	 * @return list<TExternal_Calendar>
+	 */
 	private function get_external_calendars() {
+		/** @var list<TExternal_Calendar> $calendars */
 		$calendars = get_option( 'nc_external_calendars', array() );
-		if ( ! is_array( $calendars ) || count( $calendars ) === 0 ) {
-			return array();
-		}//end if
-
 		return array_values(
 			array_filter(
 				$calendars,
-				function ( $cal ) {
-					return isset( $cal['url'] ) && ! empty( $cal['url'] ) && isset( $cal['name'] );
-				}
+				fn( $c ) => ! empty( $c['url'] )
 			)
 		);
-	}//end get_external_calendars()
+		// @intelephense: enable
+	}
 
+	/**
+	 * Gets calendar type format.
+	 *
+	 * @return string
+	 */
 	private function get_calendar_time_format() {
 		/**
 		 * Time format to use in the calendar.
 		 *
-		 * @param $format string Default: WordPress’ `time_format` option.
+		 * @param string $format Default: WordPress’ `time_format` option.
 		 *
 		 * @since 2.2.1
 		 */
 		return apply_filters( 'nelio_content_calendar_time_format', get_option( 'time_format' ) );
-	}//end get_calendar_time_format()
+	}
 
+	/**
+	 * Whether calendar time should be simplified or not.
+	 *
+	 * @return bool
+	 */
 	private function simplify_calendar_time() {
 		/**
 		 * Whether the plugin should remove “:00” and the “m” in “am/pm” when displaying times in the calendar. It also all spaces.
 		 *
-		 * @param $simplify boolean Default: true.
+		 * @param boolean $simplify Default: `true`.
 		 *
 		 * @since 2.2.1
 		 */
 		return apply_filters( 'nelio_content_simplify_calendar_time_format', true );
-	}//end simplify_calendar_time()
-}//end class
+	}
+}

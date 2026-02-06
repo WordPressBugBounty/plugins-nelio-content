@@ -8,30 +8,41 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
-use function Nelio_Content\Helpers\get as ncget;
 use function Nelio_Content\Helpers\not;
-use function Nelio_Content\Helpers\key_by;
 
 /**
  * The admin-specific functionality of the plugin.
  */
 class Nelio_Content_Admin {
 
+	/**
+	 * This instance.
+	 *
+	 * @var Nelio_Content_Admin|null
+	 */
 	protected static $instance;
 
+	/**
+	 * Returns this instance.
+	 *
+	 * @return Nelio_Content_Admin
+	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 
 		add_action( 'init', array( $this, 'init_pages' ), 9999 );
@@ -43,14 +54,17 @@ class Nelio_Content_Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_editor_dialog_styles' ), 99 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_media_scripts' ), 99 );
 		add_filter( 'option_page_capability_nelio-content_group', array( $this, 'get_settings_capability' ) );
+	}
 
-		add_action( 'admin_head', array( $this, 'add_workaround_styles' ) );
-	}//end init()
-
+	/**
+	 * Callback to create main menu.
+	 *
+	 * @return void
+	 */
 	public function create_menu() {
 
 		$capability =
-			nc_can_current_user_use_plugin()
+			nelio_content_can_current_user_use_plugin()
 				? 'read'
 				: 'invalid-capability';
 
@@ -65,7 +79,7 @@ class Nelio_Content_Admin {
 		);
 
 		$settings   = Nelio_Content_Settings::instance();
-		$post_types = $settings->get( 'calendar_post_types', array() );
+		$post_types = $settings->get( 'calendar_post_types' );
 
 		foreach ( $post_types as $post_type ) {
 			if ( 'post' === $post_type ) {
@@ -84,24 +98,36 @@ class Nelio_Content_Admin {
 					'nelio-content',
 					'__return_false'
 				);
-			}//end if
-		}//end foreach
-	}//end create_menu()
+			}
+		}
+	}
 
+	/**
+	 * Callback to add calendar option in admin bar.
+	 *
+	 * @return void
+	 */
 	public function add_calendar_in_admin_bar() {
 
+		/** @var WP_Admin_Bar $wp_admin_bar */
 		global $wp_admin_bar;
 		$original_blog_id = get_current_blog_id();
 
-		foreach ( (array) $wp_admin_bar->user->blogs as $blog ) {
+		/** @var null|object{blogs?: list<object{userblog_id?:int}>} $user */
+		$user  = ! empty( $wp_admin_bar->user ) ? $wp_admin_bar->user : null;
+		$blogs = ! empty( $user ) && ! empty( $user->blogs ) ? $user->blogs : array();
+		foreach ( $blogs as $blog ) {
+			if ( empty( $blog->userblog_id ) ) {
+				continue;
+			}
 
 			if ( is_multisite() ) {
 				switch_to_blog( $blog->userblog_id );
-			}//end if
+			}
 
-			if ( ! nc_get_site_id() || ! nc_can_current_user_use_plugin() ) {
+			if ( ! nelio_content_get_site_id() || ! nelio_content_can_current_user_use_plugin() ) {
 				continue;
-			}//end if
+			}
 
 			$wp_admin_bar->add_node(
 				array(
@@ -114,21 +140,32 @@ class Nelio_Content_Admin {
 				)
 			);
 
-		}//end foreach
+		}
 
 		if ( is_multisite() ) {
 			switch_to_blog( $original_blog_id );
-		}//end if
-	}//end add_calendar_in_admin_bar()
+		}
+	}
 
 
+	/**
+	 * Callback to init pages.
+	 *
+	 * @return void
+	 */
 	public function init_pages() {
 
 		if ( ! nelio_content()->is_ready() ) {
 			$page = new Nelio_Content_Welcome_Page();
 			$page->init();
 			return;
-		}//end if
+		}
+
+		if ( nelio_content()->is_wizard_requested() ) {
+			$page = new Nelio_Content_Wizard_Page();
+			$page->init();
+			return;
+		}
 
 		$page = new Nelio_Content_Calendar_Page();
 		$page->init();
@@ -162,8 +199,13 @@ class Nelio_Content_Admin {
 
 		$page = new Nelio_Content_Plugin_List_Page();
 		$page->init();
-	}//end init_pages()
+	}
 
+	/**
+	 * Callback to register assets.
+	 *
+	 * @return void
+	 */
 	public function register_assets() {
 
 		$url = nelio_content()->plugin_url;
@@ -178,6 +220,7 @@ class Nelio_Content_Admin {
 			'nelio-content-post-quick-editor',
 			'nelio-content-premium-hooks-for-pages',
 			'nelio-content-social-message-editor',
+			'nelio-content-social-profiles-manager',
 			'nelio-content-social-timeline',
 			'nelio-content-task-editor',
 			'nelio-content-utils',
@@ -185,34 +228,43 @@ class Nelio_Content_Admin {
 
 		foreach ( $scripts as $script ) {
 			$file_without_ext = preg_replace( '/^nelio-content-/', '', $script );
-			nc_register_script_with_auto_deps( $script, $file_without_ext, true );
-		}//end foreach
+			$file_without_ext = is_string( $file_without_ext ) ? $file_without_ext : '';
+			nelio_content_register_script_with_auto_deps( $script, $file_without_ext, true );
+		}
 
 		wp_register_style(
 			'nelio-content-components',
 			$url . '/assets/dist/css/components.css',
 			array( 'wp-admin', 'wp-components' ),
-			nc_get_script_version( 'components' )
+			nelio_content_get_script_version( 'components' )
 		);
 
-		wp_register_style( 'nelio-content-colored-post', false ); // phpcs:ignore
+		wp_register_style(
+			'nelio-content-social-profiles-manager',
+			$url . '/assets/dist/css/social-profiles-manager.css',
+			array( 'wp-admin', 'wp-components', 'nelio-content-components' ),
+			nelio_content_get_script_version( 'social-profiles-manager' )
+		);
+
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_style( 'nelio-content-colored-post', false );
 		wp_add_inline_style( 'nelio-content-colored-post', $this->get_post_status_colors_style() );
 
 		$settings    = Nelio_Content_Settings::instance();
 		$post_helper = Nelio_Content_Post_Helper::instance();
 
 		$plugin_settings = array(
-			'activePromos'            => nc_get_active_promos(),
-			'apiRoot'                 => nc_get_api_url( '', 'browser' ),
+			'activePromos'            => nelio_content_get_active_promos(),
+			'apiRoot'                 => nelio_content_get_api_url( '', 'browser' ),
 			'areAutoTutorialsEnabled' => $settings->get( 'are_auto_tutorials_enabled' ),
-			'authenticationToken'     => nc_generate_api_auth_token(),
+			'authenticationToken'     => nelio_content_generate_api_auth_token(),
 			'isGAConnected'           => $this->is_ga_connected(),
-			'limits'                  => nc_get_site_limits(),
+			'limits'                  => nelio_content_get_site_limits(),
 			'nonReferenceDomains'     => $post_helper->get_non_reference_domains(),
 			'pluginUrl'               => untrailingslashit( nelio_content()->plugin_url ),
 			'premiumStatus'           => $this->get_premium_status(),
-			'subscriptionPlan'        => nc_get_subscription() ? nc_get_subscription() : 'none',
-			'seriesTaxonomySlug'      => $settings->get( 'series_taxonomy_slug', 'series' ),
+			'subscriptionPlan'        => nelio_content_get_subscription() ? nelio_content_get_subscription() : 'none',
+			'seriesTaxonomySlug'      => $settings->get( 'series_taxonomy_slug' ),
 		);
 
 		$site_settings = array(
@@ -220,20 +272,22 @@ class Nelio_Content_Admin {
 			'adminUrl'           => admin_url(),
 			'firstDayOfWeek'     => $this->get_first_day_of_week(),
 			'homeUrl'            => home_url(),
-			'id'                 => nc_get_site_id(),
+			'id'                 => nelio_content_get_site_id(),
 			'isMultiAuthor'      => $this->is_multi_author(),
-			'language'           => nc_get_language(),
+			'isStaging'          => nelio_content_is_staging(),
+			'language'           => nelio_content_get_language(),
 			'now'                => gmdate( 'c' ),
 			'postTypes'          => $this->get_post_types(),
 			'postTypesByContext' => $this->get_post_types_by_context(),
 			'restUrl'            => untrailingslashit( get_rest_url() ),
 			'roles'              => $this->get_roles(),
-			'timezone'           => nc_get_timezone(),
+			'timezone'           => nelio_content_get_timezone(),
 		);
 
 		$user_settings = array(
 			'id'                             => get_current_user_id(),
-			'pluginPermission'               => nc_can_current_user_manage_plugin() ? 'manage' : 'use',
+			'role'                           => nelio_content_get_current_user_role(),
+			'pluginPermission'               => nelio_content_can_current_user_manage_plugin() ? 'manage' : 'use',
 			'postTypeCapabilities'           => $this->get_post_type_capabilities(),
 			'socialEditorPermission'         => nelio_content_get_social_editor_permission(),
 			'taskEditorPermission'           => $this->get_task_editor_permission(),
@@ -259,7 +313,6 @@ class Nelio_Content_Admin {
 			ncdata.getAutomationGroups();
 		} )();';
 
-
 		wp_add_inline_script(
 			'nelio-content-data',
 			sprintf(
@@ -272,15 +325,25 @@ class Nelio_Content_Admin {
 				wp_json_encode( get_option( 'nc_feeds', array() ) )
 			)
 		);
-	}//end register_assets()
+	}
 
+	/**
+	 * Callback to enqueue media scripts.
+	 *
+	 * @return void
+	 */
 	public function maybe_enqueue_media_scripts() {
 
 		if ( wp_script_is( 'nelio-content-components' ) ) {
 			wp_enqueue_media();
-		}//end if
-	}//end maybe_enqueue_media_scripts()
+		}
+	}
 
+	/**
+	 * Callback to enqueue editor dialog styles.
+	 *
+	 * @return void
+	 */
 	public function maybe_enqueue_editor_dialog_styles() {
 
 		$url   = nelio_content()->plugin_url;
@@ -291,98 +354,113 @@ class Nelio_Content_Admin {
 					"nelio-content-{$file}",
 					"{$url}/assets/dist/css/{$file}.css",
 					array( 'nelio-content-components' ),
-					nc_get_script_version( $file )
+					nelio_content_get_script_version( $file )
 				);
-			}//end if
-		}//end foreach
-	}//end maybe_enqueue_editor_dialog_styles()
+			}
+		}
+	}
 
+	/**
+	 * Gets settings capability.
+	 *
+	 * @return 'read'|'nelio-content-invalid-capability'
+	 */
 	public function get_settings_capability() {
-		return nc_can_current_user_manage_plugin() ? 'read' : 'invalid-capability';
-	}//end get_settings_capability()
+		return nelio_content_can_current_user_manage_plugin() ? 'read' : 'nelio-content-invalid-capability';
+	}
 
-	public function add_workaround_styles() {
-		echo '<style>';
-		echo '[class*=nelio-content] button.components-button.has-icon .dashicon { margin: 0; padding: 0; }';
-		echo 'button.components-button.has-icon[aria-label*="Nelio Content"] .dashicon { margin: 0; padding: 0; }';
-		echo '</style>';
-	}//end add_workaround_styles()
-
+	/**
+	 * Returns the plugin’s icon.
+	 *
+	 * @return string
+	 */
 	private function get_plugin_icon() {
 
 		$svg_icon_file = nelio_content()->plugin_path . '/assets/dist/images/logo.svg';
 		if ( ! file_exists( $svg_icon_file ) ) {
-			return false;
-		}//end if
+			return 'admin-generic';
+		}
 
-		return 'data:image/svg+xml;base64,' . base64_encode( file_get_contents( $svg_icon_file ) ); // phpcs:ignore
-	}//end get_plugin_icon()
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$icon = file_get_contents( $svg_icon_file );
+		if ( empty( $icon ) ) {
+			return 'admin-generic';
+		}
 
+		return 'data:image/svg+xml;base64,' . base64_encode( $icon );
+	}
+
+	/**
+	 * Gets list of active plugins.
+	 *
+	 * @return list<string>
+	 */
 	private function get_active_plugins() {
-		$clean_extension = function ( $plugin ) {
-			return substr( $plugin, 0, -4 );
-		};
-
 		$plugins = array_keys( get_plugins() );
 		$actives = array_map( 'is_plugin_active', $plugins );
 		$plugins = array_combine( $plugins, $actives );
 		$plugins = array_keys( array_filter( $plugins ) );
-		$plugins = array_map( $clean_extension, $plugins );
-
+		$plugins = array_map( fn( $p ) => substr( $p, 0, -4 ), $plugins );
 		return $plugins;
-	}//end get_active_plugins()
+	}
 
+	/**
+	 * Whether GA is connected.
+	 *
+	 * @return bool
+	 */
 	private function is_ga_connected() {
 		$settings = Nelio_Content_Settings::instance();
-		$ga_view  = $settings->get( 'ga4_property_id' );
-		return ! empty( $ga_view );
-	}//end is_ga_connected()
+		$ga_data  = $settings->get( 'google_analytics_data' );
+		return ! empty( $ga_data['id'] );
+	}
 
+	/**
+	 * Gets post types by context.
+	 *
+	 * @return array<TPost_Type_Context,list<string>>
+	 */
 	private function get_post_types_by_context() {
-		$contexts   = array(
-			'analytics',
-			'calendar',
-			'comments',
-			'content-board',
-			'efi',
-			'future-actions',
-			'notifications',
-			'quality-checks',
-			'references',
-			'series',
-			'social',
-			'tasks',
-			'wp',
+		return array(
+			'analytics'      => nelio_content_get_post_types( 'analytics' ),
+			'calendar'       => nelio_content_get_post_types( 'calendar' ),
+			'comments'       => nelio_content_get_post_types( 'comments' ),
+			'content-board'  => nelio_content_get_post_types( 'content-board' ),
+			'efi'            => nelio_content_get_post_types( 'efi' ),
+			'future-actions' => nelio_content_get_post_types( 'future-actions' ),
+			'notifications'  => nelio_content_get_post_types( 'notifications' ),
+			'quality-checks' => nelio_content_get_post_types( 'quality-checks' ),
+			'references'     => nelio_content_get_post_types( 'references' ),
+			'series'         => nelio_content_get_post_types( 'series' ),
+			'social'         => nelio_content_get_post_types( 'social' ),
+			'tasks'          => nelio_content_get_post_types( 'tasks' ),
+			'wp'             => nelio_content_get_post_types( 'wp' ),
 		);
-		$post_types = array_map( 'nelio_content_get_post_types', $contexts );
-		return array_combine( $contexts, $post_types );
-	}//end get_post_types_by_context()
+	}
 
+	/**
+	 * Gets post types.
+	 *
+	 * @return array<string,TPost_Type>
+	 */
 	private function get_post_types() {
 		$post_types = $this->get_post_types_by_context();
 		$post_types = array_values( array_unique( \Nelio_Content\Helpers\flatten( $post_types ) ) );
-		$post_types = array_values( array_filter( array_map( // phpcs:ignore
-			function ( $name ) {
-
-				$type = get_post_type_object( $name );
-				if ( empty( $type ) ) {
-					return false;
-				}//end if
-
-				$remove_colors = fn( $t ) => array_filter( $t, fn( $k ) => 'colors' !== $k, ARRAY_FILTER_USE_KEY );
+		$post_types = array_map( fn( $name ) => get_post_type_object( $name ), $post_types );
+		/** @var list<\WP_Post_Type> $post_types */
+		$post_types = array_values( array_filter( $post_types ) );
+		$post_types = array_map(
+			function ( $type ) {
 				return array(
 					'name'     => $type->name,
 					'labels'   => array(
-						'all'      => $type->labels->all_items,
-						'edit'     => $type->labels->edit_item,
-						'new'      => $type->labels->add_new_item,
-						'plural'   => $type->labels->name,
-						'singular' => $type->labels->singular_name,
+						'all'      => is_string( $type->labels->all_items ) ? $type->labels->all_items : '',
+						'edit'     => is_string( $type->labels->edit_item ) ? $type->labels->edit_item : '',
+						'new'      => is_string( $type->labels->add_new_item ) ? $type->labels->add_new_item : '',
+						'plural'   => is_string( $type->labels->name ) ? $type->labels->name : '',
+						'singular' => is_string( $type->labels->singular_name ) ? $type->labels->singular_name : '',
 					),
-					'statuses' => array_map(
-						$remove_colors,
-						nelio_content_get_post_statuses( $type->name )
-					),
+					'statuses' => nelio_content_get_post_statuses( $type->name ),
 					'supports' => array(
 						'author'        => post_type_supports( $type->name, 'author' ),
 						'title'         => post_type_supports( $type->name, 'title' ),
@@ -395,65 +473,92 @@ class Nelio_Content_Admin {
 				);
 			},
 			$post_types
-		) ) ); // phpcs:ignore
+		);
 
 		usort(
 			$post_types,
 			function ( $a, $b ) {
 				if ( $a['labels']['singular'] < $b['labels']['singular'] ) {
 					return -1;
-				}//end if
+				}
 				if ( $a['labels']['singular'] > $b['labels']['singular'] ) {
 					return 1;
-				}//end if
+				}
 				return 0;
 			}
 		);
 
-		return key_by( $post_types, 'name' );
-	}//end get_post_types()
+		return array_combine( array_map( fn( $t ) => $t['name'], $post_types ), $post_types );
+	}
 
+	/**
+	 * Gets roles.
+	 *
+	 * @return array<string,TRole>
+	 */
 	private function get_roles() {
 		$roles = wp_roles()->roles;
 		$roles = array_map(
 			function ( $role, $key ) {
+				/** @var array{name:string,capabilities:array<mixed>} $role */
+				/** @var string                                       $key  */
+
+				/** @var TRole */
 				return array(
-					'id'           => $key,
-					'name'         => translate_user_role( $role['name'] ),
-					'capabilities' => array_keys( array_filter( $role['capabilities'] ) ),
+					'id'      => $key,
+					'name'    => translate_user_role( $role['name'] ),
+					'isAdmin' => (
+						in_array( 'administrator', array_keys( array_filter( $role['capabilities'] ) ), true ) ||
+						in_array( 'manage_options', array_keys( array_filter( $role['capabilities'] ) ), true )
+					),
 				);
 			},
 			$roles,
 			array_keys( $roles )
 		);
 		asort( $roles );
-		return key_by( $roles, 'id' );
-	}//end get_roles()
 
+		$roles = array_values( $roles );
+		return array_combine( array_map( fn( $r ) => $r['id'], $roles ), $roles );
+	}
+
+	/**
+	 * Gets first day of the week.
+	 *
+	 * @return int
+	 */
 	private function get_first_day_of_week() {
+		$start_of_week = absint( get_option( 'start_of_week' ) ) % 7;
+
 		/**
 		 * Filters the first day of the week in the calendar view.
 		 *
-		 * @param number $first_day First day of week, from 0 to 6 (both included). 0 is Sunday.
+		 * @param int $start_of_week First day of week, from 0 to 6 (both included). 0 is Sunday.
 		 *
 		 * @since 2.0.21
 		 */
-		return absint( apply_filters( 'nelio_content_first_day_of_week_in_calendar', absint( get_option( 'start_of_week' ) ) ) ) % 7;
-	}//end get_first_day_of_week()
+		$start_of_week = apply_filters( 'nelio_content_first_day_of_week_in_calendar', $start_of_week );
+		return absint( $start_of_week ) % 7;
+	}
 
+	/**
+	 * Whether the site has multiple authors.
+	 *
+	 * @return bool
+	 */
 	private function is_multi_author() {
 
 		/**
 		 * Short-circuits the check to determine if site is multi author or not.
 		 *
-		 * @param boolean $is_multi_author whether site has multiple authors or not. Default: `null`.
+		 * @param boolean|null $is_multi_author whether site has multiple authors or not. Default: `null`.
 		 *
 		 * @since 2.3.4
 		 */
 		$short_circuit = apply_filters( 'nelio_content_is_multi_author', null );
 		if ( null !== $short_circuit ) {
 			return $short_circuit;
-		}//end if
+		}
 
 		$args = array(
 			'capability' => array( 'edit_posts' ),
@@ -461,6 +566,9 @@ class Nelio_Content_Admin {
 		);
 
 		$remove_users_sorting = function ( $results, $wp_user_query ) {
+			/** @var mixed         $results       */
+			/** @var WP_User_Query $wp_user_query */
+
 			$wp_user_query->query_orderby = '';
 			return $results;
 		};
@@ -470,12 +578,17 @@ class Nelio_Content_Admin {
 		remove_filter( 'users_pre_query', $remove_users_sorting, 10 );
 
 		return 1 < count( $authors );
-	}//end is_multi_author()
+	}
 
+	/**
+	 * Gets post type capabilities.
+	 *
+	 * @return array<string,list<TPost_Capability>>
+	 */
 	private function get_post_type_capabilities() {
-		$post_types = wp_list_pluck( $this->get_post_types(), 'name' );
+		$post_types = array_keys( $this->get_post_types() );
 
-		if ( nc_can_current_user_manage_plugin() ) {
+		if ( nelio_content_can_current_user_manage_plugin() ) {
 			$capabilities = array();
 			foreach ( $post_types as $name ) {
 				$capabilities[ $name ] = array(
@@ -487,41 +600,53 @@ class Nelio_Content_Admin {
 					'delete-own',
 					'delete-others',
 				);
-			}//end foreach
+			}
 			return $capabilities;
-		}//end if
+		}
 
 		$capabilities = array();
 		foreach ( $post_types as $name ) {
 			$type = get_post_type_object( $name );
 			if ( empty( $type ) ) {
 				continue;
-			}//end if
+			}
 
-			$capabilities[ $name ] = array_values( array_filter( // phpcs:ignore
-				array(
-					current_user_can( $type->cap->read ) ? 'read' : false,
-					current_user_can( $type->cap->edit_posts ) ? 'edit-own' : false,
-					current_user_can( $type->cap->edit_others_posts ) ? 'edit-others' : false,
-					current_user_can( $type->cap->create_posts ) ? 'create' : false,
-					current_user_can( $type->cap->publish_posts ) ? 'publish' : false,
-					current_user_can( $type->cap->delete_posts ) ? 'delete-own' : false,
-					current_user_can( $type->cap->delete_others_posts ) ? 'delete-others' : false,
-				)
-			) ); // phpcs:ignore
-		}//end foreach
+			$caps = array(
+				/** @phpstan-ignore-next-line argument.type */
+				current_user_can( $type->cap->read ) ? 'read' : false,
+				/** @phpstan-ignore-next-line argument.type */
+				current_user_can( $type->cap->edit_posts ) ? 'edit-own' : false,
+				/** @phpstan-ignore-next-line argument.type */
+				current_user_can( $type->cap->edit_others_posts ) ? 'edit-others' : false,
+				/** @phpstan-ignore-next-line argument.type */
+				current_user_can( $type->cap->create_posts ) ? 'create' : false,
+				/** @phpstan-ignore-next-line argument.type */
+				current_user_can( $type->cap->publish_posts ) ? 'publish' : false,
+				/** @phpstan-ignore-next-line argument.type */
+				current_user_can( $type->cap->delete_posts ) ? 'delete-own' : false,
+				/** @phpstan-ignore-next-line argument.type */
+				current_user_can( $type->cap->delete_others_posts ) ? 'delete-others' : false,
+			);
+
+			$capabilities[ $name ] = array_values( array_filter( $caps ) );
+		}
 
 		return $capabilities;
-	}//end get_post_type_capabilities()
+	}
 
+	/**
+	 * Gets task editor permission.
+	 *
+	 * @return 'none'|'post-type'|'all'
+	 */
 	private function get_task_editor_permission() {
 		$permission = 'none';
-		if ( nc_can_current_user_use_plugin() ) {
+		if ( nelio_content_can_current_user_use_plugin() ) {
 			$permission = 'post-type';
-		}//end if
-		if ( nc_can_current_user_manage_plugin() ) {
+		}
+		if ( nelio_content_can_current_user_manage_plugin() ) {
 			$permission = 'all';
-		}//end if
+		}
 
 		/**
 		 * Filters the required permission for the user to be able to edit tasks.
@@ -532,8 +657,8 @@ class Nelio_Content_Admin {
 		 * - `post-type`: the user can edit tasks related to a post type they can edit or tasks assigned to them
 		 * - `none`: the user can’t edit any tasks
 		 *
-		 * @param string $permission the required permisison. Possibe values are:
-		 * @param int    $user_id    current user id
+		 * @param 'none'|'post-type'|'all' $permission the required permisison. Possibe values are:
+		 * @param int                      $user_id    current user id
 		 *
 		 * @since 2.0.0
 		 */
@@ -541,54 +666,69 @@ class Nelio_Content_Admin {
 
 		if ( in_array( $new_permission, array( 'all', 'post-type', 'none' ), true ) ) {
 			$permission = $new_permission;
-		}//end if
+		}
 
 		return $permission;
-	}//end get_task_editor_permission()
+	}
 
+	/**
+	 * Gets premium editor permissions by type.
+	 *
+	 * @return array<string,'none'|'post-type'|'all'>
+	 */
 	private function get_premium_editor_permissions_by_type() {
 		/**
 		 * Filters premium editor permissions by type.
 		 *
-		 * @param array $permissions editor permissions by type.
+		 * @param array<string,'none'|'post-type'|'all'> $permissions editor permissions by type.
 		 *
 		 * @since 3.6.0
 		 */
 		return apply_filters( 'nelio_content_premium_editor_permissions_by_type', array() );
-	}//end get_premium_editor_permissions_by_type()
+	}
 
+	/**
+	 * Gets task presets.
+	 *
+	 * @return list<TTask_Preset>
+	 */
 	private function get_task_presets() {
 		$posts = get_posts(
 			array(
 				'fields'      => 'ids',
 				'post_type'   => 'nc_task_preset',
 				'post_status' => 'draft',
-				'numberposts' => Nelio_Content_Task_Preset::MAX_PRESETS, // phpcs:ignore
+				'numberposts' => Nelio_Content_Task_Preset::MAX_PRESETS,
 			)
 		);
 		$posts = array_map( fn( $p ) => new Nelio_Content_Task_Preset( $p ), $posts );
-		$posts = array_values( array_filter( $posts, not( 'is_wp_error' ) ) );
-		$posts = array_map( fn( $p ) => $p->json(), $posts );
+		$posts = array_filter( $posts, not( 'is_wp_error' ) );
+		$posts = array_values( array_map( fn( $p ) => $p->json(), $posts ) );
 		usort( $posts, fn( $a, $b ) => $a['id'] - $b['id'] );
 		return $posts;
-	}//end get_task_presets()
+	}
 
+	/**
+	 * Returns CSS style to colorize post statuses.
+	 *
+	 * @return string
+	 */
 	private function get_post_status_colors_style() {
 		$post_types = $this->get_post_types_by_context();
 		$post_types = array_values( array_unique( \Nelio_Content\Helpers\flatten( $post_types ) ) );
 
 		$statuses_by_type = array_combine(
 			$post_types,
-			array_map( 'nelio_content_get_post_statuses', $post_types )
+			array_map( fn( $t ) => nelio_content_get_post_statuses( $t ), $post_types )
 		);
 
 		$default_statuses = array_values( $statuses_by_type )[0];
 		if ( empty( $default_statuses ) ) {
 			return '';
-		}//end if
+		}
 
 		$default_statuses = array_combine(
-			wp_list_pluck( $default_statuses, 'slug' ),
+			array_map( fn( $ds ) => $ds['slug'], $default_statuses ),
 			$default_statuses
 		);
 
@@ -596,8 +736,8 @@ class Nelio_Content_Admin {
 			fn ( $statuses ) => array_filter(
 				$statuses,
 				fn( $status ) => (
-					ncget( $status, 'colors.main' ) !== ncget( $default_statuses, "{$status['slug']}.colors.main" ) ||
-					ncget( $status, 'colors.background' ) !== ncget( $default_statuses, "{$status['slug']}.colors.background" )
+					( $status['colors']['main'] ?? '' ) !== ( $default_statuses[ $status['slug'] ]['colors']['main'] ?? '' ) ||
+					( $status['colors']['background'] ?? '' ) !== ( $default_statuses[ $status['slug'] ]['colors']['background'] ?? '' )
 				)
 			),
 			$statuses_by_type
@@ -614,31 +754,34 @@ class Nelio_Content_Admin {
 				$result .= sprintf(
 					'%1$s{background-color:%2$s;border-top-color:%3$s}',
 					"{$type_selector}[data-status=\"{$status['slug']}\"]",
-					ncget( $status, 'colors.background' ),
-					ncget( $status, 'colors.main' )
+					$status['colors']['background'] ?? '',
+					$status['colors']['main'] ?? ''
 				);
-			}//end foreach
-		}//end foreach
+			}
+		}
 
 		return $result;
-	}//end get_post_status_colors_style()
+	}
 
+	/**
+	 * Gets premium status.
+	 *
+	 * @return TPremium_Status
+	 */
 	private function get_premium_status() {
 		$premium_slug         = 'nelio-content-premium/nelio-content-premium.php';
 		$installed_plugins    = get_plugins();
 		$is_premium_installed = array_key_exists( $premium_slug, $installed_plugins );
 		$status               = $is_premium_installed ? 'inactive' : 'uninstalled';
-		$status               = nc_is_subscribed() ? $status : 'unsubscribed';
+		$status               = nelio_content_is_subscribed() ? $status : 'unsubscribed';
 
 		/**
 		 * Filters premium status.
 		 *
-		 * Possible statuses: `uninstalled`, `inactive`, `unsubscribed`, `invalid-version`, or `ready`.
-		 *
-		 * @param string $status Status of the premium plugin.
+		 * @param TPremium_Status $status Status of the premium plugin.
 		 *
 		 * @since 3.6.0
 		 */
 		return apply_filters( 'nelio_content_premium_status', $status );
-	}//end get_premium_status()
-}//end class
+	}
+}

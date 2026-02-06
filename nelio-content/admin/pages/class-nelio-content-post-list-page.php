@@ -8,9 +8,7 @@
  * @since      2.0.8
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class customizes the post list screen.
@@ -22,11 +20,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Nelio_Content_Post_List_Page {
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_social_assets' ) );
 
-		add_filter( 'manage_pages_columns', array( $this, 'add_page_column_for_auto_share' ), 10, 2 );
+		add_filter( 'manage_pages_columns', array( $this, 'add_page_column_for_auto_share' ) );
 		add_action( 'manage_pages_custom_column', array( $this, 'add_value_in_column_for_auto_share' ), 10, 2 );
 
 		add_filter( 'manage_posts_columns', array( $this, 'add_post_column_for_auto_share' ), 10, 2 );
@@ -40,13 +43,18 @@ class Nelio_Content_Post_List_Page {
 		add_filter( 'post_row_actions', array( $this, 'customize_row_actions' ), 10, 2 );
 		add_filter( 'page_row_actions', array( $this, 'customize_row_actions' ), 10, 2 );
 		add_filter( 'display_post_states', array( $this, 'display_post_custom_states' ), 10, 2 );
-	}//end init()
+	}
 
+	/**
+	 * Callback to enqueue social assets.
+	 *
+	 * @return void
+	 */
 	public function maybe_enqueue_social_assets() {
 
 		if ( ! $this->is_current_screen_social_post_list() ) {
 			return;
-		}//end if
+		}
 
 		$custom_css  = '';
 		$custom_css .= '.column-nc_auto_share { width: 10% !important; }';
@@ -81,10 +89,12 @@ class Nelio_Content_Post_List_Page {
 			'nelio-content-post-list-page',
 			nelio_content()->plugin_url . '/assets/dist/css/post-list-page.css',
 			array( 'nelio-content-components' ),
-			nc_get_script_version( 'post-list-page' )
+			nelio_content_get_script_version( 'post-list-page' )
 		);
 
-		nc_enqueue_script_with_auto_deps( 'nelio-content-post-list-page', 'post-list-page', true );
+		nelio_content_enqueue_script_with_auto_deps( 'nelio-content-post-list-page', 'post-list-page', true );
+
+		/** @var string $post_type */
 		global $post_type;
 		wp_add_inline_script(
 			'nelio-content-post-list-page',
@@ -94,37 +104,58 @@ class Nelio_Content_Post_List_Page {
 					array(
 						'customStatuses' => array_values(
 							array_filter(
-								nelio_content_get_post_custom_statuses( $post_type ),
-								function ( $status ) {
-									return $status['available'];
-								}
+								$this->get_post_custom_statuses( $post_type ),
+								fn ( $status ) => ! empty( $status['available'] )
 							)
 						),
 					)
 				)
 			)
 		);
-	}//end maybe_enqueue_social_assets()
+	}
 
+	/**
+	 * Callback to add auto share column on pages.
+	 *
+	 * @param array<string,string> $columns Columns.
+	 *
+	 * @return array<string,string>
+	 */
 	public function add_page_column_for_auto_share( $columns ) {
 		return $this->add_post_column_for_auto_share( $columns, 'page' );
-	}//end add_page_column_for_auto_share()
+	}
 
+	/**
+	 * Callback to add auto share column.
+	 *
+	 * @param array<string,string> $columns   Columns.
+	 * @param string               $post_type Post type.
+	 *
+	 * @return array<string,string>
+	 */
 	public function add_post_column_for_auto_share( $columns, $post_type ) {
 		$post_types = nelio_content_get_post_types( 'social' );
 		if ( ! in_array( $post_type, $post_types, true ) ) {
 			return $columns;
-		}//end if
+		}
 
 		$columns['nc_auto_share'] = _x( 'Auto Share', 'text', 'nelio-content' );
 		return $columns;
-	}//end add_post_column_for_auto_share()
+	}
 
+	/**
+	 * Callback to add value in auto share column.
+	 *
+	 * @param string $column  Column name.
+	 * @param int    $post_id Post ID.
+	 *
+	 * @return void
+	 */
 	public function add_value_in_column_for_auto_share( $column, $post_id ) {
 
 		if ( 'nc_auto_share' !== $column ) {
 			return;
-		}//end if
+		}
 
 		$aux = Nelio_Content_Post_Helper::instance();
 		if ( ! $aux->is_auto_share_enabled( $post_id ) ) {
@@ -134,15 +165,21 @@ class Nelio_Content_Post_List_Page {
 				esc_html_x( 'Disabled', 'text (auto share)', 'nelio-content' )
 			);
 			return;
-		}//end if
+		}
 
 		$end_date = $aux->get_auto_share_end_date( $post_id );
 		$cur_date = gmdate( 'Y-m-d' );
 
 		if ( 'never' === $end_date ) {
 			printf(
-				/* translators: %s: Classname. */
-				_x( '<span class="%s">Enabled</span><br>forever', 'text (auto share)', 'nelio-content' ), // phpcs:ignore
+				wp_kses(
+					/* translators: %s: Classname. */
+					_x( '<span class="%s">Enabled</span><br>forever', 'text (auto share)', 'nelio-content' ),
+					array(
+						'span' => array( 'class' => true ),
+						'br'   => array(),
+					)
+				),
 				esc_attr( 'nc-auto-share nc-auto-share--is-enabled' )
 			);
 		} elseif ( 'unknown' === $end_date ) {
@@ -153,8 +190,14 @@ class Nelio_Content_Post_List_Page {
 			);
 		} elseif ( $cur_date <= $end_date ) {
 			printf(
-				/* translators: %1$s: Classname. %2$s: Date. */
-				_x( '<span class="%1$s">Enabled</span><br>until %2$s', 'text (auto share)', 'nelio-content' ), // phpcs:ignore
+				wp_kses(
+					/* translators: %1$s: Classname. %2$s: Date. */
+					_x( '<span class="%1$s">Enabled</span><br>until %2$s', 'text (auto share)', 'nelio-content' ),
+					array(
+						'span' => array( 'class' => true ),
+						'br'   => array(),
+					)
+				),
 				esc_attr( 'nc-auto-share nc-auto-share--is-enabled' ),
 				esc_html( $end_date )
 			);
@@ -163,39 +206,59 @@ class Nelio_Content_Post_List_Page {
 				'<span class="%1$s">%2$s</span>',
 				esc_attr( 'nc-auto-share nc-auto-share--is-finished' ),
 				sprintf(
-					/* translators: %s: Date. */
-					_x( 'Finished<br>on %s', 'text (auto share)', 'nelio-content' ), // phpcs:ignore
+					wp_kses(
+						/* translators: %s: Date. */
+						_x( 'Finished<br>on %s', 'text (auto share)', 'nelio-content' ),
+						array( 'br' => array() )
+					),
 					esc_html( $end_date )
 				)
 			);
-		}//end if
-	}//end add_value_in_column_for_auto_share()
+		}
+	}
 
-	public function add_class_with_auto_share_info( $classes, $_, $post_id ) {
+	/**
+	 * Callback to add class with auto share info.
+	 *
+	 * @param list<string> $classes Classes.
+	 * @param list<string> $css_class CSS class.
+	 * @param int          $post_id Post ID.
+	 *
+	 * @return list<string>
+	 */
+	public function add_class_with_auto_share_info( $classes, $css_class, $post_id ) {
 
 		if ( ! is_admin() ) {
 			return $classes;
-		}//end if
+		}
 
 		$aux = Nelio_Content_Post_Helper::instance();
 		if ( $aux->is_auto_share_enabled( $post_id ) ) {
 			$end_mode = $aux->get_auto_share_end_mode( $post_id );
 			array_push( $classes, 'nc-is-auto-shared', "nc-auto-share-end--is-{$end_mode}" );
-		}//end if
+		}
 
 		return $classes;
-	}//end add_class_with_auto_share_info()
+	}
 
+	/**
+	 * Callback to add auto share settings.
+	 *
+	 * @param string $column    Column name.
+	 * @param string $post_type Post type.
+	 *
+	 * @return void
+	 */
 	public function maybe_add_quick_or_bulk_edit_for_auto_share( $column, $post_type ) {
 
 		if ( 'nc_auto_share' !== $column ) {
 			return;
-		}//end if
+		}
 
 		$post_types = nelio_content_get_post_types( 'social' );
 		if ( ! in_array( $post_type, $post_types, true ) ) {
 			return;
-		}//end if
+		}
 
 		$settings = Nelio_Content_Settings::instance();
 		echo '<fieldset class="inline-edit-col-left clear">';
@@ -205,60 +268,87 @@ class Nelio_Content_Post_List_Page {
 			'<div><input type="checkbox" name="nc_auto_share" %s /> <label for="nc_auto_share">%s</label>%s</div>',
 			checked( 'include-in-auto-share', $settings->get( 'auto_share_default_mode' ), false ),
 			esc_html_x( 'Auto share on social media with Nelio Content', 'command', 'nelio-content' ),
-			$this->get_auto_share_end_select() // phpcs:ignore
+			wp_kses(
+				$this->get_auto_share_end_select(),
+				array(
+					'div'    => array( 'class' => true ),
+					'select' => array( 'name' => true ),
+					'option' => array( 'value' => true ),
+				)
+			)
 		);
 		echo '</div></fieldset>';
-	}//end maybe_add_quick_or_bulk_edit_for_auto_share()
+	}
 
+	/**
+	 * Callback to update auto share settings.
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post.
+	 *
+	 * @return void
+	 */
 	public function update_auto_share_on_quick_or_bulk_edit( $post_id, $post ) {
 
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
-		}//end if
+		}
 
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
-		}//end if
+		}
 
 		$post_types = nelio_content_get_post_types( 'social' );
 		if ( ! in_array( $post->post_type, $post_types, true ) ) {
 			return;
-		}//end if
+		}
 
-		if ( ! isset( $_REQUEST['nelio-content-quick-edit-post-nonce'] ) ) { // phpcs:ignore
+		if ( ! isset( $_REQUEST['nelio-content-quick-edit-post-nonce'] ) ) {
 			return;
-		}//end if
+		}
 
-		$nonce = sanitize_text_field( wp_unslash( $_REQUEST['nelio-content-quick-edit-post-nonce'] ) ); // phpcs:ignore
+		$nonce = sanitize_text_field( wp_unslash( $_REQUEST['nelio-content-quick-edit-post-nonce'] ) );
 		if ( ! wp_verify_nonce( $nonce, 'nelio_content_quick_edit_post' ) ) {
 			return;
-		}//end if
+		}
 
 		$auto_share = false;
-		if ( isset( $_REQUEST['nc_auto_share'] ) ) { // phpcs:ignore
-			$auto_share = 'on' === sanitize_text_field( $_REQUEST['nc_auto_share'] ); // phpcs:ignore
-		}//end if
+		if ( isset( $_REQUEST['nc_auto_share'] ) ) {
+			$auto_share = 'on' === sanitize_text_field( wp_unslash( $_REQUEST['nc_auto_share'] ) );
+		}
 
-		$end_mode = 'default';
-		if ( isset( $_REQUEST['nc_auto_share_end_mode'] ) ) { // phpcs:ignore
-			$end_mode = sanitize_text_field( $_REQUEST['nc_auto_share_end_mode'] ); // phpcs:ignore
-		}//end if
+		$end_mode = 'never';
+		if ( isset( $_REQUEST['nc_auto_share_end_mode'] ) ) {
+			$end_mode  = sanitize_text_field( wp_unslash( $_REQUEST['nc_auto_share_end_mode'] ) );
+			$end_modes = array_map( fn( $m ) => $m['value'], nelio_content_get_auto_share_end_modes() );
+			if ( ! in_array( $end_mode, $end_modes, true ) ) {
+				$end_mode = 'never';
+			}
+		}
 
 		$aux = Nelio_Content_Post_Helper::instance();
 		$aux->enable_auto_share( $post_id, $auto_share );
 		$aux->update_auto_share_end_mode( $post_id, $end_mode );
-	}//end update_auto_share_on_quick_or_bulk_edit()
+	}
 
+	/**
+	 * Callback to customize row actions.
+	 *
+	 * @param array<string,string> $actions Actions.
+	 * @param WP_Post              $post    Post.
+	 *
+	 * @return array<string,string>
+	 */
 	public function customize_row_actions( $actions, $post ) {
 		$post_types = nelio_content_get_post_types( 'social' );
 		if ( ! in_array( $post->post_type, $post_types, true ) ) {
 			return $actions;
-		}//end if
+		}
 
 		$social_permission = nelio_content_get_social_editor_permission();
 		$can_edit_social   = (
-			'all' === $social_permission ||
-			( 'post-type' === $social_permission && current_user_can( 'edit_post', $post->ID ) )
+		'all' === $social_permission ||
+		( 'post-type' === $social_permission && current_user_can( 'edit_post', $post->ID ) )
 		);
 
 		if ( $can_edit_social ) {
@@ -273,50 +363,58 @@ class Nelio_Content_Post_List_Page {
 				'<span>%s</span>',
 				esc_html( _x( 'Social Media', 'text', 'nelio-content' ) )
 			);
-		}//end if
+		}
 
 		if ( empty( $actions['view'] ) ) {
 			return $actions;
-		}//end if
+		}
 
-		$custom_statuses = nelio_content_get_post_custom_statuses( $post->post_type );
+		$custom_statuses = $this->get_post_custom_statuses( $post->post_type );
 		$custom_statuses = wp_list_pluck( $custom_statuses, 'slug' );
 		$custom_statuses = array_values( array_unique( $custom_statuses ) );
-		if ( ! empty( $custom_statuses ) && in_array( $post->post_status, $custom_statuses, true ) ) {
-			$title           = _draft_or_post_title( $post );
-			$preview_link    = get_preview_post_link( $post );
-			$actions['view'] = sprintf(
-				'<a href="%s" rel="bookmark" aria-label="%s">%s</a>',
-				esc_url( $preview_link ),
-				/* translators: %s: Post title. */
-				esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;' ), $title ) ),
-				__( 'Preview' )
-			);
-		}//end if
+		if ( in_array( $post->post_status, $custom_statuses, true ) ) {
+			$title        = _draft_or_post_title( $post );
+			$preview_link = get_preview_post_link( $post );
+			if ( $preview_link ) {
+				$actions['view'] = sprintf(
+					'<a href="%s" rel="bookmark" aria-label="%s">%s</a>',
+					esc_url( $preview_link ),
+					// phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment, WordPress.WP.I18n.MissingArgDomain
+					esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;' ), $title ) ),
+					// phpcs:ignore WordPress.WP.I18n.MissingArgDomain
+					__( 'Preview' )
+				);
+			}
+		}
 
 		return $actions;
-	}//end customize_row_actions()
+	}
 
+	/**
+	 * Callback function to display custom post states.
+	 *
+	 * @param array<string,string> $states States.
+	 * @param WP_Post              $post   Post.
+	 *
+	 * @return array<string,string>
+	 */
 	public function display_post_custom_states( $states, $post ) {
-		if ( empty( $post ) ) {
-			return $states;
-		}//end if
-
-		$custom_statuses       = nelio_content_get_post_custom_statuses( $post->post_type );
+		$custom_statuses       = $this->get_post_custom_statuses( $post->post_type );
 		$custom_statuses_slugs = wp_list_pluck( $custom_statuses, 'slug' );
 		$custom_statuses_slugs = array_values( array_unique( $custom_statuses_slugs ) );
 
 		if ( empty( $custom_statuses_slugs ) ) {
 			return $states;
-		}//end if
+		}
 
 		if ( ! in_array( $post->post_status, $custom_statuses_slugs, true ) ) {
 			return $states;
-		}//end if
+		}
 
-		if ( isset( $_REQUEST['post_status'] ) && $post->post_status === $_REQUEST['post_status'] ) { // phpcs:ignore
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_REQUEST['post_status'] ) && $post->post_status === $_REQUEST['post_status'] ) {
 			return $states;
-		}//end if
+		}
 
 		if ( in_array( $post->post_status, $custom_statuses_slugs, true ) ) {
 			$custom_status = array_filter(
@@ -328,14 +426,19 @@ class Nelio_Content_Post_List_Page {
 			$custom_status = array_shift( $custom_status );
 			if ( ! empty( $custom_status['name'] ) ) {
 				$states[ $post->post_status ] = $custom_status['name'];
-			}//end if
-		}//end if
+			}
+		}
 
 		return $states;
-	}//end display_post_custom_states()
+	}
 
+	/**
+	 * Returns auto share end mode selector.
+	 *
+	 * @return string
+	 */
 	private function get_auto_share_end_select() {
-		$options = nc_get_auto_share_end_modes();
+		$options = nelio_content_get_auto_share_end_modes();
 
 		$res = '<div class="nc-auto-share-end"><select name="nc_auto_share_end_mode">';
 		foreach ( $options as $option ) {
@@ -344,30 +447,55 @@ class Nelio_Content_Post_List_Page {
 				esc_attr( $option['value'] ),
 				esc_html( $option['label'] )
 			);
-		}//end foreach
+		}
 		$res .= '</select></div>';
 		return $res;
-	}//end get_auto_share_end_select()
+	}
 
+	/**
+	 * Returns custom statuses for the given post type.
+	 *
+	 * @param string $post_type Post type.
+	 *
+	 * @return list<TPost_Status>
+	 */
+	private function get_post_custom_statuses( $post_type ) {
+		$post_statuses   = nelio_content_get_post_statuses( $post_type );
+		$custom_statuses = array_values(
+			array_filter(
+				$post_statuses,
+				function ( $status ) {
+					return ! in_array( $status['slug'], array( 'draft', 'pending', 'future', 'private', 'publish', 'trash', 'nelio-content-unscheduled' ), true );
+				}
+			)
+		);
+		return $custom_statuses;
+	}
+
+	/**
+	 * Whether current screen is post list and the post type is included in Nelio Content’s social context.
+	 *
+	 * @return bool
+	 */
 	private function is_current_screen_social_post_list() {
 
 		$screen = get_current_screen();
 		if ( ! isset( $screen->id ) ) {
 			return false;
-		}//end if
+		}
 
 		$screen = $screen->id;
 
 		if ( strpos( $screen, 'edit-' ) !== 0 ) {
 			return false;
-		}//end if
+		}
 
 		$post_types = nelio_content_get_post_types( 'social' );
 		$screen     = preg_replace( '/^edit-/', '', $screen );
 		if ( ! in_array( $screen, $post_types, true ) ) {
 			return false;
-		}//end if
+		}
 
 		return true;
-	}//end is_current_screen_social_post_list()
-}//end class
+	}
+}

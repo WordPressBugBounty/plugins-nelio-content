@@ -21,24 +21,22 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 			'nelio-content',
 			'nelio-content-settings',
 			_x( 'Settings', 'text', 'nelio-content' ),
-			nc_can_current_user_manage_plugin()
+			nelio_content_can_current_user_manage_plugin()
 		);
-	}//end __construct()
+	}
 
 	// @Overrides
-	// phpcs:ignore
 	protected function add_page_specific_hooks() {
 		remove_all_filters( 'admin_notices' );
-	}//end add_page_specific_hooks()
+	}
 
 	// @Implements
-	// phpcs:ignore
 	public function enqueue_assets() {
 
 		$screen = get_current_screen();
-		if ( 'nelio-content_page_nelio-content-settings' !== $screen->id ) {
+		if ( empty( $screen ) || 'nelio-content_page_nelio-content-settings' !== $screen->id ) {
 			return;
-		}//end if
+		}
 
 		$settings = Nelio_Content_Settings::instance();
 		wp_enqueue_script( $settings->get_generic_script_name() );
@@ -46,20 +44,19 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 		wp_enqueue_style(
 			'nelio-content-settings-page',
 			nelio_content()->plugin_url . '/assets/dist/css/settings-page.css',
-			array( 'nelio-content-components' ),
-			nc_get_script_version( 'settings-page' )
+			array( 'nelio-content-components', 'nelio-content-social-profiles-manager' ),
+			nelio_content_get_script_version( 'settings-page' )
 		);
-		nc_enqueue_script_with_auto_deps( 'nelio-content-settings-page', 'settings-page', true );
+		nelio_content_enqueue_script_with_auto_deps( 'nelio-content-settings-page', 'settings-page', true );
 
 		$subpage = $this->get_current_subpage();
 		$script  = $this->get_custom_subpage_script( $subpage );
 		if ( $script ) {
 			$this->enqueue_supage_assets( $script, $subpage );
-		}//end if
-	}//end enqueue_assets()
+		}
+	}
 
 	// @Overwrites
-	// phpcs:ignore
 	public function display() {
 
 		echo '<div class="wrap">';
@@ -68,6 +65,13 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 			'<h1 class="wp-heading-inline">%s</h1><span id="nelio-content-settings-title"></span>',
 			esc_html_x( 'Nelio Content - Settings', 'text', 'nelio-content' )
 		);
+
+		/**
+		 * Fires after rendering the title in the settings page.
+		 *
+		 * @since 4.1.1
+		 */
+		do_action( 'nelio_content_after_settings_title' );
 
 		settings_errors();
 
@@ -81,13 +85,21 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 			echo '<div id="nelio-content-settings-submit-button">';
 			submit_button();
 			echo '</div>';
-		}//end if
+		}
 
 		echo '</form>';
 
 		echo '</div>';
-	}//end display()
+	}
 
+	/**
+	 * Enqueues subpage assets.
+	 *
+	 * @param string $script  Script.
+	 * @param string $subpage Subpage.
+	 *
+	 * @return void
+	 */
 	private function enqueue_supage_assets( $script, $subpage ) {
 
 		$handle    = "nelio-content-{$script}";
@@ -100,7 +112,7 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 			nelio_content()->plugin_version
 		);
 
-		nc_enqueue_script_with_auto_deps( $handle, $script, true );
+		nelio_content_enqueue_script_with_auto_deps( $handle, $script, true );
 		wp_add_inline_script(
 			$handle,
 			sprintf(
@@ -108,16 +120,30 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 				wp_json_encode( $target_id )
 			)
 		);
-	}//end enqueue_supage_assets()
+	}
 
+	/**
+	 * Gets current subpage.
+	 *
+	 * @return string
+	 */
 	private function get_current_subpage() {
 		$subpage = 'social--profiles';
-		if ( isset( $_GET['subpage'] ) ) { // phpcs:ignore
-			$subpage = sanitize_text_field( wp_unslash( $_GET['subpage'] ) ); // phpcs:ignore
-		}//end if
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['subpage'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$subpage = sanitize_text_field( wp_unslash( $_GET['subpage'] ) );
+		}
 		return $subpage;
-	}//end get_current_subpage()
+	}
 
+	/**
+	 * Returns the script required by the given subpage.
+	 *
+	 * @param string $subpage Subpage.
+	 *
+	 * @return string|false
+	 */
 	private function get_custom_subpage_script( $subpage ) {
 		$scripts = array(
 			'social--profiles'       => 'social-profile-settings',
@@ -126,10 +152,15 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 			'tools--task-presets'    => 'task-presets-settings',
 		);
 		return isset( $scripts[ $subpage ] ) ? $scripts[ $subpage ] : false;
-	}//end get_custom_subpage_script()
+	}
 
+	/**
+	 * Whether submit button is enabled or not.
+	 *
+	 * @return bool
+	 */
 	private function is_submit_button_enabled() {
 		$subpage = $this->get_current_subpage();
 		return empty( $this->get_custom_subpage_script( $subpage ) );
-	}//end is_submit_button_enabled()
-}//end class
+	}
+}

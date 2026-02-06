@@ -8,35 +8,53 @@
  * @since      2.1.2
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Adds Open Graph and Twitter meta tags.
  */
 class Nelio_Content_Meta_Tags {
 
+	/**
+	 * This instance.
+	 *
+	 * @var Nelio_Content_Meta_Tags|null
+	 */
 	protected static $instance;
 
+	/**
+	 * Returns this instance.
+	 *
+	 * @return Nelio_Content_Meta_Tags
+	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 		add_action( 'wp_head', array( $this, 'maybe_add_meta_tags' ) );
-	}//end init()
+	}
 
+	/**
+	 * Callback to add meta tags.
+	 *
+	 * @return void
+	 */
 	public function maybe_add_meta_tags() {
 		$settings = Nelio_Content_Settings::instance();
 		if ( ! $settings->get( 'are_meta_tags_active' ) ) {
 			return;
-		}//end if
+		}
 
 		// See https://developers.facebook.com/docs/sharing/webmasters#markup link.
 		$image = $this->get_og_image();
@@ -66,8 +84,8 @@ class Nelio_Content_Meta_Tags {
 			/**
 			 * Filters the given meta tag. If `false`, the tag won't be printed.
 			 *
-			 * @param any    $value value of the meta tag.
-			 * @param string $key   the tag we're filtering.
+			 * @param string|int|false $value value of the meta tag.
+			 * @param string       $key   the tag we're filtering.
 			 *
 			 * @since 2.1.2
 			 */
@@ -76,21 +94,18 @@ class Nelio_Content_Meta_Tags {
 			/**
 			 * Filters the given meta tag. If `false`, the tag won't be printed.
 			 *
-			 * @param any $value value of the meta tag.
+			 * @param string|int|false $value value of the meta tag.
 			 *
 			 * @since 2.1.2
 			 */
 			$metas[ $key ] = apply_filters( "nelio_content_{$key}_meta_tag", $value );
-
-			$metas[ $key ] = wp_strip_all_tags( $metas[ $key ] );
-		}//end foreach
-
-		$metas = array_filter(
-			$metas,
-			function ( $meta ) {
-				return false !== $meta;
+			if ( false === $metas[ $key ] ) {
+				unset( $metas[ $key ] );
+				continue;
 			}
-		);
+
+			$metas[ $key ] = wp_strip_all_tags( (string) $metas[ $key ] );
+		}
 
 		echo "\n\n\t<!-- Nelio Content -->";
 		foreach ( $metas as $key => $value ) {
@@ -99,30 +114,40 @@ class Nelio_Content_Meta_Tags {
 				"\n\t<meta %s=\"%s\" content=\"%s\" />",
 				esc_attr( $attr ),
 				esc_attr( $key ),
-				esc_attr( $value )
+				esc_attr( "$value" )
 			);
-		}//end foreach
+		}
 		echo "\n\t<!-- /Nelio Content -->\n\n";
-	}//end maybe_add_meta_tags()
+	}
 
+	/**
+	 * Returns OG image or `false` if none is found.
+	 *
+	 * @return array{url:string,width:int,height:int}|false
+	 */
 	private function get_og_image() {
 		if ( ! is_singular() ) {
 			return false;
-		}//end if
+		}
 
-		$thumb_id = get_post_thumbnail_id();
+		$thumb_id = absint( get_post_thumbnail_id() );
 		$thumb    = wp_get_attachment_image_src( $thumb_id, 'full' );
 		if ( empty( $thumb ) ) {
 			return false;
-		}//end if
+		}
 
 		return array(
 			'url'    => $thumb[0],
 			'width'  => $thumb[1],
 			'height' => $thumb[2],
 		);
-	}//end get_og_image()
+	}
 
+	/**
+	 * Returns OG type.
+	 *
+	 * @return 'website'|'profile'|'article'
+	 */
 	private function get_og_type() {
 		if ( is_front_page() ) {
 			return 'website';
@@ -130,13 +155,23 @@ class Nelio_Content_Meta_Tags {
 			return 'profile';
 		} else {
 			return 'article';
-		}//end if
-	}//end get_og_type()
+		}
+	}
 
+	/**
+	 * Returns OG title.
+	 *
+	 * @return string
+	 */
 	private function get_og_title() {
 		return get_the_title();
-	}//end get_og_title()
+	}
 
+	/**
+	 * Returns OG description.
+	 *
+	 * @return string
+	 */
 	private function get_og_desc() {
 		$more = function () {
 			return '…';
@@ -145,10 +180,16 @@ class Nelio_Content_Meta_Tags {
 		$excerpt = is_singular() ? get_the_excerpt() : '';
 		remove_filter( 'excerpt_more', $more );
 		return $excerpt;
-	}//end get_og_desc()
+	}
 
+	/**
+	 * Returns OG URL.
+	 *
+	 * @return string
+	 */
 	private function get_og_url() {
+		/** @var WP $wp */
 		global $wp;
 		return trailingslashit( home_url( add_query_arg( array(), $wp->request ) ) );
-	}//end get_og_url()
-}//end class
+	}
+}

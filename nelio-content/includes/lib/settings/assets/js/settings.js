@@ -15,7 +15,7 @@
 			ev.preventDefault();
 			$( this ).closest( 'tr' ).find( '.setting-help' ).toggle();
 		} );
-	} //end fixHelpButtons()
+	}
 
 	function addSubpageNameToUrl() {
 		const url = window.location.href;
@@ -24,7 +24,7 @@
 			?.getAttribute( 'value' );
 		if ( ! pageName ) {
 			return;
-		} //end if
+		}
 
 		if ( /\bsubpage=/.test( url ) ) {
 			const newUrl = url.replace(
@@ -33,10 +33,10 @@
 			);
 			window.history.replaceState( {}, '', newUrl );
 			return;
-		} //end if
+		}
 
 		const sep = url.indexOf( '?' ) ? '&' : '?';
 		const newUrl = `${ url }${ sep }subpage=${ pageName }`;
 		window.history.replaceState( {}, '', newUrl );
-	} //end addSubpageNameToUrl()
+	}
 } )( window.jQuery );

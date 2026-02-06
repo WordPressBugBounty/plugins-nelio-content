@@ -8,9 +8,7 @@
  * @since      3.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class registers the Reusable Message post type.
@@ -18,51 +16,51 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Nelio_Content_Reusable_Message_Post_Type_Register {
 
 	/**
-	 * The single instance of this class.
+	 * This instance.
 	 *
 	 * @since  3.6.0
-	 * @access protected
 	 * @var    Nelio_Content_Reusable_Message_Post_Type_Register|null
 	 */
-	protected static $instance = null;
+	protected static $instance;
 
 	/**
-	 * Returns the single instance of this class.
+	 * Returns this instance.
 	 *
-	 * @return Nelio_Content_Reusable_Message_Post_Type_Register the single instance of this class.
+	 * @return Nelio_Content_Reusable_Message_Post_Type_Register
 	 *
 	 * @since  3.6.0
-	 * @access public
 	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 
 		add_action( 'init', array( $this, 'register_post_type' ), 5 );
 
 		add_filter( 'user_has_cap', array( $this, 'set_user_capabilities' ), 10, 4 );
-	}//end init()
+	}
 
+	/**
+	 * Callback to register post type.
+	 *
+	 * @return void
+	 */
 	public function register_post_type() {
 
 		if ( post_type_exists( 'nc_reusable_message' ) ) {
 			return;
-		}//end if
-
-		/**
-		 * This action fires right before registering the "Reusable Message" post
-		 * type.
-		 *
-		 * @since 3.6.0
-		 */
-		do_action( 'nelio_content_register_post_types' );
+		}
 
 		register_post_type(
 			'nc_reusable_message',
@@ -72,6 +70,8 @@ class Nelio_Content_Reusable_Message_Post_Type_Register {
 			 * @since 3.6.0
 			 *
 			 * @param array $args The arguments, as defined in WordPress function register_post_type.
+			 *
+			 * @phpstan-ignore argument.type
 			 */
 			apply_filters(
 				'nelio_content_register_reusable_message_post_type',
@@ -102,9 +102,19 @@ class Nelio_Content_Reusable_Message_Post_Type_Register {
 				)
 			)
 		);
-	}//end register_post_type()
+	}
 
-	public function set_user_capabilities( $capabilities, $_, $__, $user ) {
+	/**
+	 * Callback to set user capabilities.
+	 *
+	 * @param array<string,bool> $capabilities All capabilities.
+	 * @param list<string>       $caps         Caps.
+	 * @param array<mixed>       $args         Args.
+	 * @param WP_User            $user         User.
+	 *
+	 * @return array<string,bool>
+	 */
+	public function set_user_capabilities( $capabilities, $caps, $args, $user ) {
 
 		$capabilities = array_filter(
 			$capabilities,
@@ -116,14 +126,14 @@ class Nelio_Content_Reusable_Message_Post_Type_Register {
 
 		if ( get_current_user_id() !== $user->ID ) {
 			return $capabilities;
-		}//end if
+		}
 
 		if ( ! did_action( 'init' ) || doing_action( 'init' ) ) {
 			return $capabilities;
-		}//end if
+		}
 
 		remove_filter( 'user_has_cap', array( $this, 'set_user_capabilities' ), 10 );
-		if ( nc_can_current_user_use_plugin() ) {
+		if ( nelio_content_can_current_user_use_plugin() ) {
 			$reference_capabilities = array(
 				'create_nc_reusable_messages',
 				'delete_nc_reusable_message',
@@ -143,10 +153,10 @@ class Nelio_Content_Reusable_Message_Post_Type_Register {
 			);
 			foreach ( $reference_capabilities as $cap ) {
 				$capabilities[ $cap ] = true;
-			}//end foreach
-		}//end if
+			}
+		}
 		add_filter( 'user_has_cap', array( $this, 'set_user_capabilities' ), 10, 4 );
 
 		return $capabilities;
-	}//end set_user_capabilities()
-}//end class
+	}
+}

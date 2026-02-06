@@ -4,20 +4,31 @@ namespace Nelio_Content\Zod;
 
 class RecordSchema extends Schema {
 
-	protected Schema $key_schema;
-	protected Schema $value_schema;
+	/** @var Schema */
+	protected $key_schema;
 
-	public static function make( Schema $key_schema, Schema $value_schema ): RecordSchema {
+	/** @var Schema */
+	protected $value_schema;
+
+	/**
+	 * Creates a record schema.
+	 *
+	 * @param Schema $key_schema   Key schema.
+	 * @param Schema $value_schema Value schema.
+	 *
+	 * @return RecordSchema
+	 */
+	public static function make( $key_schema, $value_schema ) {
 		$instance               = new self();
 		$instance->key_schema   = $key_schema;
 		$instance->value_schema = $value_schema;
 		return $instance;
-	}//end make()
+	}
 
 	public function parse_value( $value ) {
 		if ( is_object( $value ) ) {
 			$value = get_object_vars( $value );
-		}//end if
+		}
 
 		if ( ! is_array( $value ) ) {
 			throw new \Exception(
@@ -26,7 +37,7 @@ class RecordSchema extends Schema {
 					esc_html( gettype( $value ) )
 				)
 			);
-		}//end if
+		}
 
 		$result = array();
 		foreach ( $value as $key => $val ) {
@@ -34,15 +45,15 @@ class RecordSchema extends Schema {
 				$this->key_schema->parse( $key );
 			} catch ( \Exception $e ) {
 				throw new \Exception( esc_html( $this->add_path( 'Invalid key:' . $e->getMessage(), "{$key}" ) ) );
-			}//end try
+			}
 
 			try {
 				$result[ $key ] = $this->value_schema->parse( $val );
 			} catch ( \Exception $e ) {
 				throw new \Exception( esc_html( $this->add_path( 'Invalid value:' . $e->getMessage(), "{$key}" ) ) );
-			}//end try
-		}//end foreach
+			}
+		}
 
 		return array_filter( $result, fn( $p ) => ! is_null( $p ) );
-	}//end parse_value()
-}//end class
+	}
+}

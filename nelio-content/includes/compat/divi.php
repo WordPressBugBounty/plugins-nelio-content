@@ -1,19 +1,17 @@
 <?php
+namespace Nelio_Content\Compat\Divi;
+
+defined( 'ABSPATH' ) || exit;
+
 /**
- * Compatibility with DIVI Page Builder.
+ * Adds new action.
  *
- * @package    Nelio_Content
- * @subpackage Nelio_Content/includes/compat
- * @author     David Aguilera <david.aguilera@neliosoftware.com>
- * @since      1.4.6
+ * @param list<string> $actions Actions.
+ *
+ * @return list<string>
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
-
-function nc_compat_divi_enable_shortcodes_in_ajax( $actions ) {
+function divi_enable_shortcodes_in_ajax( $actions ) {
 	array_push( $actions, 'nelio_content_get_post_for_auto_sharing' );
 	return $actions;
-}//end nc_compat_divi_enable_shortcodes_in_ajax()
-add_filter( 'et_builder_load_actions', 'nc_compat_divi_enable_shortcodes_in_ajax' );
+}
+add_filter( 'et_builder_load_actions', __NAMESPACE__ . '\divi_enable_shortcodes_in_ajax' );

@@ -1,45 +1,41 @@
 <?php
+namespace Nelio_Content\Compat\WooCommerce;
+
+defined( 'ABSPATH' ) || exit;
+
 /**
- * This file adds compatibility with WooCommerce.
+ * Hooks into WordPress.
  *
- * @package    Nelio_Content
- * @subpackage Nelio_Content/includes/compat
- * @author     Antonio Villegas <antonio.villegas@neliosoftware.com>
- * @since      3.6.0
+ * @return void
  */
+function init_hooks() {
+	add_filter( 'nelio_content_available_post_types_setting', __NAMESPACE__ . '\add_order_type' );
+	add_filter( 'nelio_content_get_post_types', __NAMESPACE__ . '\remove_product_type' );
+	add_filter( 'nelio_content_post_statuses', __NAMESPACE__ . '\maybe_add_order_statuses', 10, 2 );
+}
+add_action( 'woocommerce_init', __NAMESPACE__ . '\init_hooks' );
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
-
-function nc_woocommerce_hooks() {
-
-	add_filter( 'nelio_content_available_post_types_setting', 'nc_woocommerce_add_order_type' );
-	add_filter( 'nelio_content_post_statuses', 'nc_woocommerce_maybe_add_order_statuses', 10, 2 );
-
-	add_filter(
-		'nelio_content_hidden_post_statuses',
-		function ( $hidden_statuses ) {
-			return array_merge( $hidden_statuses, array( 'wc-pending', 'wc-processing', 'wc-on-hold', 'wc-completed', 'wc-cancelled', 'wc-refunded', 'wc-failed', 'wc-checkout-draft' ) );
-		}
-	);
-
-	add_filter(
-		'nelio_content_get_post_types',
-		function ( $post_types ) {
-			return array_filter(
-				$post_types,
-				function ( $type ) {
-					return ! in_array( $type, array( 'product' ), true );
-				}
-			);
-		}
-	);
-}//end nc_woocommerce_hooks()
-add_action( 'woocommerce_init', 'nc_woocommerce_hooks' );
-
-function nc_woocommerce_add_order_type( $types ) {
+/**
+ * Callback to add order type.
+ *
+ * @param list<array{value:string, label:string}> $types Types.
+ *
+ * @return list<array{value:string, label:string}>
+ */
+function add_order_type( $types ) {
 	$shop_order = get_post_type_object( 'shop_order' );
+	if ( empty( $shop_order ) ) {
+		return $types;
+	}
+
+	if ( empty( $shop_order->labels->singular_name ) ) {
+		return $types;
+	}
+
+	if ( ! is_string( $shop_order->labels->singular_name ) ) {
+		return $types;
+	}
+
 	array_push(
 		$types,
 		array(
@@ -48,21 +44,34 @@ function nc_woocommerce_add_order_type( $types ) {
 		)
 	);
 	return $types;
-}//end nc_woocommerce_add_order_type()
+}
 
-function nc_woocommerce_maybe_add_order_statuses( $statuses, $post_type ) {
+/**
+ * Callback to add order statuses.
+ *
+ * @param list<TPost_Status> $statuses  Statuses.
+ * @param string             $post_type Post type.
+ *
+ * @return list<TPost_Status>
+ */
+function maybe_add_order_statuses( $statuses, $post_type ) {
 
 	if ( 'shop_order' !== $post_type ) {
 		return $statuses;
-	}//end if
+	}
 
 	$wc_statuses = wc_get_order_statuses();
 	$wc_statuses = array_map(
-		function ( $key, $value ) {
+		function ( $key, $value ) use ( $post_type ) {
+			/** @var string $key   */
+			/** @var string $value */
+
 			return array(
-				'slug' => $key,
-				'name' => $value,
-				'icon' => 'store',
+				'slug'      => $key,
+				'name'      => $value,
+				'icon'      => 'store',
+				'postTypes' => array( $post_type ),
+				'roles'     => array( 'shop_manager' ),
 			);
 		},
 		array_keys( $wc_statuses ),
@@ -70,4 +79,16 @@ function nc_woocommerce_maybe_add_order_statuses( $statuses, $post_type ) {
 	);
 
 	return $wc_statuses;
-}//end nc_woocommerce_maybe_add_order_statuses()
+}
+
+/**
+ * Add post types.
+ *
+ * @param list<string> $post_types post types.
+ *
+ * @return list<string>
+ */
+function remove_product_type( $post_types ) {
+	$post_types = array_filter( $post_types, fn( $t ) => 'product' !== $t );
+	return array_values( $post_types );
+}

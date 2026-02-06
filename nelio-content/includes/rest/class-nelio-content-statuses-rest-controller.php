@@ -11,52 +11,57 @@ defined( 'ABSPATH' ) || exit;
 use Nelio_Content\Zod\Schema;
 use Nelio_Content\Zod\Zod as Z;
 
-use function Nelio_Content\Helpers\find;
+use function Nelio_Content\Helpers\key_by;
 
 class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 
 	/**
-	 * The single instance of this class.
+	 * This instance.
 	 *
 	 * @since 4.0.0
 	 * @var   Nelio_Content_Statuses_REST_Controller|null
 	 */
-	protected static $instance = null;
+	protected static $instance;
 
 	/**
-	 * Returns the single instance of this class.
+	 * Returns this instance.
 	 *
-	 * @return Nelio_Content_Statuses_REST_Controller the single instance of this class.
+	 * @return Nelio_Content_Statuses_REST_Controller
 	 *
 	 * @since 4.0.0
 	 */
 	public static function instance() {
 		self::$instance = is_null( self::$instance ) ? new self() : self::$instance;
 		return self::$instance;
-	}//end instance()
+	}
 
 	/**
 	 * Hooks into WordPress.
+	 *
+	 * @return void
 	 *
 	 * @since 4.0.0
 	 */
 	public function init() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-		add_action( 'init', array( $this, 'register_post_statuses' ) );
-		add_action( 'init', array( $this, 'manage_post_statuses_capabilities' ) );
-		add_filter( 'nelio_content_can_use_post_status', array( $this, 'filter_can_use_post_status' ), 10, 3 );
-	}//end init()
+		add_action( 'init', array( $this, 'register_post_statuses' ), 9999 );
+	}
 
+	/**
+	 * Registers post statuses.
+	 *
+	 * @return void
+	 */
 	public function register_post_statuses() {
-		$statuses = nelio_content_get_saved_statuses();
+		$statuses = nelio_content_get_statuses();
 		foreach ( $statuses as $status ) {
 			if ( ! empty( $status['core'] ) ) {
 				continue;
-			}//end if
+			}
 
 			if ( get_post_status_object( $status['slug'] ) ) {
 				continue;
-			}//end if
+			}
 
 			register_post_status(
 				$status['slug'],
@@ -79,68 +84,13 @@ class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 					),
 				)
 			);
-		}//end foreach
-	}//end register_post_statuses()
-
-	public function manage_post_statuses_capabilities() {
-		$statuses = nelio_content_get_saved_statuses();
-		$roles    = wp_roles();
-		foreach ( $statuses as $status ) {
-			if ( ! empty( $status['core'] ) ) {
-				continue;
-			}//end if
-
-			foreach ( $roles->role_objects as $role_name => $role ) {
-				$cap_name = 'status_change_' . str_replace( '-', '_', $status['slug'] );
-
-				if ( isset( $status['roles'] ) && ! in_array( $role_name, $status['roles'], true ) ) {
-					$role->remove_cap( $cap_name );
-					continue;
-				}//end if
-
-				if ( ! $role->has_cap( $cap_name ) ) {
-					$role->add_cap( $cap_name );
-				}//end if
-			}//end foreach
-		}//end foreach
-	}//end manage_post_statuses_capabilities()
-
-	public function filter_can_use_post_status( $available, $status_slug, $post_type ) {
-		$statuses = nelio_content_get_saved_statuses();
-		$status   = find( $statuses, fn ( $s ) => $s['slug'] === $status_slug );
-
-		if ( ! $status ) {
-			return $available;
-		}//end if
-
-		if ( ! empty( $status['core'] ) ) {
-			return $available;
-		}//end if
-
-		$is_post_type_valid = ! isset( $status['postTypes'] ) || in_array( $post_type, $status['postTypes'], true );
-		if ( ! $is_post_type_valid ) {
-			return false;
-		}//end if
-
-		$user = wp_get_current_user();
-		if ( current_user_can( 'manage_options' ) ) {
-			return $available;
-		}//end if
-
-		$cap_name = 'status_change_' . str_replace( '-', '_', $status['slug'] );
-		if ( current_user_can( $cap_name ) ) {
-			return $available;
-		}//end if
-
-		if ( ! isset( $status['roles'] ) || array_intersect( $user->roles, $status['roles'] ) ) {
-			return $available;
-		}//end if
-
-		return false;
-	}//end filter_can_use_post_status()
+		}
+	}
 
 	/**
 	 * Register the routes for the objects of the controller.
+	 *
+	 * @return void
 	 */
 	public function register_routes() {
 
@@ -151,7 +101,7 @@ class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_statuses' ),
-					'permission_callback' => 'nc_can_current_user_manage_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_manage_plugin',
 					'args'                => array(
 						'statuses' => array(
 							'required'          => true,
@@ -162,35 +112,86 @@ class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
-	}//end register_routes()
+	}
 
+	/**
+	 * Callback to validate post statuses.
+	 *
+	 * @param mixed $statuses Post statues.
+	 *
+	 * @return true|WP_Error
+	 */
 	public function validate_statuses( $statuses ) {
-		$schema = Z::array( self::schema() );
+		$schema = Z::array( $this->schema() );
 		$result = $schema->safe_parse( $statuses );
 		return $result['success'] ? true : new WP_Error( 'parse-error', $result['error'] );
-	}//end validate_statuses()
+	}
 
+	/**
+	 * Callback to sanitize post statuses.
+	 *
+	 * @param mixed $statuses Post statues.
+	 *
+	 * @return list<TPost_Status>
+	 */
 	public function sanitize_statuses( $statuses ) {
-		return array_map( fn( $p ) => self::parse( $p ), $statuses );
-	}//end sanitize_statuses()
+		$statuses = is_array( $statuses ) ? $statuses : array();
+		$statuses = array_map( fn( $p ) => $this->parse( $p ), $statuses );
+		$statuses = array_filter( $statuses, fn( $status ) => ! is_wp_error( $status ) );
+		$statuses = key_by( $statuses, 'slug' );
+		$statuses = array_diff_key( $statuses, array_flip( array( 'nelio-content-unscheduled', 'trash' ) ) );
+		$statuses = array_values( $statuses );
+		return $statuses;
+	}
 
+	/**
+	 * Callback to update statuses.
+	 *
+	 * @param WP_REST_Request<array{statuses:list<TPost_Status>}> $request Request.
+	 *
+	 * @return WP_REST_Response
+	 */
 	public function update_statuses( $request ) {
+		/** @var list<TPost_Status> */
 		$statuses = $request->get_param( 'statuses' );
+		$statuses = array_map(
+			function ( $status ) {
+				return array(
+					'slug'        => $status['slug'],
+					'name'        => $status['name'],
+					'icon'        => $status['icon'] ?? '',
+					'description' => $status['description'] ?? '',
+					'colors'      => array(
+						'main'       => $status['colors']['main'] ?? '',
+						'background' => $status['colors']['background'] ?? '',
+					),
+					'postTypes'   => $status['postTypes'],
+					'roles'       => $status['roles'],
+					'flags'       => $status['flags'] ?? array(),
+				);
+			},
+			$statuses
+		);
 
-		$error = find( $statuses, 'is_wp_error' );
-		if ( is_wp_error( $error ) ) {
-			return $error;
-		}//end if
+		update_option( 'nc_statuses', $statuses );
 
-		nelio_content_set_saved_statuses( $statuses );
+		return new WP_REST_Response( nelio_content_get_statuses(), 200 );
+	}
 
-		return new WP_REST_Response( $statuses, 200 );
-	}//end update_statuses()
-
-	public static function schema(): Schema {
+	/**
+	 * Gets the schema.
+	 *
+	 * @return Schema
+	 */
+	private function schema() {
 		return Z::object(
 			array(
-				'slug'        => Z::string()->trim()->max( 20 ),
+				'slug'        => Z::union(
+					array(
+						Z::string()->trim()->max( 20 ),
+						Z::literal( 'nelio-content-unscheduled' ),
+					)
+				),
 				'name'        => Z::string()->trim()->min( 1 ),
 				'icon'        => Z::string()->optional(),
 				'description' => Z::string()->optional(),
@@ -201,9 +202,18 @@ class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 						'background' => Z::string()->optional(),
 					)
 				)->optional(),
-				'available'   => Z::boolean(),
-				'postTypes'   => Z::array( Z::string() )->optional(),
-				'roles'       => Z::array( Z::string() )->optional(),
+				'postTypes'   => Z::union(
+					array(
+						Z::array( Z::string() ),
+						Z::literal( 'all-types' ),
+					)
+				),
+				'roles'       => Z::union(
+					array(
+						Z::array( Z::string() ),
+						Z::literal( 'all-roles' ),
+					)
+				),
 				'flags'       => Z::array(
 					Z::enum(
 						array(
@@ -215,17 +225,25 @@ class Nelio_Content_Statuses_REST_Controller extends WP_REST_Controller {
 				)->optional(),
 			)
 		);
-	}//end schema()
+	}
 
-	public static function parse( $json ) {
+	/**
+	 * Parses the given JSON.
+	 *
+	 * @param mixed $json JSON.
+	 *
+	 * @return TPost_Status|WP_Error
+	 */
+	private function parse( $json ) {
 		$json = is_string( $json ) ? json_decode( $json, true ) : $json;
 		$json = is_array( $json ) ? $json : array();
 
-		$parsed = self::schema()->safe_parse( $json );
-		if ( empty( $parsed['success'] ) ) {
+		$parsed = $this->schema()->safe_parse( $json );
+		if ( false === $parsed['success'] ) {
 			return new WP_Error( 'parsing-error', $parsed['error'] );
-		}//end if
+		}
 
+		/** @var TPost_Status */
 		return $parsed['data'];
-	}//end parse()
-}//end class
+	}
+}

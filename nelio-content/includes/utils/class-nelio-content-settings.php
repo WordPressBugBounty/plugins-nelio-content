@@ -8,46 +8,47 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * The Settings class, responsible of defining, registering, and providing access to all Nelio Content's settings.
  */
 class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 
+	/**
+	 * This instance.
+	 *
+	 * @var Nelio_Content_Settings|null
+	 */
 	private static $instance;
 
 	/**
 	 * Initialize the class, set its properties, and add the proper hooks.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 */
 	protected function __construct() {
 
 		parent::__construct( 'nelio-content', 'nelio-content-settings' );
-	}//end __construct()
+	}
 
 	/**
-	 * Returns the single instance of this class.
+	 * Returns this instance.
 	 *
-	 * @return Nelio_Content_Settings the single instance of this class.
+	 * @return Nelio_Content_Settings
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 		return self::$instance;
-	}//end instance()
+	}
 
 	/** . @Implements */
-	public function set_tabs() { // phpcs:ignore
+	public function set_tabs() {
 
 		// Add as many tabs as you want. If you have one tab only, no tabs will be shown at all.
 		$tabs = array(
@@ -69,7 +70,7 @@ class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 					array(
 						'name'   => 'advanced',
 						'label'  => _x( 'Advanced', 'text', 'nelio-content' ),
-						'fields' => include nelio_content()->plugin_path . '/includes/data/social-settings.php',
+						'fields' => $this->get_fields( 'social-settings' ),
 					),
 				),
 			),
@@ -81,7 +82,7 @@ class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 					array(
 						'name'   => 'basic',
 						'label'  => _x( 'Basic', 'text', 'nelio-content' ),
-						'fields' => include nelio_content()->plugin_path . '/includes/data/content-settings.php',
+						'fields' => $this->get_fields( 'content-settings' ),
 					),
 				),
 			),
@@ -93,7 +94,7 @@ class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 					array(
 						'name'   => 'basic',
 						'label'  => _x( 'Basic', 'text', 'nelio-content' ),
-						'fields' => include nelio_content()->plugin_path . '/includes/data/tools-settings.php',
+						'fields' => $this->get_fields( 'tools-settings' ),
 					),
 					array(
 						'name'   => 'custom-statuses',
@@ -108,7 +109,7 @@ class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 					array(
 						'name'   => 'series',
 						'label'  => _x( 'Series', 'text', 'nelio-content' ),
-						'fields' => include nelio_content()->plugin_path . '/includes/data/series-settings.php',
+						'fields' => $this->get_fields( 'series-settings' ),
 					),
 				),
 			),
@@ -120,7 +121,7 @@ class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 					array(
 						'name'   => 'basic',
 						'label'  => _x( 'Basic', 'text', 'nelio-content' ),
-						'fields' => include nelio_content()->plugin_path . '/includes/data/others-settings.php',
+						'fields' => $this->get_fields( 'others-settings' ),
 					),
 				),
 			),
@@ -128,5 +129,17 @@ class Nelio_Content_Settings extends Nelio_Content_Abstract_Settings {
 		);
 
 		$this->do_set_tabs( $tabs );
-	}//end set_tabs()
-}//end class
+	}
+
+	/**
+	 * Gets list of fields.
+	 *
+	 * @param string $name Name.
+	 *
+	 * @return list<TSettings_Section | TSettings_Field>
+	 */
+	private function get_fields( $name ) {
+		/** @var list<TSettings_Section | TSettings_Field> */
+		return include nelio_content()->plugin_path . "/includes/data/{$name}.php";
+	}
+}

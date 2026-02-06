@@ -11,48 +11,49 @@
  * @since      1.0.5
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+namespace Nelio_Content\Compat\Page_Frog;
+
+defined( 'ABSPATH' ) || exit;
 
 /**
- * This function adds a few hooks that modify pagefrog's default behavior,
- * fixing some of the issues it generates (which result in our plugin
- * breaking).
+ * Callback to hook into Wordapress.
+ *
+ * @return void
  *
  * @since 1.0.5
  */
-function nc_compat_pagefrog_fix_issues_with_post_page() {
+function pagefrog_fix_issues_with_post_page() {
 
 	if ( ! is_admin() ) {
 		return;
-	}//end if
+	}
 
 	if ( ! function_exists( 'is_plugin_active' ) ) {
 		return;
-	}//end if
+	}
 
 	if ( ! is_plugin_active( 'pagefrog/pagefrog.php' ) ) {
 		return;
-	}//end if
+	}
 
 	$post_types = nelio_content_get_post_types( 'editor' );
 	$screen     = get_current_screen();
-	if ( ! in_array( $screen->id, $post_types, true ) ) {
+	if ( empty( $screen ) || ! in_array( $screen->id, $post_types, true ) ) {
 		return;
-	}//end if
+	}
 
-	add_action( 'admin_head', 'nc_compat_pagefrog_fix_global_css', 999 );
-}//end nc_compat_pagefrog_fix_issues_with_post_page()
-add_action( 'current_screen', 'nc_compat_pagefrog_fix_issues_with_post_page' );
+	add_action( 'admin_head', __NAMESPACE__ . '\pagefrog_fix_global_css', 999 );
+}
+add_action( 'current_screen', __NAMESPACE__ . '\pagefrog_fix_issues_with_post_page' );
 
 /**
- * This function reverts the global CSS settings and applies them to only
- * pagefrog's meta box.
+ * Callback to revert the global CSS settings and applies them to only pagefrog's meta box.
+ *
+ * @return void
  *
  * @since 1.0.5
  */
-function nc_compat_pagefrog_fix_global_css() {
+function pagefrog_fix_global_css() {
 	?>
 
 	<style type="text/css">
@@ -74,4 +75,4 @@ function nc_compat_pagefrog_fix_global_css() {
 	</style>
 
 	<?php
-}//end nc_compat_pagefrog_fix_global_css()
+}

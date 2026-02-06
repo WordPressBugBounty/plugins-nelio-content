@@ -8,30 +8,71 @@
  * @since      2.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * A class that represents a page.
  */
 abstract class Nelio_Content_Abstract_Page {
 
+	/**
+	 * Parent slug.
+	 *
+	 * @var string
+	 */
 	protected $parent_slug;
+
+	/**
+	 * Page slug.
+	 *
+	 * @var string
+	 */
 	protected $slug;
+
+	/**
+	 * Page title.
+	 *
+	 * @var string
+	 */
 	protected $title;
+
+	/**
+	 * Required capability to view page.
+	 *
+	 * @var string|bool
+	 */
 	protected $capability;
+
+	/**
+	 * Page rendering mode.
+	 *
+	 * @var 'extends-existing-page'|'regular-page'
+	 */
 	protected $mode;
 
-	public function __construct( $parent_slug, $slug, $title, $capability, $mode = 'regular' ) {
+	/**
+	 * Creates an instance of this class.
+	 *
+	 * @param string                                 $parent_slug Parent slug.
+	 * @param string                                 $slug        Page slug.
+	 * @param string                                 $title       Page title.
+	 * @param string|bool                            $capability  Required capability to view this page.
+	 * @param 'extends-existing-page'|'regular-page' $mode        Optional. Rendering mode. Default: `regular-page`.
+	 */
+	public function __construct( $parent_slug, $slug, $title, $capability, $mode = 'regular-page' ) {
 
 		$this->parent_slug = $parent_slug;
 		$this->slug        = $slug;
 		$this->title       = $title;
 		$this->capability  = $capability;
 		$this->mode        = $mode;
-	}//end __construct()
+	}
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 
 		/**
@@ -44,7 +85,7 @@ abstract class Nelio_Content_Abstract_Page {
 		$skip = apply_filters( "nelio_content_omit_{$this->slug}_page", false );
 		if ( $skip ) {
 			return;
-		}//end if
+		}
 
 		add_action( 'admin_menu', array( $this, 'add_page' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_assets' ) );
@@ -54,17 +95,22 @@ abstract class Nelio_Content_Abstract_Page {
 			function () {
 				if ( $this->is_current_screen_this_page() ) {
 					$this->add_page_specific_hooks();
-				}//end if
+				}
 			}
 		);
-	}//end init()
+	}
 
+	/**
+	 * Adds the page.
+	 *
+	 * @return void
+	 */
 	public function add_page() {
 
 		$capability = $this->capability;
 		if ( is_bool( $capability ) ) {
 			$capability = $capability ? 'read' : 'invalid-capability';
-		}//end if
+		}
 
 		add_submenu_page(
 			$this->parent_slug,
@@ -74,8 +120,13 @@ abstract class Nelio_Content_Abstract_Page {
 			$this->slug,
 			$this->get_render_function()
 		);
-	}//end add_page()
+	}
 
+	/**
+	 * Displays the page.
+	 *
+	 * @return void
+	 */
 	public function display() {
 
 		printf(
@@ -94,58 +145,97 @@ abstract class Nelio_Content_Abstract_Page {
 		);
 
 		echo '</div>';
-	}//end display()
+	}
 
+	/**
+	 * Callback to enqueue assets if the current page is this page.
+	 *
+	 * @return void
+	 */
 	public function maybe_enqueue_assets() {
 
 		if ( ! $this->is_current_screen_this_page() ) {
 			return;
-		}//end if
+		}
 
 		$this->enqueue_assets();
-	}//end maybe_enqueue_assets()
+	}
 
+	/**
+	 * Helper function that actually enqueues page assets.
+	 *
+	 * @return void
+	 */
 	abstract protected function enqueue_assets();
 
+	/**
+	 * Returns the appropriate render function based on the page’s mode.
+	 *
+	 * @return callable|''
+	 */
 	private function get_render_function() {
 
 		switch ( $this->mode ) {
 
 			case 'extends-existing-page':
-				return null;
+				return '';
 
-			case 'regular':
+			case 'regular-page':
 			default:
 				return array( $this, 'display' );
 
-		}//end switch
-	}//end get_render_function()
+		}
+	}
 
-	protected function remove_page_from_menu( $parent, $slug ) { // phpcs:ignore
+	/**
+	 * Removes the page from the menu.
+	 *
+	 * @param string $parent_slug Parent slug.
+	 * @param string $slug   Page slug.
+	 *
+	 * @return void
+	 */
+	protected function remove_page_from_menu( $parent_slug, $slug ) {
 
+		/** @var array<string, list<list<mixed>>> */
 		global $submenu;
-		if ( ! isset( $submenu[ $parent ] ) ) {
+		if ( ! isset( $submenu[ $parent_slug ] ) ) {
 			return;
-		}//end if
+		}
 
-		$submenu[ $parent ] = array_filter( // phpcs:ignore
-			$submenu[ $parent ],
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$submenu[ $parent_slug ] = array_filter(
+			$submenu[ $parent_slug ],
 			function ( $item ) use ( $slug ) {
 				return $item[2] !== $slug;
-			}//end if
+			}
 		);
-	}//end remove_page_from_menu()
+	}
 
+	/**
+	 * Whether the current screen is this page or not.
+	 *
+	 * @return bool
+	 */
 	protected function is_current_screen_this_page() {
 
-		$screen   = get_current_screen();
+		$screen = get_current_screen();
+		if ( empty( $screen ) ) {
+			return false;
+		}
+
 		$haystack = $screen->id;
 		$needle   = str_replace( 'edit.php?post_type=', 'edit-', $this->slug );
 
 		return strlen( $needle ) <= strlen( $haystack ) && 0 === substr_compare( $haystack, $needle, -strlen( $needle ) );
-	}//end is_current_screen_this_page()
+	}
 
+	/**
+	 * Adds additional hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	protected function add_page_specific_hooks() {
 		// Nothing to be done.
-	}//end add_page_specific_hooks()
-}//end class
+	}
+}

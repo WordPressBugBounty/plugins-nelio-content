@@ -16,44 +16,45 @@ use function Nelio_Content\Helpers\flow;
 class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 	/**
-	 * The single instance of this class.
+	 * This instance.
 	 *
 	 * @since  2.0.0
-	 * @access protected
 	 * @var    Nelio_Content_Post_REST_Controller|null
 	 */
-	protected static $instance = null;
+	protected static $instance;
 
 	/**
-	 * Returns the single instance of this class.
+	 * Returns this instance.
 	 *
-	 * @return Nelio_Content_Post_REST_Controller the single instance of this class.
+	 * @return Nelio_Content_Post_REST_Controller
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
 	/**
 	 * Hooks into WordPress.
 	 *
+	 * @return void
+	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-	}//end init()
+	}
 
 	/**
 	 * Register the routes for the objects of the controller.
+	 *
+	 * @return void
 	 */
 	public function register_routes() {
 
@@ -64,17 +65,17 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_posts_in_date_range' ),
-					'permission_callback' => 'nc_can_current_user_use_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
 					'args'                => array(
 						'from' => array(
 							'required'          => true,
 							'type'              => 'date',
-							'validate_callback' => 'nc_is_date',
+							'validate_callback' => 'nelio_content_is_date',
 						),
 						'to'   => array(
 							'required'          => true,
 							'type'              => 'date',
-							'validate_callback' => 'nc_is_date',
+							'validate_callback' => 'nelio_content_is_date',
 						),
 						'type' => array(
 							'required'          => true,
@@ -82,7 +83,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 							'sanitize_callback' => flow(
 								'sanitize_text_field',
 								'trim',
-								fn( $v ) => explode( ',', $v )
+								fn( $v ) => explode( ',', is_string( $v ) ? $v : '' )
 							),
 						),
 					),
@@ -97,18 +98,18 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'search_posts' ),
-					'permission_callback' => 'nc_can_current_user_use_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
 					'args'                => array(
 						'per_page' => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'page'     => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'type'     => array(
@@ -117,7 +118,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 							'sanitize_callback' => flow(
 								'sanitize_text_field',
 								'trim',
-								fn( $v ) => explode( ',', $v )
+								fn( $v ) => explode( ',', is_string( $v ) ? $v : '' )
 							),
 						),
 						'status'   => array(
@@ -127,7 +128,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 								'sanitize_text_field',
 								'trim',
 								fn( $v ) => empty( $v ) ? 'publish' : $v,
-								fn( $v ) => explode( ',', $v )
+								fn( $v ) => explode( ',', is_string( $v ) ? $v : '' )
 							),
 						),
 					),
@@ -147,24 +148,24 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 						'authorId'   => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'title'      => array(
 							'required'          => true,
 							'type'              => 'string',
-							'validate_callback' => 'nc_is_not_empty',
+							'validate_callback' => 'nelio_content_is_not_empty',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'dateValue'  => array(
 							'required'          => false,
 							'type'              => 'date',
-							'validate_callback' => 'nc_is_date',
+							'validate_callback' => 'nelio_content_is_date',
 						),
 						'timeValue'  => array(
 							'required'          => false,
 							'type'              => 'time',
-							'validate_callback' => 'nc_is_time',
+							'validate_callback' => 'nelio_content_is_time',
 						),
 						'type'       => array(
 							'required'          => true,
@@ -184,12 +185,12 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 						'references' => array(
 							'required'          => true,
 							'type'              => 'URL',
-							'validate_callback' => nc_is_array( 'nc_is_url' ),
+							'validate_callback' => nelio_content_is_array( 'nelio_content_is_url' ),
 						),
 						'series'     => array(
 							'required'          => false,
 							'type'              => 'array<record<id, part>>',
-							'validate_callback' => array( $this, 'sanitize_series' ),
+							'sanitize_callback' => array( $this, 'sanitize_series' ),
 						),
 					),
 				),
@@ -203,12 +204,12 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_post' ),
-					'permission_callback' => 'nc_can_current_user_use_plugin',
+					'permission_callback' => array( $this, 'check_if_user_can_view_post' ),
 					'args'                => array(
 						'id'  => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'aws' => array(
@@ -226,30 +227,30 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 						'id'         => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'authorId'   => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'title'      => array(
 							'required'          => true,
 							'type'              => 'string',
-							'validate_callback' => 'nc_is_not_empty',
+							'validate_callback' => 'nelio_content_is_not_empty',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'dateValue'  => array(
 							'required'          => false,
 							'type'              => 'date',
-							'validate_callback' => 'nc_is_date',
+							'validate_callback' => 'nelio_content_is_date',
 						),
 						'timeValue'  => array(
 							'required'          => false,
 							'type'              => 'time',
-							'validate_callback' => 'nc_is_time',
+							'validate_callback' => 'nelio_content_is_time',
 						),
 						'status'     => array(
 							'required'          => true,
@@ -264,12 +265,12 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 						'references' => array(
 							'required'          => true,
 							'type'              => 'URL',
-							'validate_callback' => nc_is_array( 'nc_is_url' ),
+							'validate_callback' => nelio_content_is_array( 'nelio_content_is_url' ),
 						),
 						'series'     => array(
 							'required'          => false,
 							'type'              => 'array<record<id, part>>',
-							'validate_callback' => array( $this, 'sanitize_series' ),
+							'sanitize_callback' => array( $this, 'sanitize_series' ),
 						),
 					),
 				),
@@ -288,7 +289,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 						'id'     => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'values' => array(
@@ -306,12 +307,12 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_post_references' ),
-					'permission_callback' => 'nc_can_current_user_use_plugin',
+					'permission_callback' => array( $this, 'check_if_user_can_view_post' ),
 					'args'                => array(
 						'id' => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 					),
@@ -331,23 +332,23 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 						'id'          => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'day'         => array(
 							'required'          => true,
 							'type'              => 'date',
-							'validate_callback' => 'nc_is_date',
+							'validate_callback' => 'nelio_content_is_date',
 						),
 						'hour'        => array(
 							'required'          => false,
 							'type'              => 'time',
-							'validate_callback' => 'nc_is_time',
+							'validate_callback' => 'nelio_content_is_time',
 						),
 						'defaultHour' => array(
 							'required'          => true,
 							'type'              => 'time',
-							'validate_callback' => 'nc_is_time',
+							'validate_callback' => 'nelio_content_is_time',
 						),
 					),
 				),
@@ -366,7 +367,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 						'id' => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 					),
@@ -386,7 +387,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 						'id' => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 					),
@@ -406,7 +407,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 						'id'        => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'status'    => array(
@@ -417,160 +418,246 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 						'dateValue' => array(
 							'required'          => false,
 							'type'              => 'datetime',
-							'validate_callback' => 'nc_is_datetime',
+							'validate_callback' => 'nelio_content_is_datetime',
 						),
 					),
 				),
 			)
 		);
-	}//end register_routes()
+	}
 
+	/**
+	 * Callback to check if user can create a post.
+	 *
+	 * @param WP_REST_Request<array<string,mixed>> $request Request.
+	 *
+	 * @return bool
+	 */
 	public function check_if_user_can_create_post( $request ) {
 
-		if ( nc_can_current_user_manage_plugin() ) {
+		if ( nelio_content_can_current_user_manage_plugin() ) {
 			return true;
-		}//end if
+		}
 
-		$post_type = get_post_type_object( $request['type'] );
-		return current_user_can( $post_type->cap->create_posts );
-	}//end check_if_user_can_create_post()
+		$post_type  = $request['type'] ?? '';
+		$post_type  = is_string( $post_type ) ? $post_type : '';
+		$post_type  = get_post_type_object( $post_type );
+		$capability = ! empty( $post_type ) ? $post_type->cap->create_posts : null;
+		return is_string( $capability ) && current_user_can( $capability );
+	}
 
+	/**
+	 * Callback to check if user can view a post.
+	 *
+	 * @param WP_REST_Request<array<string,mixed>> $request Request.
+	 *
+	 * @return bool
+	 */
+	public function check_if_user_can_view_post( $request ) {
+
+		if ( nelio_content_can_current_user_manage_plugin() ) {
+			return true;
+		}
+
+		$post_id = absint( $request['id'] );
+		return current_user_can( 'read_post', $post_id );
+	}
+
+	/**
+	 * Callback to check if post type is valid.
+	 *
+	 * @param string $type Post type.
+	 *
+	 * @return bool
+	 */
 	public function is_valid_post_type( $type ) {
 		if ( empty( $type ) ) {
 			return false;
-		}//end if
+		}
 
-		$post_types = nelio_content_get_post_types( 'calendar,content-board' );
+		$post_types = array_merge(
+			nelio_content_get_post_types( 'calendar' ),
+			nelio_content_get_post_types( 'content-board' )
+		);
 		if ( ! in_array( $type, $post_types, true ) ) {
 			return false;
-		}//end if
+		}
 
 		$post_type = get_post_type_object( $type );
 		return ! empty( $post_type );
-	}//end is_valid_post_type()
+	}
 
+	/**
+	 * Callback to check if user can edit post.
+	 *
+	 * @param WP_REST_Request<array<string,mixed>> $request Request.
+	 *
+	 * @return bool
+	 */
 	public function check_if_user_can_edit_post( $request ) {
 
-		$post_id   = $request['id'];
+		$post_id   = absint( $request['id'] );
 		$post_type = get_post_type( $post_id );
 		if ( empty( $post_type ) ) {
 			return false;
-		}//end if
+		}
 
 		if ( ! $this->is_valid_post_type( $post_type ) ) {
 			return false;
-		}//end if
+		}
 
-		if ( nc_can_current_user_manage_plugin() ) {
+		if ( nelio_content_can_current_user_manage_plugin() ) {
 			return true;
-		}//end if
+		}
 
-		$post_type  = get_post_type_object( $post_type );
+		$post_type = get_post_type_object( $post_type );
+		if ( empty( $post_type ) ) {
+			return false;
+		}
+
 		$capability = in_array( get_post_status( $post_id ), array( 'publish', 'future' ), true )
 			? $post_type->cap->edit_published_posts
 			: $post_type->cap->edit_posts;
-		return current_user_can( $capability, $post_id );
-	}//end check_if_user_can_edit_post()
+		return is_string( $capability ) && current_user_can( $capability, $post_id );
+	}
 
+	/**
+	 * Callback to check if user can trash post.
+	 *
+	 * @param WP_REST_Request<array<string,mixed>> $request Request.
+	 *
+	 * @return bool
+	 */
 	public function check_if_user_can_trash_post( $request ) {
 
 		$editable = $this->check_if_user_can_edit_post( $request );
 		if ( empty( $editable ) ) {
 			return false;
-		}//end if
+		}
 
-		if ( nc_can_current_user_manage_plugin() ) {
+		if ( nelio_content_can_current_user_manage_plugin() ) {
 			return true;
-		}//end if
+		}
 
-		$post_id    = $request['id'];
-		$post_type  = get_post_type( $post_id );
-		$post_type  = get_post_type_object( $post_type );
+		$post_id   = absint( $request['id'] );
+		$post_type = get_post_type( $post_id );
+		$post_type = ! empty( $post_type ) ? $post_type : '';
+		$post_type = get_post_type_object( $post_type );
+		if ( empty( $post_type ) ) {
+			return false;
+		}
+
 		$capability = in_array( get_post_status( $post_id ), array( 'publish', 'future' ), true )
 			? $post_type->cap->delete_published_posts
 			: $post_type->cap->delete_posts;
-		return current_user_can( $capability, $post_id );
-	}//end check_if_user_can_trash_post()
+		return is_string( $capability ) && current_user_can( $capability, $post_id );
+	}
 
+	/**
+	 * Callback to sanitize taxonomies.
+	 *
+	 * @param array<string,list<array{id?:int}>> $taxonomies Taxonomies with terms.
+	 *
+	 * @return array<string,list<int>>
+	 */
 	public function sanitize_taxonomies( $taxonomies ) {
 		return array_map(
 			function ( $values ) {
-				$id = function ( $term ) {
-					return isset( $term['id'] ) ? absint( $term['id'] ) : 0;
-				};
-				return array_values( array_filter( array_map( $id, $values ) ) );
+				$values = array_map( fn( $term ) => absint( $term['id'] ?? 0 ), $values );
+				return array_values( array_filter( $values ) );
 			},
 			$taxonomies
 		);
-	}//end sanitize_taxonomies()
+	}
 
+	/**
+	 * Callback to sanitize series.
+	 *
+	 * @param list<TSeries> $series Series.
+	 *
+	 * @return list<TSeries>
+	 */
 	public function sanitize_series( $series ) {
 		return array_map(
-			function ( $values ) {
-				$fix = function ( $series_item ) {
-					return array(
-						'id'   => isset( $series_item['id'] ) ? absint( $series_item['id'] ) : 0,
-						'part' => ! empty( $series_item['part'] ) ? absint( $series_item['part'] ) : null,
+			function ( $series_item ) {
+				$id   = absint( $series_item['id'] );
+				$part = absint( $series_item['part'] ?? 0 );
+				return $part
+					? array(
+						'id'   => $id,
+						'part' => $part,
+					)
+					: array(
+						'id' => $id,
 					);
-				};
-				return array_map( $fix, $values );
 			},
 			$series
 		);
-	}//end sanitize_series()
+	}
 
 	/**
 	 * Returns the requested post.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{id:int,aws?:bool}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response.
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_post( $request ) {
 
-		$post = get_post( $request['id'] );
+		$post = get_post( absint( $request['id'] ) );
 		if ( empty( $post ) ) {
 			return new WP_Error(
 				'post-not-found',
 				_x( 'Post not found.', 'text', 'nelio-content' )
 			);
-		}//end if
+		}
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
+		$json        = ! empty( $request['aws'] )
+			? $post_helper->post_to_aws_json( $post->ID )
+			: $post_helper->post_to_json( $post->ID );
+		if ( empty( $json ) ) {
+			return new WP_Error(
+				'stringify-error',
+				_x( 'Unable to stringify post', 'text', 'nelio-content' )
+			);
+		}
 
-		return isset( $request['aws'] ) && $request['aws']
-			? new WP_REST_Response( $post_helper->post_to_aws_json( $post->ID ), 200 )
-			: new WP_REST_Response( $post_helper->post_to_json( $post->ID ), 200 );
-	}//end get_post()
+		return new WP_REST_Response( $json, 200 );
+	}
 
 	/**
 	 * Gets the post references.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{id:int}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_post_references( $request ) {
-		$post_id     = $request['id'];
+		$post_id     = absint( $request['id'] );
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		return new WP_REST_Response(
 			$post_helper->get_references( $post_id, 'suggested' ),
 			200
 		);
-	}//end get_post_references()
+	}
 
 	/**
 	 * Gets all posts in given date period.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{from:string,to:string,type:list<string>}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response
 	 */
 	public function get_posts_in_date_range( $request ) {
 
+		/** @var WP_Post|null */
 		global $post;
-		$from       = $request->get_param( 'from' );
-		$to         = $request->get_param( 'to' );
+		/** @var string */
+		$from = $request->get_param( 'from' );
+		/** @var string */
+		$to = $request->get_param( 'to' );
+		/** @var list<string> */
 		$post_types = $request->get_param( 'type' );
 
 		$args = array(
@@ -579,7 +666,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				'before'    => $to,
 				'inclusive' => true,
 			),
-			'posts_per_page' => -1, // phpcs:ignore
+			'posts_per_page' => -1,
 			'orderby'        => 'date',
 			'order'          => 'desc',
 			'post_type'      => $post_types,
@@ -593,40 +680,54 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		while ( $query->have_posts() ) {
 			$query->the_post();
 
-			if ( '0000-00-00 00:00:00' === $post->post_date_gmt ) {
+			if ( empty( $post ) || '0000-00-00 00:00:00' === $post->post_date_gmt ) {
 				continue;
-			}//end if
+			}
+
+			if ( ! current_user_can( 'read_post', $post->ID ) ) {
+				continue;
+			}
 
 			$aux = $post_helper->post_to_json( $post );
 			if ( ! empty( $aux ) ) {
 				array_push( $result, $aux );
-			}//end if
-		}//end while
+			}
+		}
 
 		return new WP_REST_Response( $result, 200 );
-	}//end get_posts_in_date_range()
+	}
 
 	/**
 	 * Creates a new post.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array<string,mixed>> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_post( $request ) {
 
-		$author_id  = $request->get_param( 'authorId' );
-		$title      = $request->get_param( 'title' );
-		$date       = $request->get_param( 'dateValue' );
-		$date       = ! empty( $date ) ? $date : false;
-		$time       = $request->get_param( 'timeValue' );
-		$time       = ! empty( $time ) ? $time : false;
-		$post_type  = $request->get_param( 'type' );
-		$status     = $request->get_param( 'status' );
+		/** @var int */
+		$author_id = absint( $request->get_param( 'authorId' ) );
+		/** @var string */
+		$title = $request->get_param( 'title' );
+		/** @var string|false */
+		$date = $request->get_param( 'dateValue' );
+		$date = ! empty( $date ) ? $date : false;
+		/** @var string|false */
+		$time = $request->get_param( 'timeValue' );
+		$time = ! empty( $time ) ? $time : false;
+		/** @var string */
+		$status = $request->get_param( 'status' );
+		/** @var array<string,list<int>>|null */
 		$taxonomies = $request->get_param( 'taxonomies' );
 		$taxonomies = ! empty( $taxonomies ) ? $taxonomies : array();
+		/** @var list<string> */
 		$references = $request->get_param( 'references' );
-		$series     = $request->get_param( 'series' );
+		/** @var list<TSeries>|null */
+		$series = $request->get_param( 'series' );
+		$series = ! empty( $series ) ? $series : array();
+		/** @var string */
+		$type = $request->get_param( 'type' );
 
 		/**
 		 * Modifies the title that will be used in the given post.
@@ -640,21 +741,22 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		$title = trim( apply_filters( 'nelio_content_calendar_create_post_title', $title ) );
 		if ( empty( $title ) ) {
 			$title = _x( 'No Title', 'text', 'nelio-content' );
-		}//end if
+		}
 
 		// Create new post.
 		$post_data = array(
 			'post_title'  => $title,
 			'post_author' => $author_id,
-			'post_type'   => $post_type,
+			'post_type'   => $type,
 			'post_status' => $status,
 		);
-		if ( $date && $time ) {
+		$datetime  = $date && $time ? strtotime( "$date $time:00" ) : false;
+		if ( $date && $time && $datetime ) {
 			$post_data['post_date']     = "$date $time:00";
-			$post_data['post_date_gmt'] = get_gmt_from_date( gmdate( 'Y-m-d H:i:s', strtotime( "$date $time:00" ) ) );
+			$post_data['post_date_gmt'] = get_gmt_from_date( gmdate( 'Y-m-d H:i:s', $datetime ) );
 		} else {
 			$post_data['post_date_gmt'] = '0000-00-00 00:00:00';
-		}//end if
+		}
 
 		$post_id = wp_insert_post( $post_data, true );
 		if ( is_wp_error( $post_id ) ) {
@@ -662,7 +764,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				'internal-error',
 				_x( 'Post could not be created.', 'text', 'nelio-content' )
 			);
-		}//end if
+		}
 
 		// NOTE. Make sure post_modified and post_modified_gmt are properly set by triggering an update.
 		$post_data['ID'] = $post_id;
@@ -672,48 +774,62 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		foreach ( $taxonomies as $tax => $term_ids ) {
 			wp_set_post_terms( $post_id, $term_ids, $tax );
-		}//end foreach
+		}
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		$post_helper->update_post_references( $post_id, $references, array() );
 		$post_helper->update_series( $post_id, $series );
 
-		$post = get_post( $post_id ); // phpcs:ignore
+		$post = get_post( $post_id );
 		if ( ! $post ) {
 			return new WP_Error(
 				'internal-error',
 				_x( 'Post was successfully created, but could not be retrieved.', 'text', 'nelio-content' )
 			);
-		}//end if
+		}
 
 		$response = array(
 			'post'       => $post_helper->post_to_json( $post ),
 			'references' => $post_helper->get_references( $post_id, 'suggested' ),
 		);
 		return new WP_REST_Response( $response, 200 );
-	}//end create_post()
+	}
 
 	/**
 	 * Updates a post.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array<string,mixed>> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_post( $request ) {
 
-		$post_id    = $request['id'];
-		$author_id  = $request->get_param( 'authorId' );
-		$title      = $request->get_param( 'title' );
-		$date       = $request->get_param( 'dateValue' );
-		$date       = ! empty( $date ) ? $date : false;
-		$time       = $request->get_param( 'timeValue' );
-		$time       = ! empty( $time ) ? $time : false;
-		$status     = $request->get_param( 'status' );
+		/** @var int */
+		$post_id = absint( $request['id'] );
+		/** @var int */
+		$author_id = absint( $request->get_param( 'authorId' ) );
+		/** @var string */
+		$title = $request->get_param( 'title' );
+		/** @var string|false */
+		$date = $request->get_param( 'dateValue' );
+		$date = ! empty( $date ) ? $date : false;
+		/** @var string|false */
+		$time = $request->get_param( 'timeValue' );
+		$time = ! empty( $time ) ? $time : false;
+		/** @var string */
+		$status = $request->get_param( 'status' );
+		/** @var array<string,list<int>>|null */
 		$taxonomies = $request->get_param( 'taxonomies' );
 		$taxonomies = ! empty( $taxonomies ) ? $taxonomies : array();
+		/** @var list<string> */
 		$references = $request->get_param( 'references' );
-		$series     = $request->get_param( 'series' );
+		/** @var list<TSeries>|null */
+		$series = $request->get_param( 'series' );
+		$series = ! empty( $series ) ? $series : array();
+		/** @var string */
+		$type = $request->get_param( 'type' );
+		/** @var bool */
+		$sticky = ! empty( $request->get_param( 'isSticky' ) );
 
 		/**
 		 * Modifies the title that will be used in the given post.
@@ -728,12 +844,12 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		$title = trim( apply_filters( 'nelio_content_calendar_update_post_title', $title, $post_id ) );
 		if ( empty( $title ) ) {
 			$title = _x( 'No Title', 'text', 'nelio-content' );
-		}//end if
+		}
 
 		$post = $this->maybe_get_post( $post_id );
 		if ( is_wp_error( $post ) ) {
 			return $post;
-		}//end if
+		}
 
 		$post_data = array(
 			'ID'          => $post_id,
@@ -742,13 +858,14 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 			'post_status' => $status,
 			'edit_date'   => true,
 		);
-		if ( $date && $time ) {
+		$datetime  = $date && $time ? strtotime( "$date $time:00" ) : false;
+		if ( $date && $time && $datetime ) {
 			$post_data['post_date']     = "$date $time:00";
-			$post_data['post_date_gmt'] = get_gmt_from_date( gmdate( 'Y-m-d H:i:s', strtotime( "$date $time:00" ) ) );
+			$post_data['post_date_gmt'] = get_gmt_from_date( gmdate( 'Y-m-d H:i:s', $datetime ) );
 		} else {
 			$post_data['post_date']     = '0000-00-00 00:00:00';
 			$post_data['post_date_gmt'] = '0000-00-00 00:00:00';
-		}//end if
+		}
 
 		$aux = wp_update_post( $post_data, true );
 		if ( is_wp_error( $aux ) ) {
@@ -760,11 +877,19 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 					$post_id
 				)
 			);
-		}//end if
+		}
 
 		foreach ( $taxonomies as $tax => $term_ids ) {
 			wp_set_post_terms( $post_id, $term_ids, $tax );
-		}//end foreach
+		}
+
+		if ( 'post' === $type ) {
+			if ( $sticky ) {
+				stick_post( $post_id );
+			} else {
+				unstick_post( $post_id );
+			}
+		}
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		$post_helper->update_post_references( $post_id, $references, array() );
@@ -778,82 +903,83 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				'internal-error',
 				_x( 'Post was successfully updated, but could not be retrieved.', 'text', 'nelio-content' )
 			);
-		}//end if
+		}
 
 		$response = array(
 			'post'       => $post_helper->post_to_json( $post ),
 			'references' => $post_helper->get_references( $post_id, 'suggested' ),
 		);
 		return new WP_REST_Response( $response, 200 );
-	}//end update_post()
+	}
 
 
 
 	/**
 	 * Updates post items.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{id:int,values:array<mixed>|null}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_post_items( $request ) {
 
-		$post_id = $request['id'];
+		$post_id = absint( $request['id'] );
 		$values  = $request->get_param( 'values' );
 
 		$post = $this->maybe_get_post( $post_id );
 		if ( is_wp_error( $post ) ) {
 			return $post;
-		}//end if
+		}
 
 		Nelio_Content_Gutenberg::instance()->save( $values, $post );
 
 		return new WP_REST_Response( true, 200 );
-	}//end update_post_items()
+	}
 
 	/**
 	 * Updates a post status.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{id:int,status:string,dateValue:string}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_post_status( $request ) {
 
-		$post_id  = $request['id'];
-		$status   = $request->get_param( 'status' );
+		$post_id = absint( $request['id'] );
+		/** @var string */
+		$status = $request->get_param( 'status' );
+		/** @var string */
 		$utc_date = $request->get_param( 'dateValue' );
 
 		$post = $this->maybe_get_post( $post_id );
 		if ( is_wp_error( $post ) ) {
 			return $post;
-		}//end if
+		}
 
 		if ( 'publish' === $status ) {
-			$post_id    = $request['id'];
 			$post_type  = get_post_type( $post_id );
+			$post_type  = ! empty( $post_type ) ? $post_type : '';
 			$post_type  = get_post_type_object( $post_type );
-			$capability = $post_type->cap->publish_posts;
-			if ( ! current_user_can( $capability, $post_id ) ) {
+			$capability = ! empty( $post_type ) && is_string( $post_type->cap->publish_posts ) ? $post_type->cap->publish_posts : null;
+			if ( empty( $capability ) || ! current_user_can( $capability, $post_id ) ) {
 				return new WP_Error( _x( 'You’re not allowed to publish this post.', 'text', 'nelio-content' ) );
-			}//end if
-		}//end if
+			}
+		}
 
 		$post_data = array(
 			'ID'          => $post_id,
 			'post_status' => $status,
 		);
 
-
 		if ( 'publish' === $status ) {
 			$utc_date = current_datetime()->format( 'c' );
-		}//end if
+		}
 
 		if ( ! empty( $utc_date ) ) {
 			$post_data['post_date']     = get_date_from_gmt( $utc_date );
 			$post_data['post_date_gmt'] = $utc_date;
 			$post_data['edit_date']     = true;
-		}//end if
+		}
 
 		$aux = wp_update_post( $post_data, true );
 		if ( is_wp_error( $aux ) ) {
@@ -865,7 +991,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 					$post_id
 				)
 			);
-		}//end if
+		}
 
 		$this->trigger_save_post_action( $post_id, false );
 
@@ -875,29 +1001,35 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				'internal-error',
 				_x( 'Post status was successfully updated, but could not be retrieved.', 'text', 'nelio-content' )
 			);
-		}//end if
+		}
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		return new WP_REST_Response( $post_helper->post_to_json( $post ), 200 );
-	}//end update_post_status()
+	}
 
 	/**
 	 * Search posts.
 	 *
-	 * @param  WP_REST_Request $request Full data about the request.
-	 * @return WP_REST_Response The response
+	 * @param  WP_REST_Request<array{query:string,per_page?:int,page?:int,status:list<string>,type:list<string>}> $request Full data about the request.
+	 *
+	 * @return WP_REST_Response
 	 */
 	public function search_posts( $request ) {
 
-		$per_page   = $request->get_param( 'per_page' );
-		$per_page   = ! empty( $per_page ) ? $per_page : 10;
-		$page       = $request->get_param( 'page' );
-		$page       = ! empty( $page ) ? $page : 1;
-		$status     = $request->get_param( 'status' );
+		/** @var string */
+		$query = $request->get_param( 'query' );
+		/** @var int */
+		$per_page = $request->get_param( 'per_page' );
+		$per_page = ! empty( $per_page ) ? $per_page : 10;
+		/** @var int */
+		$page = $request->get_param( 'page' );
+		$page = ! empty( $page ) ? $page : 1;
+		/** @var list<string> */
+		$status = $request->get_param( 'status' );
+		/** @var list<string> */
 		$post_types = $request->get_param( 'type' );
 
-		$query = $request->get_param( 'query' );
-		$args  = array(
+		$args = array(
 			'per_page'   => $per_page,
 			'page'       => $page,
 			'status'     => $status,
@@ -906,62 +1038,81 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		$data = $this->search_wp_posts( $query, $args );
 		return new WP_REST_Response( $data, 200 );
-	}//end search_posts()
+	}
 
 	/**
 	 * Reschedules the post to the given date.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{id:int,day:string,hour:string,defaultHour:string}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function reschedule_post( $request ) {
 
-		$post_id = $request['id'];
+		$post_id = absint( $request['id'] );
 		$post    = $this->maybe_get_post( $post_id );
 		if ( is_wp_error( $post ) ) {
 			return $post;
-		}//end if
+		}
 
-		$day  = $request->get_param( 'day' );
+		/** @var string */
+		$day = $request->get_param( 'day' );
+		/** @var string */
 		$time = $request->get_param( 'hour' );
 
 		if ( empty( $time ) ) {
+			/** @var string */
 			$time = $request->get_param( 'defaultHour' );
 			if ( '0000-00-00 00:00:00' !== $post->post_date_gmt ) {
-				$time = gmdate( 'H:i:s', strtotime( $post->post_date ) );
-			}//end if
-		}//end if
+				$pd = strtotime( $post->post_date );
+				if ( ! empty( $pd ) ) {
+					$time = gmdate( 'H:i:s', $pd );
+				}
+			}
+		}
+
+		$gmt_time = strtotime( $day . ' ' . $time );
+		if ( empty( $gmt_time ) ) {
+			return new WP_Error( 'gmt-error', _x( 'Unable to compute GMT time', 'text', 'nelio-content' ) );
+		}
 
 		wp_update_post(
 			array(
 				'ID'            => $post_id,
 				'post_date'     => $day . ' ' . $time,
-				'post_date_gmt' => get_gmt_from_date( gmdate( 'Y-m-d H:i:s', strtotime( $day . ' ' . $time ) ) ),
+				'post_date_gmt' => get_gmt_from_date( gmdate( 'Y-m-d H:i:s', $gmt_time ) ),
 				'edit_date'     => true,
 			)
 		);
 		$this->trigger_save_post_action( $post_id, false );
 
-		$post        = get_post( $post_id ); // phpcs:ignore
+		$post        = get_post( $post_id );
 		$post_helper = Nelio_Content_Post_Helper::instance();
-		return new WP_REST_Response( $post_helper->post_to_json( $post ), 200 );
-	}//end reschedule_post()
+		$json        = ! empty( $post ) ? $post_helper->post_to_json( $post ) : false;
+		if ( ! $json ) {
+			return new WP_Error(
+				'stringify-error',
+				_x( 'Unable to stringify post', 'text', 'nelio-content' )
+			);
+		}
+
+		return new WP_REST_Response( $json, 200 );
+	}
 
 	/**
 	 * Unschedules the post.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{id:int}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function unschedule_post( $request ) {
 
-		$post_id = $request['id'];
+		$post_id = absint( $request['id'] );
 		$post    = $this->maybe_get_post( $post_id );
 		if ( is_wp_error( $post ) ) {
 			return $post;
-		}//end if
+		}
 
 		wp_update_post(
 			array(
@@ -974,32 +1125,32 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		);
 		$this->trigger_save_post_action( $post_id, false );
 
-		$post = get_post( $post_id ); // phpcs:ignore
+		$post = get_post( $post_id );
 		if ( ! $post ) {
 			return new WP_Error(
 				'internal-error',
 				_x( 'Post was successfully unscheduled, but could not be retrieved.', 'text', 'nelio-content' )
 			);
-		}//end if
+		}
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		return new WP_REST_Response( $post_helper->post_to_json( $post ), 200 );
-	}//end unschedule_post()
+	}
 
 	/**
 	 * Trashes the post.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{id:int}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function trash_post( $request ) {
 
-		$post_id = $request['id'];
+		$post_id = absint( $request['id'] );
 		$post    = $this->maybe_get_post( $post_id );
 		if ( is_wp_error( $post ) ) {
 			return $post;
-		}//end if
+		}
 
 		$result = wp_trash_post( $post_id );
 		if ( empty( $result ) ) {
@@ -1007,25 +1158,52 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				'trash-post-failed',
 				_x( 'Something went wrong when trashing the post.', 'text', 'nelio-content' )
 			);
-		}//end if
+		}
 		$this->trigger_save_post_action( $post_id, false );
 
 		return new WP_REST_Response( true, 200 );
-	}//end trash_post()
+	}
 
+	/**
+	 * Triggers save post action.
+	 *
+	 * @param int  $post_id Post ID.
+	 * @param bool $creating Creating.
+	 *
+	 * @return void
+	 */
 	private function trigger_save_post_action( $post_id, $creating ) {
 		/**
 		 * This filter is documented in includes/utils/class-nelio-content-post-saving.php
 		 */
 		do_action( 'nelio_content_save_post', $post_id, $creating );
-	}//end trigger_save_post_action()
+	}
 
+	/**
+	 * Searches posts.
+	 *
+	 * @param string                                                                   $query Query.
+	 * @param array{page:int,per_page:int,status:list<string>,post_types:list<string>} $args  Arguments.
+	 *
+	 * @return (
+	 *   array{
+	 *     results: list<TPost>,
+	 *     pagination: array{
+	 *       more: bool,
+	 *       pages: int
+	 *     }
+	 *   }
+	 * )
+	 */
 	private function search_wp_posts( $query, $args ) {
 
+		/** @var WP_Post|null */
 		global $post;
-		global $wpdb;
-		$wpdb->set_sql_mode( array( 'ALLOW_INVALID_DATES' ) );
 
+		/** @var wpdb */
+		global $wpdb;
+
+		$wpdb->set_sql_mode( array( 'ALLOW_INVALID_DATES' ) );
 		$page       = $args['page'];
 		$per_page   = $args['per_page'];
 		$status     = $args['status'];
@@ -1034,15 +1212,16 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		$posts = array();
 		if ( 1 === $page ) {
 			$posts = $this->search_wp_post_by_id_or_url( $query, $post_types );
-		}//end if
+		}
 
 		$args = array(
-			'post_title__like' => $query,
-			'post_type'        => $post_types,
-			'order'            => 'desc',
-			'orderby'          => 'date',
-			'posts_per_page'   => $per_page,
-			'paged'            => $page,
+			'post_title__like'    => $query,
+			'post_type'           => $post_types,
+			'order'               => 'desc',
+			'orderby'             => 'date',
+			'posts_per_page'      => $per_page,
+			'paged'               => $page,
+			'ignore_sticky_posts' => true,
 		);
 
 		$args['post_status'] = $status;
@@ -1053,7 +1232,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				'before'    => '0000-00-00',
 				'inclusive' => true,
 			);
-		}//end if
+		}
 
 		add_filter( 'posts_where', array( $this, 'add_title_filter_to_wp_query' ), 10, 2 );
 		$wp_query = new WP_Query( $args );
@@ -1061,16 +1240,20 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		while ( $wp_query->have_posts() ) {
-
 			$wp_query->the_post();
-			if ( absint( $query ) !== $post->ID ) {
-				array_push(
-					$posts,
-					$post_helper->post_to_json( $post )
-				);
-			}//end if
-		}//end while
+			if ( empty( $post ) || absint( $query ) === $post->ID ) {
+				continue;
+			}
 
+			if ( ! current_user_can( 'read_post', $post->ID ) ) {
+				continue;
+			}
+
+			$json = $post_helper->post_to_json( $post );
+			if ( $json ) {
+				array_push( $posts, $json );
+			}
+		}
 		wp_reset_postdata();
 
 		$data = array(
@@ -1082,35 +1265,52 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		);
 
 		return $data;
-	}//end search_wp_posts()
+	}
 
+	/**
+	 * Search posts by ID or URL.
+	 *
+	 * @param string|int   $id_or_url  ID or URL.
+	 * @param list<string> $post_types Post types.
+	 *
+	 * @return list<TPost>
+	 */
 	private function search_wp_post_by_id_or_url( $id_or_url, $post_types ) {
 
 		if ( ! absint( $id_or_url ) && ! filter_var( $id_or_url, FILTER_VALIDATE_URL ) ) {
 			return array();
-		}//end if
+		}
 
-		$post_id = $id_or_url;
-		if ( ! absint( $id_or_url ) ) {
-			$post_id = nc_url_to_postid( $id_or_url );
-		}//end if
+		$post_id = absint( $id_or_url );
+		if ( ! $post_id ) {
+			$post_id = nelio_content_url_to_postid( "{$id_or_url}" );
+		}
 
 		$post = get_post( $post_id );
 		if ( ! $post ) {
 			return array();
-		}//end if
+		}
 
 		if ( ! in_array( $post->post_type, $post_types, true ) ) {
 			return array();
-		}//end if
+		}
 
-		if ( ! in_array( $post->post_status, array( 'publish', 'draft' ), true ) ) {
+		if ( 'trash' === $post->post_status ) {
 			return array();
-		}//end if
+		}
+
+		if ( ! current_user_can( 'read_post', $post->ID ) ) {
+			return array();
+		}
 
 		$post_helper = Nelio_Content_Post_Helper::instance();
-		return array( $post_helper->post_to_json( $post ) );
-	}//end search_wp_post_by_id_or_url()
+		$json        = $post_helper->post_to_json( $post );
+		if ( ! $json ) {
+			return array();
+		}
+
+		return array( $json );
+	}
 
 	/**
 	 * A filter to search posts based on their title.
@@ -1122,25 +1322,33 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 * @param WP_Query $wp_query The $wp_query object that contains the params
 	 *                           used to build the where clause.
 	 *
-	 * @return string the query.
+	 * @return string
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function add_title_filter_to_wp_query( $where, $wp_query ) {
 
+		/** @var wpdb */
 		global $wpdb;
 
+		/** @var string|null */
 		$search_term = $wp_query->get( 'post_title__like' );
 		if ( $search_term ) {
-			$search_term = $wpdb->esc_like( $search_term );
+			$search_term = esc_sql( $wpdb->esc_like( $search_term ) );
 			$search_term = ' \'%' . $search_term . '%\'';
 			$where       = $where . ' AND ' . $wpdb->posts . '.post_title LIKE ' . $search_term;
-		}//end if
+		}
 
 		return $where;
-	}//end add_title_filter_to_wp_query()
+	}
 
+	/**
+	 * Gets post.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return WP_Error|WP_Post
+	 */
 	private function maybe_get_post( $post_id ) {
 
 		if ( empty( $post_id ) ) {
@@ -1148,9 +1356,9 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				'missing-post-id',
 				_x( 'Post ID is missing.', 'text', 'nelio-content' )
 			);
-		}//end if
+		}
 
-		$post = get_post( $post_id ); // phpcs:ignore
+		$post = get_post( $post_id );
 		if ( empty( $post ) ) {
 			return new WP_Error(
 				'post-not-found',
@@ -1160,8 +1368,8 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 					$post_id
 				)
 			);
-		}//end if
+		}
 
 		return $post;
-	}//end maybe_get_post()
-}//end class
+	}
+}

@@ -16,44 +16,45 @@ use function Nelio_Content\Helpers\flow;
 class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 
 	/**
-	 * The single instance of this class.
+	 * This instance.
 	 *
 	 * @since  2.0.0
-	 * @access protected
 	 * @var    Nelio_Content_Author_REST_Controller|null
 	 */
-	protected static $instance = null;
+	protected static $instance;
 
 	/**
-	 * Returns the single instance of this class.
+	 * Returns this instance.
 	 *
-	 * @return Nelio_Content_Author_REST_Controller the single instance of this class.
+	 * @return Nelio_Content_Author_REST_Controller
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
 	/**
 	 * Hooks into WordPress.
 	 *
+	 * @return void
+	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-	}//end init()
+	}
 
 	/**
 	 * Register the routes for the objects of the controller.
+	 *
+	 * @return void
 	 */
 	public function register_routes() {
 
@@ -64,12 +65,12 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_author' ),
-					'permission_callback' => 'nc_can_current_user_use_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
 					'args'                => array(
 						'id' => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 					),
@@ -84,7 +85,7 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'search_authors' ),
-					'permission_callback' => 'nc_can_current_user_use_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
 					'args'                => array(
 						'query'    => array(
 							'required'          => true,
@@ -94,33 +95,34 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 						'page'     => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'per_page' => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 					),
 				),
 			)
 		);
-	}//end register_routes()
+	}
 
 	/**
 	 * Retrieves the specified author.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{id:int}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_author( $request ) {
 
+		/** @var int */
 		$author_id = $request['id'];
 
-		$author = get_userdata( $author_id );
+		$author = $this->json( get_userdata( $author_id ) );
 		if ( ! $author ) {
 			return new WP_Error(
 				'author-not-found',
@@ -130,30 +132,33 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 					$author_id
 				)
 			);
-		}//end if
+		}
 
-		return new WP_REST_Response( $this->json( $author ), 200 );
-	}//end get_author()
+		return new WP_REST_Response( $author, 200 );
+	}
 
 	/**
 	 * Search authors.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array<mixed>> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response
 	 */
 	public function search_authors( $request ) {
 
-		$query    = $request->get_param( 'query' );
+		/** @var string */
+		$query = $request->get_param( 'query' );
+		/** @var int */
 		$per_page = $request->get_param( 'per_page' );
-		$page     = $request->get_param( 'page' );
+		/** @var int */
+		$page = $request->get_param( 'page' );
 
 		// Search query.
 		$args = array(
 			/**
 			 * Filters the authors capabilities.
 			 *
-			 * @param array $capabilities Array of capabilities
+			 * @param list<string> $capabilities Array of capabilities
 			 *
 			 * @since 3.7.2
 			 */
@@ -166,22 +171,21 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 		);
 
 		if ( empty( $query ) ) {
-			$args['exclude'] = $this->get_priority_authors(); // phpcs:ignore
-		}//end if
+			// phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+			$args['exclude'] = $this->get_priority_authors();
+		}
 
 		$wp_user_query = new WP_User_Query( $args );
-		$authors       = array_map(
-			function ( $user ) {
-				return $this->json( $user->data );
-			},
-			$wp_user_query->get_results()
-		);
+		/** @var list<object{data:WP_User}> */
+		$authors = $wp_user_query->get_results();
+		$authors = array_map( fn( $user ) => $this->json( $user->data ), $authors );
+		$authors = array_values( array_filter( $authors ) );
 
 		if ( empty( $query ) ) {
 			if ( 1 === $page ) {
 				$authors = $this->add_priority_authors( $authors );
-			}//end if
-		}//end if
+			}
+		}
 
 		// Build result object, ready for pagination.
 		$max_num_pages = ceil( $wp_user_query->get_total() / $per_page );
@@ -194,8 +198,15 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 		);
 
 		return new WP_REST_Response( $result, 200 );
-	}//end search_authors()
+	}
 
+	/**
+	 * Adds priority authors.
+	 *
+	 * @param list<TAuthor> $authors Authors.
+	 *
+	 * @return list<TAuthor>
+	 */
 	private function add_priority_authors( $authors ) {
 
 		$priority_authors = array_map(
@@ -206,47 +217,74 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 		);
 
 		return array_merge(
-			array_filter( $priority_authors ),
+			array_filter( $priority_authors, fn( $a ) => ! empty( $a['id'] ) ),
 			$authors
 		);
-	}//end add_priority_authors()
+	}
 
+	/**
+	 * Returns the list of priority authors.
+	 *
+	 * @return list<int>
+	 */
 	private function get_priority_authors() {
 		/**
 		 * Returns a list of author IDs.
 		 *
 		 * These authors will be the first results returned by an empty search.
 		 *
-		 * @param array $author_ids list of author IDs.
+		 * @param list<int> $author_ids list of author IDs.
 		 *
 		 * @since 2.0.0
 		 */
 		return apply_filters( 'nelio_content_get_priority_authors', array() );
-	}//end get_priority_authors()
+	}
 
+	/**
+	 * Private function to convert user to json.
+	 *
+	 * @param WP_User|false $author Author.
+	 *
+	 * @return TAuthor|false
+	 */
 	private function json( $author ) {
+
+		if ( empty( $author ) ) {
+			return false;
+		}
 
 		$author_id = absint( $author->ID );
 
+		$photo = get_avatar_url(
+			$author->user_email,
+			array(
+				'size'    => 60,
+				'default' => 'blank',
+			)
+		);
+		$photo = is_string( $photo ) ? $photo : '';
 		return array(
 			'id'      => $author_id,
 			'isAdmin' => user_can( $author_id, 'manage_options' ),
 			'email'   => $this->mask_email( $author->user_email ),
 			'name'    => $author->display_name,
-			'photo'   => get_avatar_url(
-				$author->user_email,
-				array(
-					'size'    => 60,
-					'default' => 'blank',
-				)
-			),
+			'photo'   => $photo,
 		);
-	}//end json()
+	}
 
+	/**
+	 * Helper function to mask email.
+	 *
+	 * @param string $email Email.
+	 *
+	 * @return string
+	 */
 	private function mask_email( $email ) {
 
 		$domain    = strrchr( $email, '@' );
+		$domain    = is_string( $domain ) ? $domain : '';
 		$extension = strrchr( $domain, '.' );
+		$extension = is_string( $extension ) ? $extension : '';
 		$mailname  = str_replace( $domain, '', $email );
 
 		$domain = str_replace( $extension, '', $domain );
@@ -258,14 +296,14 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 			$mailname = '***';
 		} else {
 			$mailname = substr( $mailname, 0, 3 ) . '***';
-		}//end if
+		}
 
 		if ( strlen( $domain ) < 5 ) {
 			$domain = '***';
 		} else {
 			$domain = substr( $domain, 0, 3 ) . '***';
-		}//end if
+		}
 
 		return "$mailname@$domain$extension";
-	}//end mask_email()
-}//end class
+	}
+}

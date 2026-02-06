@@ -21,20 +21,32 @@ defined( 'ABSPATH' ) || exit;
  */
 class Nelio_Content_Plugin_List_Page {
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'plugin_action_links_' . nelio_content()->plugin_file, array( $this, 'customize_plugin_actions' ) );
+		add_filter( 'plugin_action_links_' . nelio_content()->plugin_file, array( $this, 'customize_plugin_actions' ) );
 		add_action( 'admin_init', array( $this, 'maybe_show_premium_notice' ) );
-	}//end init()
+	}
 
+	/**
+	 * Callback to customize the plugin action links.
+	 *
+	 * @param array<string,string> $actions List of actions.
+	 *
+	 * @return array<string,string>
+	 */
 	public function customize_plugin_actions( $actions ) {
 
-		if ( ! nc_get_site_id() ) {
+		if ( ! nelio_content_get_site_id() ) {
 			return $actions;
-		}//end if
+		}
 
-		if ( ! nc_is_subscribed() ) {
+		if ( ! nelio_content_is_subscribed() ) {
 
 			$subscribe_url = add_query_arg(
 				array(
@@ -52,27 +64,32 @@ class Nelio_Content_Plugin_List_Page {
 				esc_html_x( 'Upgrade to Premium', 'command', 'nelio-content' )
 			);
 
-		}//end if
+		}
 
 		if ( current_user_can( 'deactivate_plugin', nelio_content()->plugin_file ) && isset( $actions['deactivate'] ) ) {
 			$actions['deactivate'] = sprintf(
 				'<span class="nelio-content-deactivate-link"></span><noscript>%s</noscript>',
 				$actions['deactivate']
 			);
-		}//end if
+		}
 
 		return $actions;
-	}//end customize_plugin_actions()
+	}
 
+	/**
+	 * Callback to show premium notice.
+	 *
+	 * @return void
+	 */
 	public function maybe_show_premium_notice() {
-		if ( ! nc_is_subscribed() ) {
+		if ( ! nelio_content_is_subscribed() ) {
 			return;
-		}//end if
+		}
 
 		$premium_slug = 'nelio-content-premium/nelio-content-premium.php';
 		if ( is_plugin_active( $premium_slug ) ) {
 			return;
-		}//end if
+		}
 
 		$installed_plugins   = get_plugins();
 		$is_plugin_installed = array_key_exists( $premium_slug, $installed_plugins );
@@ -86,26 +103,34 @@ class Nelio_Content_Plugin_List_Page {
 				global $pagenow;
 				if ( 'plugins.php' !== $pagenow ) {
 					return;
-				}//end if
+				}
 
 				printf(
 					'<div class="notice notice-warning"><p>%s</p><div class="nelio-content-install-premium-action"></div></div>',
-					$html_message // phpcs:ignore
+					wp_kses(
+						$html_message,
+						array( 'strong' => array() )
+					)
 				);
 			}
 		);
-	}//end maybe_show_premium_notice()
+	}
 
+	/**
+	 * Callback to enqueue this page’s assets.
+	 *
+	 * @return void
+	 */
 	public function enqueue_assets() {
 
 		$screen = get_current_screen();
 		if ( empty( $screen ) || 'plugins' !== $screen->id ) {
 			return;
-		}//end if
+		}
 
 		$settings = array(
 			'isPremiumActive' => is_plugin_active( 'nelio-content-premium/nelio-content-premium.php' ),
-			'isSubscribed'    => nc_is_subscribed(),
+			'isSubscribed'    => nelio_content_is_subscribed(),
 			'cleanNonce'      => wp_create_nonce( 'nelio_content_clean_plugin_data_' . get_current_user_id() ),
 			'deactivationUrl' => $this->get_deactivation_url(),
 		);
@@ -114,19 +139,24 @@ class Nelio_Content_Plugin_List_Page {
 			'nelio-content-plugin-list-page',
 			nelio_content()->plugin_url . '/assets/dist/css/plugin-list-page.css',
 			array( 'nelio-content-components' ),
-			nc_get_script_version( 'plugin-list-page' )
+			nelio_content_get_script_version( 'plugin-list-page' )
 		);
-		nc_enqueue_script_with_auto_deps( 'nelio-content-plugin-list-page', 'plugin-list-page', true );
+		nelio_content_enqueue_script_with_auto_deps( 'nelio-content-plugin-list-page', 'plugin-list-page', true );
 
 		wp_add_inline_script(
 			'nelio-content-plugin-list-page',
 			sprintf(
 				'NelioContent.initPage( %s );',
-				wp_json_encode( $settings ) // phpcs:ignore
+				wp_json_encode( $settings )
 			)
 		);
-	}//end enqueue_assets()
+	}
 
+	/**
+	 * Returns the deactivation URL.
+	 *
+	 * @return string
+	 */
 	private function get_deactivation_url() {
 
 		global $status, $page, $s;
@@ -141,5 +171,5 @@ class Nelio_Content_Plugin_List_Page {
 			),
 			admin_url( 'plugins.php' )
 		);
-	}//end get_deactivation_url()
-}//end class
+	}
+}

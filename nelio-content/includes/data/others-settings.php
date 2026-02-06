@@ -1,7 +1,5 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 return array(
 
@@ -10,7 +8,7 @@ return array(
 	array(
 		'type'  => 'section',
 		'name'  => 'misc-section',
-		'label' => nc_make_settings_title( esc_html_x( 'Miscellaneous', 'text', 'nelio-content' ), 'admin-tools' ),
+		'label' => nelio_content_make_settings_title( esc_html_x( 'Miscellaneous', 'text', 'nelio-content' ), 'admin-tools' ),
 	),
 	// =========================================================================
 	// =========================================================================
@@ -44,7 +42,7 @@ return array(
 	array(
 		'type'  => 'section',
 		'name'  => 'efi-section',
-		'label' => nc_make_settings_title( esc_html_x( 'External Featured Images', 'text', 'nelio-content' ), 'format-image' ),
+		'label' => nelio_content_make_settings_title( esc_html_x( 'External Featured Images', 'text', 'nelio-content' ), 'format-image' ),
 	),
 	// =========================================================================
 	// =========================================================================

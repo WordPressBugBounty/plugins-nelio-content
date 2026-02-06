@@ -2,10 +2,10 @@
 /**
  * The plugin bootstrap file.
  *
- * Plugin Name:       Nelio Content - Editorial Calendar & Social Media Scheduling
+ * Plugin Name:       Nelio Content - Editorial Calendar & Social Media Auto-Posting
  * Plugin URI:        https://neliosoftware.com/content/
  * Description:       Auto-post, schedule, and share your posts on Twitter, Facebook, LinkedIn, Instagram, and other social networks. Save time with useful automations.
- * Version:           4.0.4
+ * Version:           4.2.1
  *
  * Author:            Nelio Software
  * Author URI:        https://neliosoftware.com
@@ -18,9 +18,7 @@
  * Text Domain:       nelio-content
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 define( 'NELIO_CONTENT', true );
 require untrailingslashit( __DIR__ ) . '/class-nelio-content.php';
@@ -34,7 +32,7 @@ require untrailingslashit( __DIR__ ) . '/class-nelio-content.php';
  */
 function nelio_content() {
 	return Nelio_Content::instance();
-}//end nelio_content()
+}
 
 // Start plugin.
 nelio_content();

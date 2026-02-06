@@ -8,9 +8,7 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * The interface for a setting in our plugin.
@@ -27,8 +25,9 @@ interface Nelio_Content_Setting {
 	 *
 	 * @param mixed $value The value of this setting.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_value( $value );
 
@@ -37,8 +36,9 @@ interface Nelio_Content_Setting {
 	 *
 	 * @param mixed $value The default value of this setting.
 	 *
+	 * @return void
+	 *
 	 * @since  3.7.0
-	 * @access public
 	 */
 	public function set_default_value( $value );
 
@@ -51,28 +51,29 @@ interface Nelio_Content_Setting {
 	 * @param string $option_group A settings group name.
 	 * @param string $option_name  The name of an option to sanitize and save.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function register( $label, $page, $section, $option_group, $option_name );
 
 	/**
 	 * Displays the setting in the settings screen, under the appropriate section.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function display();
 
 	/**
 	 * Sanitizes the setting's input before it's stored in the database.
 	 *
-	 * @param object $input the input to be sanitized.
+	 * @param array<string,mixed> $input the input to be sanitized.
 	 *
-	 * @return object the setting's input properly sanitized.
+	 * @return array<string,mixed> the setting's input properly sanitized.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function sanitize( $input );
-}//end interface
+}

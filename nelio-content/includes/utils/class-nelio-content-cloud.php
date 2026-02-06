@@ -8,29 +8,46 @@
  * @since      2.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
-
-use function Nelio_Content\Helpers\get;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class implements some functions to sync WordPress with Nelio’s cloud.
  */
 class Nelio_Content_Cloud {
 
+	/**
+	 * This instance.
+	 *
+	 * @var Nelio_Content_Cloud|null
+	 */
 	protected static $instance;
+
+	/**
+	 * Whether site options are updated or not.
+	 *
+	 * @var bool
+	 */
 	private $are_site_options_updated = false;
 
+	/**
+	 * Returns this instance.
+	 *
+	 * @return Nelio_Content_Cloud
+	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
+	/**
+	 * Hooks into WordPress.
+	 *
+	 * @return void
+	 */
 	public function init() {
 
 		add_action( 'admin_init', array( $this, 'add_hooks_for_updating_site_in_cloud' ) );
@@ -39,8 +56,13 @@ class Nelio_Content_Cloud {
 		add_action( 'nelio_content_update_post_in_cloud', array( $this, 'maybe_sync_post' ) );
 		add_action( 'init', array( $this, 'add_hooks_for_updating_post_in_cloud_on_publish' ) );
 		add_action( 'init', array( $this, 'maybe_add_profile_status_checker' ) );
-	}//end init()
+	}
 
+	/**
+	 * Callback to add hooks for updating site in cloud.
+	 *
+	 * @return void
+	 */
 	public function add_hooks_for_updating_site_in_cloud() {
 
 		add_filter( 'pre_update_option_gmt_offset', array( $this, 'on_site_option_updated' ), 10, 2 );
@@ -48,54 +70,72 @@ class Nelio_Content_Cloud {
 		add_filter( 'pre_update_option_WPLANG', array( $this, 'on_site_option_updated' ), 10, 2 );
 		add_filter( 'pre_update_option_home', array( $this, 'on_site_option_updated' ), 10, 2 );
 
-		add_action( 'shutdown', array( $this, 'maybe_sync_site' ), 10, 2 );
-	}//end add_hooks_for_updating_site_in_cloud()
+		add_action( 'shutdown', array( $this, 'maybe_sync_site' ) );
+	}
 
+	/**
+	 * Callback to add hooks for updating post on cloud on publish.
+	 *
+	 * @return void
+	 */
 	public function add_hooks_for_updating_post_in_cloud_on_publish() {
-
 		$post_types = nelio_content_get_post_types( 'cloud' );
 		foreach ( $post_types as $post_type ) {
 			add_action( "publish_{$post_type}", array( $this, 'maybe_sync_post' ) );
-		}//end foreach
-	}//end add_hooks_for_updating_post_in_cloud_on_publish()
+		}
+	}
 
+	/**
+	 * Callback to sync post with AWS.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return void
+	 */
 	public function maybe_sync_post( $post_id ) {
+		if ( nelio_content_is_staging() ) {
+			return;
+		}
 
 		// If it's a revision or an autosave, do nothing.
 		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
 			return;
-		}//end if
+		}
 
 		// If it’s an auto-draft, do nothing.
 		if ( 'auto-draft' === get_post_status( $post_id ) ) {
 			return;
-		}//end if
+		}
 
 		// If we don't have social profiles, do nothing.
 		if ( ! get_option( 'nc_has_social_profiles' ) ) {
 			return;
-		}//end if
+		}
 
 		// If post type is not controlled by the plugin, do nothing.
 		$post_types = nelio_content_get_post_types( 'cloud' );
 		if ( ! in_array( get_post_type( $post_id ), $post_types, true ) ) {
 			return;
-		}//end if
+		}
 
 		// If the post hasn’t changed since last time...
 		$post_helper = Nelio_Content_Post_Helper::instance();
 		if ( ! $post_helper->has_relevant_changes( $post_id ) ) {
 			return;
-		}//end if
+		}
 
 		// Otherwise, synch the plugin.
 		$attempts = get_post_meta( $post_id, '_nc_cloud_sync_attempts', true );
 		if ( empty( $attempts ) ) {
 			$attempts = 0;
-		}//end if
+		}
 		++$attempts;
 
-		$post    = $post_helper->post_to_aws_json( $post_id );
+		$post = $post_helper->post_to_aws_json( $post_id );
+		if ( empty( $post ) ) {
+			return;
+		}
+
 		$synched = $this->sync_post( $post_id, $post );
 		if ( ! $synched && 3 >= $attempts ) {
 			update_post_meta( $post_id, '_nc_cloud_sync_attempts', $attempts );
@@ -103,44 +143,65 @@ class Nelio_Content_Cloud {
 		} else {
 			delete_post_meta( $post_id, '_nc_cloud_sync_attempts' );
 			$post_helper->mark_post_as_synched( $post_id );
-		}//end if
-	}//end maybe_sync_post()
+		}
+	}
 
+	/**
+	 * Callback to mark when the site has been updated and requires resync.
+	 *
+	 * @param mixed $new_value New value.
+	 * @param mixed $old_value Old value.
+	 *
+	 * @return mixed
+	 */
 	public function on_site_option_updated( $new_value, $old_value ) {
 		if ( $new_value !== $old_value ) {
 			$this->are_site_options_updated = true;
-		}//end if
+		}
 		return $new_value;
-	}//end on_site_option_updated()
+	}
 
+	/**
+	 * Callback to sync site with AWS.
+	 *
+	 * @return void
+	 */
 	public function maybe_sync_site() {
 
 		if ( ! $this->are_site_options_updated ) {
 			return;
-		}//end if
+		}
 
-		// Note. Use error_logs for logging this function or you won't see anything.
+		$body = wp_json_encode(
+			array(
+				'url'      => home_url(),
+				'timezone' => nelio_content_get_timezone(),
+				'language' => nelio_content_get_language(),
+			)
+		);
+		assert( ! empty( $body ) );
+
+		// NOTE. Use error_logs for logging this function or you won't see anything.
 		$data = array(
 			'method'  => 'PUT',
-			'timeout' => apply_filters( 'nelio_content_request_timeout', 30 ),
+			'timeout' => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
 			'headers' => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
-			'body'    => wp_json_encode(
-				array(
-					'url'      => home_url(),
-					'timezone' => nc_get_timezone(),
-					'language' => nc_get_language(),
-				)
-			),
+			'body'    => $body,
 		);
 
-		$url = nc_get_api_url( '/site/' . nc_get_site_id(), 'wp' );
+		$url = nelio_content_get_api_url( '/site/' . nelio_content_get_site_id(), 'wp' );
 		wp_remote_request( $url, $data );
-	}//end maybe_sync_site()
+	}
 
+	/**
+	 * Callback to add profile status checker.
+	 *
+	 * @return void
+	 */
 	public function maybe_add_profile_status_checker() {
 
 		$event = 'nelio_content_check_profile_status';
@@ -148,62 +209,69 @@ class Nelio_Content_Cloud {
 		/**
 		 * Whether Nelio Content should warn users when there are profiles that need to be reauthenticated.
 		 *
-		 * @param boolean $warn Send emails with warning. Default: `true`.
+		 * @param boolean $warn
 		 *
 		 * @since 2.0.7
 		 */
 		if ( ! apply_filters( 'nelio_content_warn_when_profile_reauth_is_required', true ) ) {
-			$schedule = wp_next_scheduled( $event );
+			$schedule = absint( wp_next_scheduled( $event ) );
 			wp_unschedule_event( $schedule, $event );
 			return;
-		}//end if
+		}
 
 		add_action( $event, array( $this, 'check_profile_status' ) );
 
 		$actual_recurrence   = wp_get_schedule( $event );
-		$expected_recurrence = nc_is_subscribed() ? 'daily' : 'weekly';
+		$expected_recurrence = nelio_content_is_subscribed() ? 'daily' : 'weekly';
 		if ( $actual_recurrence !== $expected_recurrence ) {
-			$schedule = wp_next_scheduled( $event );
+			$schedule = absint( wp_next_scheduled( $event ) );
 			wp_unschedule_event( $schedule, $event );
 			wp_schedule_event( time() + DAY_IN_SECONDS, $expected_recurrence, $event );
-		}//end if
-	}//end maybe_add_profile_status_checker()
+		}
+	}
 
+	/**
+	 * Callback to check profile status.
+	 *
+	 * @return void
+	 */
 	public function check_profile_status() {
 
 		$data = array(
 			'method'    => 'GET',
-			'timeout'   => apply_filters( 'nelio_content_request_timeout', 30 ),
-			'sslverify' => ! nc_does_api_use_proxy(),
+			'timeout'   => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+			'sslverify' => ! nelio_content_does_api_use_proxy(),
 			'headers'   => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
 		);
 
 		$url = sprintf(
-			nc_get_api_url( '/site/%s/profiles/renew', 'wp' ),
-			nc_get_site_id()
+			nelio_content_get_api_url( '/site/%s/profiles/renew', 'wp' ),
+			nelio_content_get_site_id()
 		);
 
 		$response = wp_remote_request( $url, $data );
-		if ( is_wp_error( $response ) || 200 !== get( $response, 'response.code' ) ) {
+		$profiles = nelio_content_extract_response_body( $response );
+		if ( is_wp_error( $response ) ) {
 			return;
-		}//end if
+		}
 
-		$profiles = json_decode( $response['body'], true );
-		if ( ! is_array( $profiles ) ) {
-			return;
-		}//end if
+		/** @var list<TSocial_Profile> $profiles */
+		$profiles = $profiles;
 
-		$users  = array_values( array_unique( wp_list_pluck( $profiles, 'creatorId' ) ) );
+		$users  = array_map( fn( $p ) => $p['creatorId'], $profiles );
+		$users  = array_values( array_unique( $users ) );
 		$emails = array_map(
 			function ( $user_id ) {
+				/** @var int $user_id */
+
 				$info = get_userdata( $user_id );
 				if ( ! is_user_member_of_blog( $user_id ) || empty( $info ) ) {
 					return false;
-				}//end if
+				}
 				return $info->user_email;
 			},
 			$users
@@ -212,7 +280,7 @@ class Nelio_Content_Cloud {
 
 		if ( empty( $emails ) ) {
 			return;
-		}//end if
+		}
 
 		$subject = sprintf(
 			/* translators: %s: Blogname. */
@@ -227,36 +295,45 @@ class Nelio_Content_Cloud {
 			admin_url( 'admin.php?page=nelio-content-settings&subpage=social--profiles' )
 		);
 
-		// phpcs:ignore
 		wp_mail( $emails, $subject, $message );
-	}//end check_profile_status()
+	}
 
+	/**
+	 * Syncs post with our cloud.
+	 *
+	 * @param int       $post_id Post ID.
+	 * @param TAWS_Post $post Post.
+	 *
+	 * @return bool
+	 */
 	private function sync_post( $post_id, $post ) {
+		if ( nelio_content_is_staging() ) {
+			return false;
+		}
+
+		$body = wp_json_encode( $post );
+		assert( ! empty( $body ) );
 
 		$data = array(
 			'method'    => 'PUT',
-			'timeout'   => apply_filters( 'nelio_content_request_timeout', 30 ),
-			'sslverify' => ! nc_does_api_use_proxy(),
+			'timeout'   => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+			'sslverify' => ! nelio_content_does_api_use_proxy(),
 			'headers'   => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
-			'body'      => wp_json_encode( $post ),
+			'body'      => $body,
 		);
 
 		$url = sprintf(
-			nc_get_api_url( '/site/%s/post/%s', 'wp' ),
-			nc_get_site_id(),
+			nelio_content_get_api_url( '/site/%s/post/%s', 'wp' ),
+			nelio_content_get_site_id(),
 			$post_id
 		);
 
 		$response = wp_remote_request( $url, $data );
-
-		if ( is_wp_error( $response ) || 200 !== get( $response, 'response.code' ) ) {
-			return false;
-		}//end if
-
-		return true;
-	}//end sync_post()
-}//end class
+		$response = nelio_content_extract_response_body( $response );
+		return ! is_wp_error( $response );
+	}
+}

@@ -1,7 +1,5 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 return array(
 
@@ -10,7 +8,7 @@ return array(
 	array(
 		'type'  => 'section',
 		'name'  => 'series-taxonomy-section',
-		'label' => nc_make_settings_title( esc_html_x( 'Series Taxonomy', 'text', 'nelio-content' ), 'category' ),
+		'label' => nelio_content_make_settings_title( esc_html_x( 'Series Taxonomy', 'text', 'nelio-content' ), 'category' ),
 	),
 	// =========================================================================
 	// =========================================================================
@@ -28,7 +26,7 @@ return array(
 	array(
 		'type'  => 'section',
 		'name'  => 'series-frontend-data-section',
-		'label' => nc_make_settings_title( esc_html_x( 'Series Frontend Display', 'text', 'nelio-content' ), 'welcome-view-site' ),
+		'label' => nelio_content_make_settings_title( esc_html_x( 'Series Frontend Display', 'text', 'nelio-content' ), 'welcome-view-site' ),
 	),
 	// =========================================================================
 	// =========================================================================

@@ -21,43 +21,40 @@ class Nelio_Content_Feeds_Page extends Nelio_Content_Abstract_Page {
 			'nelio-content',
 			'nelio-content-feeds',
 			_x( 'Feeds', 'text', 'nelio-content' ),
-			nc_can_current_user_use_plugin()
+			nelio_content_can_current_user_use_plugin()
 		);
-	}//end __construct()
+	}
 
 	// @Overrides
-	// phpcs:ignore
 	protected function add_page_specific_hooks() {
 		remove_all_filters( 'admin_notices' );
-	}//end add_page_specific_hooks()
+	}
 
 	// @Overrides
-	// phpcs:ignore
 	public function init() {
 
 		$settings = Nelio_Content_Settings::instance();
 		if ( empty( $settings->get( 'use_feeds' ) ) ) {
 			return;
-		}//end if
+		}
 
 		parent::init();
-	}//end init()
+	}
 
 	// @Implements
-	// phpcs:ignore
 	public function enqueue_assets() {
 
 		wp_enqueue_style(
 			'nelio-content-feeds-page',
 			nelio_content()->plugin_url . '/assets/dist/css/feeds-page.css',
 			array( 'nelio-content-components' ),
-			nc_get_script_version( 'feeds-page' )
+			nelio_content_get_script_version( 'feeds-page' )
 		);
-		nc_enqueue_script_with_auto_deps( 'nelio-content-feeds-page', 'feeds-page', true );
+		nelio_content_enqueue_script_with_auto_deps( 'nelio-content-feeds-page', 'feeds-page', true );
 
 		wp_add_inline_script(
 			'nelio-content-feeds-page',
 			'NelioContent.initPage( "nelio-content-feeds-page" );'
 		);
-	}//end enqueue_assets()
-}//end class
+	}
+}

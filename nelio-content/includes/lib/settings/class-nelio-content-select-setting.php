@@ -8,9 +8,7 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class represents a Select setting.
@@ -26,7 +24,6 @@ class Nelio_Content_Select_Setting extends Nelio_Content_Abstract_Setting {
 	 * The currently-selected value of this select.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $value;
@@ -35,26 +32,24 @@ class Nelio_Content_Select_Setting extends Nelio_Content_Abstract_Setting {
 	 * The list of options.
 	 *
 	 * @since  1.0.0
-	 * @access protected
-	 * @var    array
+	 * @var    list<array{value:string,label:string,desc?:string}>
 	 */
 	protected $options;
 
 	/**
 	 * Creates a new instance of this class.
 	 *
-	 * @param string $name    The name that identifies this setting.
-	 * @param string $desc    A text that describes this field.
-	 * @param string $more    A link pointing to more information about this field.
-	 * @param array  $options The list of options.
+	 * @param string                                              $name    The name that identifies this setting.
+	 * @param string                                              $desc    A text that describes this field.
+	 * @param string                                              $more    A link pointing to more information about this field.
+	 * @param list<array{value:string,label:string,desc?:string}> $options The list of options.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function __construct( $name, $desc, $more, $options ) {
 		parent::__construct( $name, $desc, $more );
 		$this->options = $options;
-	}//end __construct()
+	}
 
 	/**
 	 * Specifies which option is selected.
@@ -62,15 +57,14 @@ class Nelio_Content_Select_Setting extends Nelio_Content_Abstract_Setting {
 	 * @param string $value The currently-selected value of this select.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_value( $value ) {
 		$this->value = $value;
-	}//end set_value()
+	}
 
 	// @Implements
 	/** . @SuppressWarnings( PHPMD.UnusedLocalVariable, PHPMD.ShortVariableName ) */
-	public function display() { // phpcs:ignore
+	public function display() {
 
 		// Preparing data for the partial.
 		$id      = str_replace( '_', '-', $this->name );
@@ -79,24 +73,24 @@ class Nelio_Content_Select_Setting extends Nelio_Content_Abstract_Setting {
 		$options = $this->options;
 		$desc    = $this->desc;
 		$more    = $this->more;
-		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-settings-select-setting.php';
-	}//end display()
+		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-content-select-setting.php';
+	}
 
 	// @Implements
-	public function sanitize( $input ) { // phpcs:ignore
+	public function sanitize( $input ) {
 
 		if ( ! isset( $input[ $this->name ] ) ) {
 			$input[ $this->name ] = $this->value;
-		}//end if
+		}
 		$is_value_correct = false;
 		foreach ( $this->options as $option ) {
 			if ( $option['value'] === $input[ $this->name ] ) {
 				$is_value_correct = true;
-			}//end if
-		}//end foreach
+			}
+		}
 		if ( ! $is_value_correct ) {
 			$input[ $this->name ] = $this->value;
-		}//end if
+		}
 		return $input;
-	}//end sanitize()
-}//end class
+	}
+}

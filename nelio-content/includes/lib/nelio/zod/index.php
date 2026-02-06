@@ -14,39 +14,97 @@ require_once __DIR__ . '/string-schema.php';
 require_once __DIR__ . '/union-schema.php';
 
 class Zod {
-	public static function array( Schema $schema ): ArraySchema {
+	/**
+	 * Creates an array schema.
+	 *
+	 * @param Schema $schema Schema.
+	 *
+	 * @return ArraySchema
+	 */
+	public static function array( $schema ) {
 		return ArraySchema::make( $schema );
-	}//end array()
+	}
 
-	public static function boolean(): BooleanSchema {
+	/**
+	 * Creates a boolean schema.
+	 *
+	 * @return BooleanSchema
+	 */
+	public static function boolean() {
 		return BooleanSchema::make();
-	}//end boolean()
+	}
 
-	public static function enum( array $values ): EnumSchema {
+	/**
+	 * Creates an enum schema.
+	 *
+	 * @param non-empty-list<string>|non-empty-list<int> $values Values.
+	 *
+	 * @return EnumSchema
+	 */
+	public static function enum( $values ) {
 		return EnumSchema::make( $values );
-	}//end enum()
+	}
 
-	public static function literal( $value ): LiteralSchema {
+	/**
+	 * Creates a literal schema.
+	 *
+	 * @param string|bool|number $value Value.
+	 *
+	 * @return LiteralSchema
+	 */
+	public static function literal( $value ) {
 		return LiteralSchema::make( $value );
-	}//end literal()
+	}
 
-	public static function number(): NumberSchema {
+	/**
+	 * Creates a number schema.
+	 *
+	 * @return NumberSchema
+	 */
+	public static function number() {
 		return NumberSchema::make();
-	}//end number()
+	}
 
-	public static function record( Schema $key_schema, Schema $value_schema ): RecordSchema {
+	/**
+	 * Creates a record schema.
+	 *
+	 * @param Schema $key_schema   Key schema.
+	 * @param Schema $value_schema Value schema.
+	 *
+	 * @return RecordSchema
+	 */
+	public static function record( $key_schema, $value_schema ) {
 		return RecordSchema::make( $key_schema, $value_schema );
-	}//end record()
+	}
 
-	public static function object( array $schema ): ObjectSchema {
+	/**
+	 * Creates a object schema.
+	 *
+	 * @param array<string,Schema> $schema Schema.
+	 *
+	 * @return ObjectSchema
+	 */
+	public static function object( $schema ) {
 		return ObjectSchema::make( $schema );
-	}//end object()
+	}
 
-	public static function string(): StringSchema {
+	/**
+	 * Creates a string schema.
+	 *
+	 * @return StringSchema
+	 */
+	public static function string() {
 		return StringSchema::make();
-	}//end string()
+	}
 
-	public static function union( array $schemas ): UnionSchema {
+	/**
+	 * Creates a union schema.
+	 *
+	 * @param non-empty-list<Schema> $schemas Schemas.
+	 *
+	 * @return UnionSchema
+	 */
+	public static function union( $schemas ) {
 		return UnionSchema::make( $schemas );
-	}//end union()
-}//end class
+	}
+}

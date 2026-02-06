@@ -16,44 +16,45 @@ use function Nelio_Content\Helpers\flow;
 class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 
 	/**
-	 * The single instance of this class.
+	 * This instance.
 	 *
 	 * @since  2.0.0
-	 * @access protected
 	 * @var    Nelio_Content_Reference_REST_Controller|null
 	 */
-	protected static $instance = null;
+	protected static $instance;
 
 	/**
-	 * Returns the single instance of this class.
+	 * Returns this instance.
 	 *
-	 * @return Nelio_Content_Reference_REST_Controller the single instance of this class.
+	 * @return Nelio_Content_Reference_REST_Controller
 	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public static function instance() {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
-		}//end if
+		}
 
 		return self::$instance;
-	}//end instance()
+	}
 
 	/**
 	 * Hooks into WordPress.
 	 *
+	 * @return void
+	 *
 	 * @since  2.0.0
-	 * @access public
 	 */
 	public function init() {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-	}//end init()
+	}
 
 	/**
 	 * Register the routes for the objects of the controller.
+	 *
+	 * @return void
 	 */
 	public function register_routes() {
 
@@ -64,12 +65,12 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_reference' ),
-					'permission_callback' => 'nc_can_current_user_use_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
 					'args'                => array(
 						'id'      => array(
 							'required'          => true,
 							'type'              => 'number',
-							'validate_callback' => 'nc_can_be_natural_number',
+							'validate_callback' => 'nelio_content_can_be_natural_number',
 							'sanitize_callback' => 'absint',
 						),
 						'title'   => array(
@@ -85,17 +86,17 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 						'email'   => array(
 							'required'          => false,
 							'type'              => 'string',
-							'validate_callback' => 'nc_is_email',
+							'validate_callback' => 'nelio_content_is_email',
 						),
 						'twitter' => array(
 							'required'          => false,
 							'type'              => 'string',
-							'validate_callback' => 'nc_is_twitter_handle',
+							'validate_callback' => 'nelio_content_is_twitter_handle',
 						),
 						'date'    => array(
 							'required'          => false,
 							'type'              => 'datetime',
-							'validate_callback' => 'nc_is_datetime',
+							'validate_callback' => 'nelio_content_is_datetime',
 						),
 					),
 				),
@@ -109,51 +110,50 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'search_reference_by_url' ),
-					'permission_callback' => 'nc_can_current_user_use_plugin',
+					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
 					'args'                => array(
 						'url' => array(
 							'required'          => true,
 							'type'              => 'URL',
-							'validate_callback' => 'nc_is_url',
+							'validate_callback' => 'nelio_content_is_url',
 						),
 					),
 				),
 			)
 		);
-	}//end register_routes()
+	}
 
 	/**
 	 * Gets the requested reference.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<array{url:string}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response The response.
+	 * @return WP_REST_Response
 	 */
 	public function search_reference_by_url( $request ) {
-
 		$url       = $request->get_param( 'url' );
-		$reference = nc_create_reference( $url );
-		return new WP_REST_Response( $reference->json_encode(), 200 );
-	}//end search_reference_by_url()
+		$reference = ! empty( $url ) ? nelio_content_create_reference( $url ) : false;
+		return new WP_REST_Response( ! empty( $reference ) ? $reference->json_encode() : false, 200 );
+	}
 
 	/**
 	 * Updates the reference.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param WP_REST_Request<TEditorial_Reference> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error The response.
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_reference( $request ) {
 
-		$reference_id = $request['id'];
+		$reference_id = absint( $request['id'] );
 
-		$reference = nc_get_reference( $reference_id );
+		$reference = nelio_content_get_reference( $reference_id );
 		if ( ! $reference ) {
 			return new WP_Error(
 				'reference-not-found',
 				_x( 'Reference not found', 'text', 'nelio-content' )
 			);
-		}//end if
+		}
 
 		$title = $request->get_param( 'title' );
 		$title = ! empty( $title ) ? $title : '';
@@ -176,5 +176,5 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 		$reference->set_publication_date( $date );
 
 		return new WP_REST_Response( $reference->json_encode(), 200 );
-	}//end update_reference()
-}//end class
+	}
+}

@@ -1,25 +1,17 @@
 <?php
+namespace Nelio_Content\Compat\Nelio_Popups;
+
+defined( 'ABSPATH' ) || exit;
+
 /**
- * Compatibility with Nelio Popups.
+ * Callback to remove popup post type.
  *
- * @package    Nelio_Content
- * @subpackage Nelio_Content/includes/compat
- * @author     Antonio Villegas <antonio.villegas@neliosoftware.com>
- * @since      4.0.0
+ * @param list<string> $post_types Post types.
+ *
+ * @return list<string>
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
-
-add_filter(
-	'nelio_content_get_post_types',
-	function ( $post_types ) {
-		return array_filter(
-			$post_types,
-			function ( $type ) {
-				return ! in_array( $type, array( 'nelio_popup' ), true );
-			}
-		);
-	}
-);
+function remove_popup_type( $post_types ) {
+	$post_types = array_filter( $post_types, fn( $t ) => 'nelio_popup' !== $t );
+	return array_values( $post_types );
+}
+add_filter( 'nelio_content_get_post_types', __NAMESPACE__ . '\remove_popup_type' );

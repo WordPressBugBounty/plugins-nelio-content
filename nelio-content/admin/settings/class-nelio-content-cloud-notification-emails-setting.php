@@ -1,8 +1,6 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Notification emails.
@@ -11,13 +9,16 @@ class Nelio_Content_Cloud_Notification_Emails_Setting extends Nelio_Content_Abst
 
 	public function __construct() {
 		parent::__construct( 'cloud_notification_emails', 'CloudNotificationEmailsSetting' );
-	}//end __construct()
+	}
 
 	// @Implements
-	// phpcs:ignore
 	public function sanitize( $input ) {
 
-		$value = isset( $input[ $this->name ] ) ? $input[ $this->name ] : '';
+		if ( ! isset( $input[ $this->name ] ) ) {
+			return $input;
+		}
+
+		$value = $input[ $this->name ];
 		$value = trim( sanitize_text_field( $value ) );
 		$value = explode( ',', $value );
 		$value = array_filter( array_map( 'trim', $value ) );
@@ -25,23 +26,25 @@ class Nelio_Content_Cloud_Notification_Emails_Setting extends Nelio_Content_Abst
 		$body = array(
 			'notificationEmails' => $value,
 		);
+		$body = wp_json_encode( $body );
+		assert( ! empty( $body ) );
 
 		$data = array(
 			'method'    => 'PUT',
-			'timeout'   => apply_filters( 'nelio_content_request_timeout', 30 ),
-			'sslverify' => ! nc_does_api_use_proxy(),
+			'timeout'   => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+			'sslverify' => ! nelio_content_does_api_use_proxy(),
 			'headers'   => array(
-				'Authorization' => 'Bearer ' . nc_generate_api_auth_token(),
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
-			'body'      => wp_json_encode( $body ),
+			'body'      => $body,
 		);
 
-		$url = nc_get_api_url( '/site/' . nc_get_site_id(), 'wp' );
+		$url = nelio_content_get_api_url( '/site/' . nelio_content_get_site_id(), 'wp' );
 		wp_remote_request( $url, $data );
 
 		unset( $input[ $this->name ] );
 		return $input;
-	}//end sanitize()
-}//end class
+	}
+}

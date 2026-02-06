@@ -8,9 +8,7 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 return array(
 
@@ -57,6 +55,14 @@ return array(
 		'label'    => esc_html_x( 'Social Sharing Delay', 'text', 'nelio-content' ),
 		'instance' => new Nelio_Content_Social_Sharing_Delay_Setting(),
 		'default'  => 0,
+	),
+
+	array(
+		'type'     => 'custom',
+		'name'     => 'link_shortener',
+		'label'    => esc_html_x( 'Link Shortening', 'text', 'nelio-content' ),
+		'instance' => new Nelio_Content_Link_Shortener_Setting(),
+		'default'  => false,
 	),
 
 	array(

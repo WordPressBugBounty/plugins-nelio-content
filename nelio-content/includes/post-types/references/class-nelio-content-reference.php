@@ -8,9 +8,7 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class represents a reference in a post.
@@ -32,9 +30,9 @@ class Nelio_Content_Reference {
 	/**
 	 * Stores post data.
 	 *
-	 * @var WP_Post
+	 * @var stdClass&object{ID:int, post_author:string, post_title:string, post_status:string, post_type:string, post_date:string|null}
 	 */
-	public $post = null;
+	public $post;
 
 	/**
 	 * The URL of the reference.
@@ -72,8 +70,7 @@ class Nelio_Content_Reference {
 	private $publication_date;
 
 	/**
-	 * Whether this reference has to be considered a suggestion (for a certain
-	 * post) or not.
+	 * Whether this reference has to be considered a suggestion (for a certain post) or not.
 	 *
 	 * @var bool
 	 */
@@ -105,48 +102,38 @@ class Nelio_Content_Reference {
 	 *                 database will be created.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function __construct( $reference = 0 ) {
 
-		if ( is_numeric( $reference ) ) {
-
-			$this->ID = absint( $reference );
-
-			if ( 0 === $this->ID ) {
-				$this->post = json_decode(
-					wp_json_encode(
-						array(
-							'post_title'  => '',
-							'post_type'   => 'nc_reference',
-							'post_status' => 'nc_pending',
-						)
-					)
-				);
-			} else {
-				$this->post = get_post( $this->ID );
-			}//end if
-		} elseif ( $reference instanceof Nelio_Content_Reference ) {
+		if ( $reference instanceof Nelio_Content_Reference ) {
 
 			$this->ID   = absint( $reference->ID );
 			$this->post = $reference->post;
 
-		} elseif ( ! empty( $reference->ID ) ) {
+		} else {
+			$post = $reference instanceof WP_Post ? $reference : get_post( absint( $reference ) );
 
-			$this->ID   = absint( $reference->ID );
-			$this->post = $reference;
-
-		}//end if
+			$this->ID   = ! empty( $post ) ? $post->ID : 0;
+			$this->post = (object) array(
+				'ID'          => ! empty( $post ) ? $post->ID : 0,
+				'post_author' => ! empty( $post ) ? $post->post_author : '',
+				'post_title'  => ! empty( $post ) ? $post->post_title : '',
+				'post_status' => ! empty( $post ) ? $post->post_status : 'nc_pending',
+				'post_type'   => ! empty( $post ) ? $post->post_type : 'nc_reference',
+				'post_date'   => ! empty( $post ) ? $post->post_date : null,
+			);
+		}
 
 		// Initialize variables.
 		$this->build();
-	}//end __construct()
+	}
 
 	/**
 	 * Initializes the private variables.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access private
 	 */
 	private function build() {
 
@@ -162,14 +149,19 @@ class Nelio_Content_Reference {
 
 		} else {
 
-			$this->url              = get_permalink( $this->ID );
-			$this->author_name      = get_the_author_meta( 'display_name', absint( $this->post->post_author ) );
-			$this->author_email     = get_the_author_meta( 'email', absint( $this->post->post_author ) );
-			$this->author_twitter   = '';
-			$this->publication_date = mysql2date( 'Y-m-d', $this->post->post_date );
+			$url       = get_permalink( $this->ID );
+			$this->url = is_string( $url ) ? $url : '';
 
-		}//end if
-	}//end build()
+			$this->author_name    = get_the_author_meta( 'display_name', absint( $this->post->post_author ) );
+			$this->author_email   = get_the_author_meta( 'email', absint( $this->post->post_author ) );
+			$this->author_twitter = '';
+
+			if ( ! empty( $this->post->post_date ) ) {
+				$publication_date       = mysql2date( 'Y-m-d', $this->post->post_date );
+				$this->publication_date = is_string( $publication_date ) ? $publication_date : '';
+			}
+		}
+	}
 
 	/**
 	 * Whether this reference is external (points to an external page) or not
@@ -178,12 +170,11 @@ class Nelio_Content_Reference {
 	 * @return boolean Whether this reference is external or not.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function is_external() {
 
 		return 'nc_reference' === $this->post->post_type;
-	}//end is_external()
+	}
 
 	/**
 	 * Returns the title of the reference.
@@ -191,12 +182,11 @@ class Nelio_Content_Reference {
 	 * @return string The title of the reference.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function get_title() {
 
 		return $this->post->post_title;
-	}//end get_title()
+	}
 
 	/**
 	 * Sets the title of the reference to the given title.
@@ -205,21 +195,20 @@ class Nelio_Content_Reference {
 	 *
 	 * @param string $title the new title of the reference.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_title( $title ) {
+		if ( ! $this->is_external() || 0 === $this->ID ) {
+			return;
+		}
 
-		if ( $this->is_external() ) {
-
-			$this->post->post_title = trim( $title );
-			if ( $this->ID > 0 && ! $this->maybe_update_status() ) {
-				$postarr                = (array) $this->post;
-				$postarr['post_author'] = absint( $postarr['post_author'] );
-				wp_update_post( $postarr );
-			}//end if
-		}//end if
-	}//end set_title()
+		$this->post->post_title = trim( $title );
+		if ( ! $this->maybe_update_status() ) {
+			$this->update_post();
+		}
+	}
 
 	/**
 	 * Returns the URL of this reference.
@@ -227,12 +216,10 @@ class Nelio_Content_Reference {
 	 * @return string the URL of this reference.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function get_url() {
-
 		return $this->url;
-	}//end get_url()
+	}
 
 	/**
 	 * Sets the URL of this reference to the given URL.
@@ -241,17 +228,17 @@ class Nelio_Content_Reference {
 	 *
 	 * @param string $url the new URL of this reference.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_url( $url ) {
-
 		$this->url = $url;
 		if ( $this->ID > 0 ) {
 			update_post_meta( $this->ID, '_nc_url', $url );
-		}//end if
+		}
 		$this->maybe_update_status();
-	}//end set_url()
+	}
 
 	/**
 	 * Returns the name of the author of this reference.
@@ -259,12 +246,10 @@ class Nelio_Content_Reference {
 	 * @return string the name of the author of this reference.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function get_author_name() {
-
 		return $this->author_name;
-	}//end get_author_name()
+	}
 
 	/**
 	 * Sets the name of the author to the given name.
@@ -273,19 +258,19 @@ class Nelio_Content_Reference {
 	 *
 	 * @param string $author_name the new name of the author.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_author_name( $author_name ) {
-
 		if ( $this->is_external() ) {
 			$this->author_name = $author_name;
 			if ( $this->ID > 0 ) {
 				update_post_meta( $this->ID, '_nc_author_name', $author_name );
-			}//end if
+			}
 			$this->maybe_update_status();
-		}//end if
-	}//end set_author_name()
+		}
+	}
 
 	/**
 	 * Returns the email of the author of this reference.
@@ -293,12 +278,11 @@ class Nelio_Content_Reference {
 	 * @return string the author's email.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function get_author_email() {
 
 		return $this->author_email;
-	}//end get_author_email()
+	}
 
 	/**
 	 * Sets the author's email to the given email.
@@ -307,19 +291,19 @@ class Nelio_Content_Reference {
 	 *
 	 * @param string $author_email the new email address.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_author_email( $author_email ) {
-
 		if ( $this->is_external() ) {
 			$this->author_email = $author_email;
 			if ( $this->ID > 0 ) {
 				update_post_meta( $this->ID, '_nc_author_email', $author_email );
-			}//end if
+			}
 			$this->maybe_update_status();
-		}//end if
-	}//end set_author_email()
+		}
+	}
 
 	/**
 	 * Returns the author's Twitter username.
@@ -327,12 +311,10 @@ class Nelio_Content_Reference {
 	 * @return string the author's Twitter username.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function get_author_twitter() {
-
 		return $this->author_twitter;
-	}//end get_author_twitter()
+	}
 
 	/**
 	 * Sets the author's Twitter to the given username.
@@ -341,21 +323,21 @@ class Nelio_Content_Reference {
 	 *
 	 * @param string $author_twitter the new author's Twitter username.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_author_twitter( $author_twitter ) {
-
 		if ( ! $this->is_external() ) {
 			return;
-		}//end if
+		}
 
 		$this->author_twitter = $this->atify( $author_twitter );
 		if ( $this->ID > 0 ) {
 			update_post_meta( $this->ID, '_nc_author_twitter', $author_twitter );
-		}//end if
+		}
 		$this->maybe_update_status();
-	}//end set_author_twitter()
+	}
 
 	/**
 	 * Returns the publication date of this reference.
@@ -363,12 +345,10 @@ class Nelio_Content_Reference {
 	 * @return string The publication date following the format YYYY-MM-DD.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function get_publication_date() {
-
 		return $this->publication_date;
-	}//end get_publication_date()
+	}
 
 	/**
 	 * Sets the publication date of this reference to the given date.
@@ -377,39 +357,46 @@ class Nelio_Content_Reference {
 	 *
 	 * @param string $publication_date the new publication date.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function set_publication_date( $publication_date ) {
-
 		if ( $this->is_external() ) {
 			$this->publication_date = $publication_date;
 			if ( $this->ID > 0 ) {
 				update_post_meta( $this->ID, '_nc_publication_date', $publication_date );
-			}//end if
+			}
 			$this->maybe_update_status();
-		}//end if
-	}//end set_publication_date()
+		}
+	}
 
 	/**
 	 * Returns the status of this reference.
 	 *
 	 * (See Reference status in the Register class).
 	 *
-	 * @return string The status of this reference. If the reference is internal,
-	 *                its status is always `complete`.
+	 * @return 'pending'|'improvable'|'complete'|'broken'|'check' The status of this reference. If the reference is internal, its status is always `complete`.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function get_status() {
-
 		if ( $this->is_external() ) {
-			return str_replace( 'nc_', '', $this->post->post_status );
+			$status = str_replace( 'nc_', '', $this->post->post_status );
+			switch ( $status ) {
+				case 'pending':
+				case 'improvable':
+				case 'complete':
+				case 'broken':
+				case 'check':
+					return $status;
+				default:
+					return 'pending';
+			}
 		} else {
 			return 'complete';
-		}//end if
-	}//end get_status()
+		}
+	}
 
 	/**
 	 * Marks this concrete instance of a reference as suggested by someone on
@@ -418,16 +405,15 @@ class Nelio_Content_Reference {
 	 * @param integer $advisor ID of the user who suggested this reference.
 	 * @param integer $date    UNIX timestamp in which the suggestion was made.
 	 *
+	 * @return void
+	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function mark_as_suggested( $advisor, $date ) {
-
-		$this->is_suggestion = true;
-
+		$this->is_suggestion      = true;
 		$this->suggestion_advisor = $advisor;
 		$this->suggestion_date    = $date;
-	}//end mark_as_suggested()
+	}
 
 	/**
 	 * This function updates the status of this reference based on the amount of
@@ -438,20 +424,18 @@ class Nelio_Content_Reference {
 	 * @return boolean Whether the status has been updated to a new value or not.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	private function maybe_update_status() {
-
 		// Only external references may have a status different than "complete".
 		if ( ! $this->is_external() ) {
 			return false;
-		}//end if
+		}
 
 		// If the post status is "broken", we shouldn't update it.
 		$status = $this->get_status();
 		if ( 'broken' === $status || 'check' === $status ) {
 			return false;
-		}//end if
+		}
 
 		// Finally, we simply need to set the reference to "complete" or "improvable".
 		$values = array(
@@ -465,36 +449,31 @@ class Nelio_Content_Reference {
 
 		// If one of the values is empty, the reference is "improvable".
 		if ( in_array( '', $values, true ) ) {
-			$new_status = 'nc_improvable';
+			$new_status = 'improvable';
 		} else {
-			$new_status = 'nc_complete';
-		}//end if
+			$new_status = 'complete';
+		}
 
 		$old_status = $this->get_status();
-		if ( $new_status !== $old_status ) {
-
-			$this->post->post_status = $new_status;
-			if ( $this->ID > 0 ) {
-				$postarr                = (array) $this->post;
-				$postarr['post_author'] = absint( $postarr['post_author'] );
-				wp_update_post( $postarr );
-			}//end if
-			return true;
-
-		} else {
-
+		if ( $new_status === $old_status ) {
 			return false;
+		}
 
-		}//end if
-	}//end maybe_update_status()
+		$this->post->post_status = "nc_{$new_status}";
+		if ( 0 === $this->ID ) {
+			return false;
+		}
+
+		$this->update_post();
+		return true;
+	}
 
 	/**
-	 * Returns a Backbone-compatible, JSON encoded version of this reference.
+	 * Returns a JSON encoded version of this reference.
 	 *
-	 * @return array a Backbone-compatible, JSON encoded version of this reference.
+	 * @return TEditorial_Reference
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function json_encode() {
 
@@ -512,22 +491,41 @@ class Nelio_Content_Reference {
 		);
 
 		if ( $this->is_suggestion ) {
-			$advisor      = get_userdata( $this->suggestion_advisor );
-			$advisor_name = $advisor->first_name;
-			if ( empty( $advisor_name ) ) {
-				$advisor_name = $advisor->display_name;
-			}//end if
 			$result['suggestionAdvisorId'] = $this->suggestion_advisor;
 			$result['suggestionDate']      = $this->suggestion_date . 'T00:00:00';
-		}//end if
+		}
 
 		return $result;
-	}//end json_encode()
+	}
 
+	/**
+	 * Adds at symbol to the value.
+	 *
+	 * @param string $value Value.
+	 *
+	 * @return string
+	 */
 	private function atify( $value ) {
 		if ( mb_strlen( $value ) && '@' !== mb_substr( $value, 0, 1 ) ) {
 			$value = '@' . $value;
-		}//end if
+		}
 		return $value;
-	}//end atify()
-}//end class
+	}
+
+	/**
+	 * Updates post.
+	 *
+	 * @return void
+	 */
+	private function update_post() {
+		wp_update_post(
+			array(
+				'ID'          => $this->post->ID,
+				'post_author' => absint( $this->post->post_author ),
+				'post_title'  => $this->post->post_title,
+				'post_status' => $this->post->post_status,
+				'post_type'   => $this->post->post_type,
+			)
+		);
+	}
+}

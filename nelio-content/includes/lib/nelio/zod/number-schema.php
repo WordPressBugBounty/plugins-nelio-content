@@ -4,42 +4,84 @@ namespace Nelio_Content\Zod;
 
 class NumberSchema extends Schema {
 
+	/** @var int|null */
 	private $min;
+
+	/** @var int|null */
 	private $max;
 
-	public static function make(): NumberSchema {
+	/**
+	 * Creates a number schema.
+	 *
+	 * @return NumberSchema
+	 */
+	public static function make() {
 		return new self();
-	}//end make()
+	}
 
-	public function positive(): NumberSchema {
+	/**
+	 * Sets the min value to 1 (included).
+	 *
+	 * @return static
+	 */
+	public function positive() {
 		$this->min = 1;
 		return $this;
-	}//end positive()
+	}
 
-	public function nonpositive(): NumberSchema {
+	/**
+	 * Sets the min value to 0 (included).
+	 *
+	 * @return static
+	 */
+	public function nonpositive() {
 		$this->max = 0;
 		return $this;
-	}//end nonpositive()
+	}
 
-	public function negative(): NumberSchema {
+	/**
+	 * Sets the max value to -1 (included).
+	 *
+	 * @return static
+	 */
+	public function negative() {
 		$this->max = -1;
 		return $this;
-	}//end negative()
+	}
 
-	public function nonnegative(): NumberSchema {
+	/**
+	 * Sets the max value to 0 (included).
+	 *
+	 * @return static
+	 */
+	public function nonnegative() {
 		$this->min = 0;
 		return $this;
-	}//end nonnegative()
+	}
 
-	public function min( int $min ): NumberSchema {
+	/**
+	 * Sets the min value.
+	 *
+	 * @param int $min Min value.
+	 *
+	 * @return static
+	 */
+	public function min( $min ) {
 		$this->min = $min;
 		return $this;
-	}//end min()
+	}
 
-	public function max( int $max ): NumberSchema {
+	/**
+	 * Sets the max value.
+	 *
+	 * @param int $max Max value.
+	 *
+	 * @return static
+	 */
+	public function max( $max ) {
 		$this->max = $max;
 		return $this;
-	}//end max()
+	}
 
 	public function parse_value( $value ) {
 		if ( ! is_numeric( $value ) || is_string( $value ) ) {
@@ -49,7 +91,7 @@ class NumberSchema extends Schema {
 					esc_html( gettype( $value ) )
 				)
 			);
-		}//end if
+		}
 
 		if ( ! is_null( $this->min ) && $value < $this->min ) {
 			throw new \Exception(
@@ -59,7 +101,7 @@ class NumberSchema extends Schema {
 					esc_html( "$value" )
 				)
 			);
-		}//end if
+		}
 
 		if ( ! is_null( $this->max ) && $this->max < $value ) {
 			throw new \Exception(
@@ -69,8 +111,8 @@ class NumberSchema extends Schema {
 					esc_html( "$value" )
 				)
 			);
-		}//end if
+		}
 
 		return $value;
-	}//end parse_value()
-}//end class
+	}
+}

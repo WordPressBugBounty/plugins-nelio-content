@@ -21,45 +21,29 @@ class Nelio_Content_Help_Page extends Nelio_Content_Abstract_Page {
 			'nelio-content',
 			'nelio-content-help',
 			_x( 'Help', 'text', 'nelio-content' ),
-			nc_can_current_user_use_plugin()
+			nelio_content_can_current_user_use_plugin()
 		);
-	}//end __construct()
-
-	// @Overrides
-	// phpcs:ignore
-	public function add_page() {
-
-		parent::add_page();
-
-		global $submenu;
-		if ( isset( $submenu['nelio-content'] ) ) {
-			$count = count( $submenu['nelio-content'] );
-			for ( $i = 0; $i < $count; ++$i ) {
-				if ( 'nelio-content-help' === $submenu['nelio-content'][ $i ][2] ) {
-					$submenu['nelio-content'][ $i ][2] = add_query_arg( // phpcs:ignore
-						array(
-							'utm_source'   => 'nelio-content',
-							'utm_medium'   => 'plugin',
-							'utm_campaign' => 'support',
-							'utm_content'  => 'overview-help',
-						),
-						'https://neliosoftware.com/content/help/'
-					);
-					break;
-				}//end if
-			}//end for
-		}//end if
-	}//end add_page()
+	}
 
 	// @Implements
-	// phpcs:ignore
 	public function enqueue_assets() {
-		// Nothing to be done.
-	}//end enqueue_assets()
+		$help_url = add_query_arg(
+			array(
+				'utm_source'   => 'nelio-content',
+				'utm_medium'   => 'plugin',
+				'utm_campaign' => 'support',
+				'utm_content'  => 'overview-help',
+			),
+			'https://neliosoftware.com/content/help/'
+		);
+		printf(
+			'<meta http-equiv="refresh" content="0; url=%s" />',
+			esc_url( $help_url )
+		);
+	}
 
-	// @Overwrites
-	// phpcs:ignore
+	// @Implements
 	public function display() {
 		// Nothing to be done.
-	}//end display()
-}//end class
+	}
+}

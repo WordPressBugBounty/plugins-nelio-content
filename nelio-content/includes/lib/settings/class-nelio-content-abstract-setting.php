@@ -8,9 +8,7 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * A class that represents a Nelio_Content Setting.
@@ -29,7 +27,6 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 	 * The label associated to this setting.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $label;
@@ -38,7 +35,6 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 	 * The name that identifies this setting.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $name;
@@ -47,7 +43,6 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 	 * A text that describes this field.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $desc;
@@ -56,7 +51,6 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 	 * A link pointing to more information about this field.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $more;
@@ -65,7 +59,6 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 	 * The option name in which this setting will be stored.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 * @var    string
 	 */
 	protected $option_name;
@@ -74,7 +67,6 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 	 * The default value.
 	 *
 	 * @since  3.7.0
-	 * @access protected
 	 * @var    mixed
 	 */
 	protected $default_value = null;
@@ -89,14 +81,13 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 	 *                     Default: the empty string.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function __construct( $name, $desc = '', $more = '' ) {
 
 		$this->name = $name;
 		$this->desc = $desc;
 		$this->more = $more;
-	}//end __construct()
+	}
 
 	/**
 	 * Returns the name that identifies this setting.
@@ -104,19 +95,18 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 	 * @return string The name that identifies this setting.
 	 *
 	 * @since  1.0.0
-	 * @access public
 	 */
 	public function get_name() {
 		return $this->name;
-	}//end get_name()
+	}
 
 	// @Implements
-	public function register( $label, $page, $section, $option_group, $option_name ) { // phpcs:ignore
+	public function register( $label, $page, $section, $option_group, $option_name ) {
 
 		$this->label       = $label;
 		$this->option_name = $option_name;
 
-		register_setting( // phpcs:ignore
+		register_setting(
 			$option_group,
 			$option_name,
 			array( $this, 'sanitize' ) // Sanitization function.
@@ -131,12 +121,40 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 			$section,
 			empty( $label ) ? array( 'class' => 'nelio-content-reduce-top-margin' ) : array()
 		);
-	}//end register()
+	}
 
 	// @Implements
-	public function set_default_value( $value ) { // phpcs:ignore
+	public function set_default_value( $value ) {
 		$this->default_value = $value;
-	}//end set_default_value()
+	}
+
+	/**
+	 * Prints the description by properly escaping it.
+	 *
+	 * @param string $html Text with HTML code. Only some tags are supported.
+	 *
+	 * @return void
+	 */
+	public function print_html( $html ) {
+		$tags = array(
+			'<code>'    => '%1$s',
+			'</code>'   => '%2$s',
+			'<strong>'  => '%3$s',
+			'</strong>' => '%4$s',
+		);
+
+		foreach ( $tags as $tag => $placeholder ) {
+			$html = str_replace( $tag, $placeholder, $html );
+		}
+
+		printf(
+			esc_html( $html ),
+			'<code>',
+			'</code>',
+			'<strong>',
+			'</strong>'
+		);
+	}
 
 	/**
 	 * This function generates a label for this field.
@@ -147,7 +165,6 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 	 * @return string the label for this field.
 	 *
 	 * @since  1.0.0
-	 * @access protected
 	 */
 	protected function generate_label() {
 
@@ -156,8 +173,8 @@ abstract class Nelio_Content_Abstract_Setting implements Nelio_Content_Setting {
 		if ( ! empty( $this->desc ) ) {
 			$img    = nelio_content()->plugin_url . '/includes/lib/settings/assets/images/help.png';
 			$label .= '<img class="nelio-settings-help" style="float:right;margin-right:-15px;cursor:pointer;" src="' . $img . '" height="16" width="16" />'; //phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
-		}//end if
+		}
 
 		return $label;
-	}//end generate_label()
-}//end class
+	}
+}

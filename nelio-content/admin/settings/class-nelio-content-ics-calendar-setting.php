@@ -9,9 +9,7 @@
  * @since      1.4.2
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This class represents the setting for exporting post data to other calendar
@@ -24,18 +22,29 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Nelio_Content_ICS_Calendar_Setting extends Nelio_Content_Abstract_Setting {
 
+	/**
+	 * Value.
+	 *
+	 * @var mixed
+	 */
 	protected $value;
 
 	public function __construct() {
 		parent::__construct( 'use_ics_subscription' );
-	}//end __construct()
+	}
 
+	/**
+	 * Sets value.
+	 *
+	 * @param mixed $value Value.
+	 *
+	 * @return void
+	 */
 	public function set_value( $value ) {
 		$this->value = $value;
-	}//end set_value()
+	}
 
 	// @Implements
-	// phpcs:ignore
 	public function display() {
 
 		$id   = str_replace( '_', '-', $this->name );
@@ -49,10 +58,9 @@ class Nelio_Content_ICS_Calendar_Setting extends Nelio_Content_Abstract_Setting 
 			checked( $this->value, true, false ),
 			esc_html( $desc )
 		);
-	}//end display()
+	}
 
 	// @Implements
-	// phpcs:ignore
 	public function sanitize( $input ) {
 
 		$checked = false;
@@ -63,8 +71,8 @@ class Nelio_Content_ICS_Calendar_Setting extends Nelio_Content_Abstract_Setting 
 				$checked = true;
 			} elseif ( true === $input[ $this->name ] ) {
 				$checked = true;
-			}//end if
-		}//end if
+			}
+		}
 
 		// Manage key option when needed.
 		$ics_secret_key = get_option( 'nc_ics_key', false );
@@ -72,13 +80,13 @@ class Nelio_Content_ICS_Calendar_Setting extends Nelio_Content_Abstract_Setting 
 
 			if ( ! $ics_secret_key ) {
 				update_option( 'nc_ics_key', wp_generate_password() );
-			}//end if
+			}
 		} else {
 			delete_option( 'nc_ics_key' );
-		}//end if
+		}
 
 		$input[ $this->name ] = $checked;
 
 		return $input;
-	}//end sanitize()
-}//end class
+	}
+}

@@ -29,7 +29,7 @@ class Nelio_Content_Task_Preset {
 	/**
 	 * Tasks in this preset.
 	 *
-	 * @var array
+	 * @var list<TTask_Template>
 	 */
 	private $tasks = array();
 
@@ -61,16 +61,22 @@ class Nelio_Content_Task_Preset {
 		if ( ! empty( $preset ) ) {
 			$this->ID    = $preset->ID;
 			$this->name  = $preset->post_title;
+			$this->tasks = array();
+
 			$content     = json_decode( base64_decode( $preset->post_content ) );
-			$tasks       = Z::array( self::task_schema() )->safe_parse( $content );
-			$this->tasks = ! empty( $tasks['success'] ) ? $tasks['data'] : array();
-		}//end if
-	}//end __construct()
+			$parsed_data = Z::array( self::task_schema() )->safe_parse( $content );
+			if ( true === $parsed_data['success'] ) {
+				/** @var list<TTask_Template> */
+				$parsed_data = $parsed_data['data'];
+				$this->tasks = $parsed_data;
+			}
+		}
+	}
 
 	/**
 	 * Parses the given JSON and converts it into an instance of this class.
 	 *
-	 * @param string|array $json Task preset as JSON.
+	 * @param string|array<mixed> $json Task preset as JSON.
 	 *
 	 * @return Nelio_Content_Task_Preset|WP_Error an instance of this class or error.
 	 *
@@ -81,21 +87,22 @@ class Nelio_Content_Task_Preset {
 		$json = is_array( $json ) ? $json : array();
 
 		$parsed = self::schema()->safe_parse( $json );
-		if ( empty( $parsed['success'] ) ) {
+		if ( false === $parsed['success'] ) {
 			return new WP_Error( 'parsing-error', $parsed['error'] );
-		}//end if
+		}
 
+		/** @var TTask_Preset $parsed */
 		$parsed = $parsed['data'];
 		if ( 0 < $parsed['id'] && 'nc_task_preset' !== get_post_type( $parsed['id'] ) ) {
 			return new WP_Error( 'invalid-id', sprintf( 'Post %d is not a Task Preset', $parsed['id'] ) );
-		}//end if
+		}
 
 		$result        = new self();
 		$result->ID    = $parsed['id'] < 0 ? 0 : $parsed['id'];
 		$result->name  = $parsed['name'];
 		$result->tasks = $parsed['tasks'];
 		return $result;
-	}//end parse()
+	}
 
 	/**
 	 * Saves the task preset to the database.
@@ -105,9 +112,14 @@ class Nelio_Content_Task_Preset {
 	 * @since 3.2.0
 	 */
 	public function save() {
+		$tasks = wp_json_encode( $this->tasks );
+		if ( false === $tasks ) {
+			return new WP_Error( 'encoding-error', _x( 'Encoding error', 'text', 'nelio-content' ) );
+		}
+
 		$args = array(
 			'post_title'   => $this->name,
-			'post_content' => base64_encode( wp_json_encode( $this->tasks ) ),
+			'post_content' => base64_encode( $tasks ),
 			'post_type'    => 'nc_task_preset',
 			'post_status'  => 'draft',
 		);
@@ -118,16 +130,16 @@ class Nelio_Content_Task_Preset {
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
-		}//end if
+		}
 
 		$this->ID = $result;
 		return $this;
-	}//end save()
+	}
 
 	/**
 	 * Converts this class into JSON.
 	 *
-	 * @return array this class into JSON.
+	 * @return TTask_Preset this class into JSON.
 	 *
 	 * @since 3.2.0
 	 */
@@ -137,26 +149,38 @@ class Nelio_Content_Task_Preset {
 			'name'  => $this->name,
 			'tasks' => $this->tasks,
 		);
-	}//end json()
+	}
 
-	private static $schema = null; // phpcs:ignore
+	/**
+	 * Returns the schema.
+	 *
+	 * @return Nelio_Content\Zod\Schema
+	 */
 	public static function schema(): Schema {
-		if ( empty( self::$schema ) ) {
-			self::$schema = Z::object(
+		/** @var Nelio_Content\Zod\Schema|null $schema */
+		static $schema;
+		if ( empty( $schema ) ) {
+			$schema = Z::object(
 				array(
 					'id'    => Z::number(),
 					'name'  => Z::string()->trim()->min( 1 ),
 					'tasks' => Z::array( self::task_schema() )->min( 1 )->max( self::MAX_PRESETS ),
 				)
 			);
-		}//end if
-		return self::$schema;
-	}//end schema()
+		}
+		return $schema;
+	}
 
-	private static $task_schema = null; // phpcs:ignore
-	private static function task_schema(): Schema {
-		if ( empty( self::$task_schema ) ) {
-			self::$task_schema = Z::object(
+	/**
+	 * Returns the task schema.
+	 *
+	 * @return Nelio_Content\Zod\Schema
+	 */
+	private static function task_schema() {
+		/** @var Nelio_Content\Zod\Schema|null $task_schema */
+		static $task_schema;
+		if ( empty( $task_schema ) ) {
+			$task_schema = Z::object(
 				array(
 					'assigneeId' => Z::number()->optional(),
 					'color'      => Z::enum(
@@ -182,7 +206,7 @@ class Nelio_Content_Task_Preset {
 					'task'       => Z::string()->trim()->min( 1 ),
 				)
 			);
-		}//end if
-		return self::$task_schema;
-	}//end task_schema()
-}//end class
+		}
+		return $task_schema;
+	}
+}

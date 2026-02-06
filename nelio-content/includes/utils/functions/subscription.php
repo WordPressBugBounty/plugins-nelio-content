@@ -8,62 +8,52 @@
  * @since      1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * This function returns the current subscription plan, if any.
  *
- * @return string|boolean name of the current subscription plan, or `false` if it has none.
+ * @return string|false name of the current subscription plan, or `false` if it has none.
  *
- * @since 1.0.0
+ * @since 4.0.8
  */
-function nc_get_subscription() {
-
-	$subscription = get_option( 'nc_subscription', false );
-
-	// TODO. Compatibility with previous versions of Nelio Content.
-	if ( empty( $subscription ) ) {
-		return false;
-	} elseif ( is_array( $subscription ) ) {
-		return 'basic';
-	}//end if
-
-	return $subscription;
-}//end nc_get_subscription()
+function nelio_content_get_subscription() {
+	return get_option( 'nc_subscription', false );
+}
 
 /**
  * Returns whether the current user is a paying customer or not.
  *
  * @return boolean whether the current user is a paying customer or not.
  *
- * @since 1.0.0
+ * @since 4.0.8
  */
-function nc_is_subscribed() {
+function nelio_content_is_subscribed() {
 
-	$subscription = nc_get_subscription();
+	$subscription = nelio_content_get_subscription();
 	return ! empty( $subscription );
-}//end nc_is_subscribed()
+}
 
 /**
  * This helper function updates the current subscription.
  *
- * @param string $plan   The plan of the subscription.
- * @param array  $limits Max profile limit values.
+ * @param string       $plan   The plan of the subscription.
+ * @param TSite_Limits $limits Max profile limit values.
  *
- * @since 2.0.17
+ * @return void
+ *
+ * @since 4.0.8
  */
-function nc_update_subscription( $plan, $limits ) {
+function nelio_content_update_subscription( $plan, $limits ) {
 
 	if ( empty( $plan ) || 'free' === $plan ) {
 		delete_option( 'nc_subscription' );
 	} else {
 		update_option( 'nc_subscription', $plan );
-	}//end if
+	}
 
 	update_option( 'nc_site_limits', $limits );
-}//end nc_update_subscription()
+}
 
 /**
  * Returns the plan related to the given product.
@@ -72,48 +62,46 @@ function nc_update_subscription( $plan, $limits ) {
  *
  * @return string plan related to the given product.
  *
- * @since 2.0.17
+ * @since 4.0.8
  */
-function nc_get_plan( $product ) {
-	return Nelio_Content\Helpers\get_string(
-		array(
-			'nc-monthly'          => 'basic',
-			'nc-monthly-standard' => 'standard',
-			'nc-monthly-plus'     => 'plus',
-			'nc-yearly'           => 'basic',
-			'nc-yearly-standard'  => 'standard',
-			'nc-yearly-plus'      => 'plus',
-		),
-		$product,
-		'basic'
+function nelio_content_get_plan( $product ) {
+	$map = array(
+		'nc-monthly'          => 'basic',
+		'nc-monthly-standard' => 'standard',
+		'nc-monthly-plus'     => 'plus',
+		'nc-yearly'           => 'basic',
+		'nc-yearly-standard'  => 'standard',
+		'nc-yearly-plus'      => 'plus',
 	);
-}//end nc_get_plan()
+	return $map[ $product ] ?? 'basic';
+}
 
 /**
  * Returns a list of active promos.
  *
- * @return array list of active promos
+ * @return list<string> list of active promos
  *
- * @since 3.6.0
+ * @since 4.0.8
  */
-function nc_get_active_promos() {
+function nelio_content_get_active_promos() {
+	/** @var list<string>|false $promos */
 	static $promos = false;
 
-	if ( ! nc_get_site_id() ) {
+	if ( ! nelio_content_get_site_id() ) {
 		return array();
-	}//end if
+	}
 
 	// If we already know the active promos, return them.
 	if ( false !== $promos ) {
 		return $promos;
-	}//end if
+	}
 
 	// Trigger side effect to load token and promos.
-	nc_generate_api_auth_token();
+	nelio_content_generate_api_auth_token();
 
 	// If we don't, let's see if there's a transient.
-	$transient_name = 'nc_active_promos';
-	$active_promos  = get_transient( $transient_name );
-	$promos         = empty( $active_promos ) ? array() : $active_promos;
+	/** @var list<string>|false */
+	$active_promos = get_transient( 'nc_active_promos' );
+	$promos        = ! empty( $active_promos ) ? $active_promos : array();
 	return $promos;
-}//end nc_get_active_promos()
+}

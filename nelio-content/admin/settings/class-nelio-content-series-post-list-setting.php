@@ -1,8 +1,6 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}//end if
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Notification emails.
@@ -11,17 +9,16 @@ class Nelio_Content_Series_Post_List_Setting extends Nelio_Content_Abstract_Reac
 
 	public function __construct() {
 		parent::__construct( 'series_post_list', 'SeriesPostListSetting' );
-	}//end __construct()
+	}
 
 	// @Implements
-	// phpcs:ignore
 	public function sanitize( $input ) {
 
 		$value = isset( $input[ $this->name ] ) ? $input[ $this->name ] : $this->default_value;
 		$value = is_string( $value ) ? json_decode( $value, true ) : $value;
-		$value = is_array( $value ) ? wp_parse_args( $value, $this->default_value ) : $this->default_value;
+		$value = is_array( $value ) && is_array( $this->default_value ) ? wp_parse_args( $value, $this->default_value ) : $this->default_value;
 
 		$input[ $this->name ] = $value;
 		return $input;
-	}//end sanitize()
-}//end class
+	}
+}
