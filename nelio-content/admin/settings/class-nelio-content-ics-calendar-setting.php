@@ -46,18 +46,13 @@ class Nelio_Content_ICS_Calendar_Setting extends Nelio_Content_Abstract_Setting 
 
 	// @Implements
 	public function display() {
-
-		$id   = str_replace( '_', '-', $this->name );
-		$name = $this->option_name . '[' . $this->name . ']';
-		$desc = _x( 'Export your calendar posts to Google Calendar or any other calendar tool', 'command', 'nelio-content' );
-
-		printf(
-			'<p><input type="checkbox" id="%s" name="%s" %s  /> %s</p>',
-			esc_attr( $id ),
-			esc_attr( $name ),
-			checked( $this->value, true, false ),
-			esc_html( $desc )
-		);
+		// Preparing data for the partial.
+		$id      = $this->option_name . '_' . str_replace( '_', '-', $this->name );
+		$name    = $this->option_name . '[' . $this->name . ']';
+		$desc    = _x( 'Export your calendar posts to Google Calendar or any other calendar tool', 'command', 'nelio-content' );
+		$more    = '';
+		$checked = checked( $this->value, true, false );
+		include nelio_content()->plugin_path . '/includes/lib/settings/partials/nelio-content-checkbox-setting.php';
 	}
 
 	// @Implements
@@ -67,7 +62,7 @@ class Nelio_Content_ICS_Calendar_Setting extends Nelio_Content_Abstract_Setting 
 
 		if ( isset( $input[ $this->name ] ) ) {
 
-			if ( 'on' === $input[ $this->name ] ) {
+			if ( 'on' === $input[ $this->name ] || '1' === $input[ $this->name ] || 'true' === $input[ $this->name ] ) {
 				$checked = true;
 			} elseif ( true === $input[ $this->name ] ) {
 				$checked = true;

@@ -305,12 +305,37 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 	/**
 	 * Whether the response corresponds to an ICS calendar.
 	 *
-	 * @param array{body:string} $response Response.
+	 * @param array{body:mixed} $response Response.
 	 *
 	 * @return bool
 	 */
 	private function is_ics_content( $response ) {
-		return 0 === strpos( $response['body'], 'BEGIN:VCALENDAR' );
+		if ( ! is_string( $response['body'] ) ) {
+			return false;
+		}
+
+		if ( 0 !== strpos( $response['body'], 'BEGIN:VCALENDAR' ) ) {
+			return false;
+		}
+
+		if ( ! class_exists( \ICal\ICal::class ) ) {
+			return false;
+		}
+
+		try {
+			$ical = new \ICal\ICal(
+				false,
+				array(
+					'skipRecurrence' => false,
+				)
+			);
+			$ical->initString( $response['body'] );
+			$ical->events();
+
+			return true;
+		} catch ( \Throwable $e ) {
+			return false;
+		}
 	}
 
 	/**

@@ -54,6 +54,25 @@ class Nelio_Content_Analytics_Helper {
 	 * @return void
 	 */
 	public function init() {
+
+		/**
+		 * Filters the networks that provide engagement metrics.
+		 *
+		 * @param list<string> $networks The networks that provide engagement metrics.
+		 *
+		 * @since 4.3.0
+		 */
+		self::$engagement_metrics = apply_filters( 'nelio_content_engagement_metrics', self::$engagement_metrics );
+
+		/**
+		 * Filters the networks that provide pageview metrics.
+		 *
+		 * @param list<string> $networks The networks that provide pageview metrics.
+		 *
+		 * @since 4.3.0
+		 */
+		self::$pageviews_metrics = apply_filters( 'nelio_content_pageview_metrics', self::$pageviews_metrics );
+
 		add_filter( 'cron_schedules', array( $this, 'add_cron_interval' ) );
 		add_action( 'init', array( $this, 'maybe_enable_cron_tasks' ) );
 		add_action( 'wp_update_comment_count', array( $this, 'update_comment_count' ), 10, 2 );
@@ -254,6 +273,15 @@ class Nelio_Content_Analytics_Helper {
 			return true;
 		}
 
+		/**
+		 * Runs before updating the statistics of a WordPress post.
+		 *
+		 * @param int $post_id the post whose statistics has to be updated.
+		 *
+		 * @since 4.3.0
+		 */
+		do_action( 'nelio_content_before_update_statistics', $post_id );
+
 		// Compute engagement.
 		$social_analytics = $this->get_social_count( $post_id );
 		$url              = get_permalink( $post_id );
@@ -272,6 +300,15 @@ class Nelio_Content_Analytics_Helper {
 			'reddit'    => $this->get_reddit_count( $url ),
 			'comments'  => intval( wp_count_comments( $post_id )->approved ),
 		);
+
+		/**
+		 * Filters the networks that provide engagement metrics.
+		 *
+		 * @param array<string, int> $engagement The key value array of networks that provide engagement metrics and their value.
+		 *
+		 * @since 4.3.0
+		 */
+		$engagement = apply_filters( 'nelio_content_engagement_values', $engagement );
 		$this->save_engagement( $post_id, $engagement );
 
 		// Compute pageviews.
@@ -288,6 +325,15 @@ class Nelio_Content_Analytics_Helper {
 				$this->save_pageviews( $ga4_prop, $post_id, $pageviews );
 			}
 		}
+
+		/**
+		 * Runs after updating the statistics of a WordPress post.
+		 *
+		 * @param int $post_id the post whose statistics has been updated.
+		 *
+		 * @since 4.3.0
+		 */
+		do_action( 'nelio_content_after_update_statistics', $post_id );
 
 		// Refresh last update.
 		update_post_meta( $post_id, '_nc_last_update', time() );
@@ -339,9 +385,19 @@ class Nelio_Content_Analytics_Helper {
 			}
 		}
 
-		return array(
-			'engagement' => $engagement,
-			'pageviews'  => $pageviews,
+		/**
+		 * Filters the statistics of a given post.
+		 *
+		 * @param TPost_Stats $stats the statistics of the given post.
+		 *
+		 * @since 4.3.0
+		 */
+		return apply_filters(
+			'nelio_content_post_statistics',
+			array(
+				'engagement' => $engagement,
+				'pageviews'  => $pageviews,
+			)
 		);
 	}
 
@@ -1385,7 +1441,8 @@ class Nelio_Content_Analytics_Helper {
 	 */
 	private function engagement_key( $metric ) {
 		/** @var '_nc_engagement_{metric}' */
-		return "_nc_engagement_{$metric}";
+		$result = "_nc_engagement_{$metric}";
+		return $result;
 	}
 
 	/**
@@ -1397,7 +1454,8 @@ class Nelio_Content_Analytics_Helper {
 	 */
 	private function pageviews_social_data_key( $ga4_prop ) {
 		/** @var '_nc_pageviews_social_data_{ga4_prop}' */
-		return "_nc_pageviews_social_data_{$ga4_prop}";
+		$result = "_nc_pageviews_social_data_{$ga4_prop}";
+		return $result;
 	}
 
 	/**
@@ -1409,7 +1467,8 @@ class Nelio_Content_Analytics_Helper {
 	 */
 	private function pageviews_total_key( $ga4_prop ) {
 		/** @var '_nc_pageviews_total_{ga4_prop}' */
-		return "_nc_pageviews_total_{$ga4_prop}";
+		$result = "_nc_pageviews_total_{$ga4_prop}";
+		return $result;
 	}
 
 	/**

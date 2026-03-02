@@ -58,7 +58,7 @@ class Nelio_Content_Checkbox_Setting extends Nelio_Content_Abstract_Setting {
 	public function display() {
 
 		// Preparing data for the partial.
-		$id      = str_replace( '_', '-', $this->name );
+		$id      = $this->option_name . '_' . str_replace( '_', '-', $this->name );
 		$name    = $this->option_name . '[' . $this->name . ']';
 		$desc    = $this->desc;
 		$more    = $this->more;
@@ -73,7 +73,7 @@ class Nelio_Content_Checkbox_Setting extends Nelio_Content_Abstract_Setting {
 
 		if ( isset( $input[ $this->name ] ) ) {
 
-			if ( 'on' === $input[ $this->name ] ) {
+			if ( 'on' === $input[ $this->name ] || '1' === $input[ $this->name ] || 'true' === $input[ $this->name ] ) {
 				$value = true;
 			} elseif ( true === $input[ $this->name ] ) {
 				$value = true;

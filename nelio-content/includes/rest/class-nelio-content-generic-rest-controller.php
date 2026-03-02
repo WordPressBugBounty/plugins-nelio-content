@@ -272,11 +272,14 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Pauses or resumes social publication.
+	 * Resets reshare messages.
 	 *
 	 * @return WP_REST_Response
 	 */
 	public function reset_auto_social_messages() {
+		delete_transient( 'nc_automation_groups' );
+		delete_option( 'nc_reshare_last_day' );
+
 		$sharer = Nelio_Content_Auto_Sharer::instance();
 		$sharer->reset();
 		return new WP_REST_Response( true, 200 );

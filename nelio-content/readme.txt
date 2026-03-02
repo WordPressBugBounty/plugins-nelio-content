@@ -5,7 +5,7 @@ Tags: editorial calendar, social media, social media scheduler, auto post, conte
 Requires PHP: 7.4
 Requires at least: 6.7
 Tested up to: 6.9
-Stable tag: 4.2.1
+Stable tag: 4.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -284,6 +284,25 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 4.3.0 (March 2, 2026) =
+* Add support for posting videos to Facebook Pages.
+* Add custom placeholders for WooCommerce products.
+* Add custom placeholders for LearnDash courses.
+* Add custom placeholders for The Events Calendar events.
+* Add custom placeholders for Easy Digital Downloads.
+* Add custom placeholders for Yoast SEO.
+* Limit scope of settings errors to avoid rendering errors from other plugins in the settings page.
+* Improve function `createSocialMessage`.
+* Add filter `nelio_content_engagement_metrics`.
+* Add filter `nelio_content_pageview_metrics`.
+* Add filter `nelio_content_engagement_values`.
+* Add filter `nelio_content_post_statistics`.
+* Add action `nelio_content_before_update_statistics`.
+* Add action `nelio_content_after_update_statistics`.
+* Enhance ICS content validation in external calendar REST controller.
+* Fix JavaScript warnings with deprecated features in WordPress.
+* Fix query conditions on reshare by filtering empty values in taxonomies.
 
 = 4.2.1 (January 29, 2026) =
 * Fix minor security issue.
@@ -819,5 +838,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 4.2.1 (January 29, 2026) =
-Fix minor security issue.
+= 4.3.0 (March 2, 2026) =
+Add Facebook video support, new custom placeholders and hooks, plus validation and bug fixes.

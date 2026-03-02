@@ -28,6 +28,7 @@ defined( 'ABSPATH' ) || exit;
 
 <p><input
 	type="<?php echo esc_attr( $type ); ?>"
+	class="<?php echo esc_attr( str_replace( '_', '-', $id ) ); ?>"
 	id="<?php echo esc_attr( $id ); ?>"
 	placeholder="<?php echo esc_attr( $placeholder ); ?>"
 	name="<?php echo esc_attr( $name ); ?>"

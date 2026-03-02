@@ -7,6 +7,8 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'ICal\\Event' => $vendorDir . '/johngrogg/ics-parser/src/ICal/Event.php',
+    'ICal\\ICal' => $vendorDir . '/johngrogg/ics-parser/src/ICal/ICal.php',
     'Nelio_Content\\Zod\\ArraySchema' => $baseDir . '/includes/lib/nelio/zod/array-schema.php',
     'Nelio_Content\\Zod\\BooleanSchema' => $baseDir . '/includes/lib/nelio/zod/boolean-schema.php',
     'Nelio_Content\\Zod\\EnumSchema' => $baseDir . '/includes/lib/nelio/zod/enum-schema.php',

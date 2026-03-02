@@ -4,10 +4,22 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc0e0424f5c04a842b2093f148ebe2b86
+class ComposerStaticInit0b7d905265507f085ac3875de289a5bd
 {
+    public static $prefixesPsr0 = array (
+        'I' => 
+        array (
+            'ICal' => 
+            array (
+                0 => __DIR__ . '/..' . '/johngrogg/ics-parser/src',
+            ),
+        ),
+    );
+
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'ICal\\Event' => __DIR__ . '/..' . '/johngrogg/ics-parser/src/ICal/Event.php',
+        'ICal\\ICal' => __DIR__ . '/..' . '/johngrogg/ics-parser/src/ICal/ICal.php',
         'Nelio_Content\\Zod\\ArraySchema' => __DIR__ . '/../..' . '/includes/lib/nelio/zod/array-schema.php',
         'Nelio_Content\\Zod\\BooleanSchema' => __DIR__ . '/../..' . '/includes/lib/nelio/zod/boolean-schema.php',
         'Nelio_Content\\Zod\\EnumSchema' => __DIR__ . '/../..' . '/includes/lib/nelio/zod/enum-schema.php',
@@ -96,7 +108,8 @@ class ComposerStaticInitc0e0424f5c04a842b2093f148ebe2b86
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInitc0e0424f5c04a842b2093f148ebe2b86::$classMap;
+            $loader->prefixesPsr0 = ComposerStaticInit0b7d905265507f085ac3875de289a5bd::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit0b7d905265507f085ac3875de289a5bd::$classMap;
 
         }, null, ClassLoader::class);
     }

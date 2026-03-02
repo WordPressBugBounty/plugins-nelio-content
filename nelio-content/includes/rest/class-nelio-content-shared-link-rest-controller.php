@@ -160,6 +160,7 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 
 		// Fix Twitter.
 		$result['twitter'] = preg_replace( '/@|https?:\/\/twitter.com\/?/', '', $result['twitter'] );
+		$result['twitter'] = preg_replace( '/@|https?:\/\/x.com\/?/', '', is_string( $result['twitter'] ) ? $result['twitter'] : '' );
 		$result['twitter'] = is_string( $result['twitter'] ) ? $result['twitter'] : '';
 		if ( mb_strlen( $result['twitter'] ) ) {
 			$result['twitter'] = '@' . $result['twitter'];
@@ -365,7 +366,7 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 
 		// Get $username's twitter profile page.
 		$username = str_replace( '@', '', $username );
-		$aux      = $this->get_page_content( 'https://twitter.com/' . $username );
+		$aux      = $this->get_page_content( 'https://x.com/' . $username );
 
 		// If we couldn't load the page content, return.
 		if ( empty( $aux ) ) {

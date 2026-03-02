@@ -229,7 +229,7 @@ class Nelio_Content_Missed_Schedule_Handler {
 			$wpdb->prepare(
 				"SELECT ID FROM %i WHERE post_date <= %s AND post_status = 'future' LIMIT %d",
 				$wpdb->posts,
-				current_time( 'mysql', 0 ),
+				current_time( 'mysql' ),
 				self::BATCH_LIMIT
 			)
 		);

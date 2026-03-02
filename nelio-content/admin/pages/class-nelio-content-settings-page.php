@@ -47,7 +47,7 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 			array( 'nelio-content-components', 'nelio-content-social-profiles-manager' ),
 			nelio_content_get_script_version( 'settings-page' )
 		);
-		nelio_content_enqueue_script_with_auto_deps( 'nelio-content-settings-page', 'settings-page', true );
+		nelio_content_enqueue_script_with_auto_deps( 'nelio-content-settings-page', 'settings-page', false );
 
 		$subpage = $this->get_current_subpage();
 		$script  = $this->get_custom_subpage_script( $subpage );
@@ -73,7 +73,7 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 		 */
 		do_action( 'nelio_content_after_settings_title' );
 
-		settings_errors();
+		settings_errors( 'nelio-content' );
 
 		echo '<form id="nelio-content-settings-form" method="post" action="options.php">';
 

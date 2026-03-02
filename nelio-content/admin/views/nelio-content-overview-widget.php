@@ -320,7 +320,6 @@ function get_news( $mode ) {
 			return array();
 		}
 		$news = $rss->get_items( 0, 3 );
-		$news = is_array( $news ) ? $news : array();
 		$news = array_map(
 			function ( $n ) {
 				return array(

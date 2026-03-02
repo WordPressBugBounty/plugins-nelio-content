@@ -424,7 +424,7 @@ class Nelio_Content_Auto_Sharer {
 
 				$taxonomies = $group['taxonomies'] ?? array();
 				if ( ! empty( $taxonomies ) ) {
-					$conds   = array_map(
+					$conds = array_map(
 						function ( $tax, $terms ) use ( &$term_map, &$tax_tables ) {
 							/** @var string    $tax   */
 							/** @var list<int> $terms */
@@ -447,7 +447,10 @@ class Nelio_Content_Auto_Sharer {
 						array_keys( $taxonomies ),
 						array_values( $taxonomies )
 					);
-					$where[] = '(' . implode( ' AND ', array_filter( $conds ) ) . ')';
+					$conds = array_filter( $conds );
+					if ( ! empty( $conds ) ) {
+						$where[] = '(' . implode( ' AND ', $conds ) . ')';
+					}
 				}
 
 				$authors = $group['authors'] ?? array();
@@ -523,7 +526,7 @@ class Nelio_Content_Auto_Sharer {
 		}
 
 		$taxonomies = array_map(
-			fn ( $terms ) => array_values( array_filter( $terms ) ),
+			fn ( $terms ) => array_filter( $terms ),
 			$taxonomies
 		);
 

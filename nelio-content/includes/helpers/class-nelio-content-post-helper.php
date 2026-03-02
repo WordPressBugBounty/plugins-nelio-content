@@ -126,6 +126,7 @@ class Nelio_Content_Post_Helper {
 				'linkedin.com',
 				'unsplash.com',
 				'twitter.com',
+				'x.com',
 				'facebook.com',
 			)
 		);
