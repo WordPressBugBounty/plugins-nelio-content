@@ -142,8 +142,8 @@ class Nelio_Content_Notifications {
 		/**
 		 *  Kill switch for comment creation notification.
 		 *
-		 *  @param TEditorial_Comment|false $comment The comment.
-		 *  @param WP_Post                  $post    The related post.
+		 * @param TEditorial_Comment|false $comment The comment.
+		 * @param WP_Post                  $post    The related post.
 		 *
 		 * @since 1.4.2
 		 */
@@ -186,8 +186,8 @@ class Nelio_Content_Notifications {
 		/**
 		 * Kill switch for task creation notification.
 		 *
-		 *  @param TEditorial_Task|false $task The task.
-		 *  @param WP_Post|null          $post The related post (if any).
+		 * @param TEditorial_Task|false $task The task.
+		 * @param WP_Post|null          $post The related post (if any).
 		 *
 		 * @since 1.4.2
 		 */
@@ -230,8 +230,8 @@ class Nelio_Content_Notifications {
 		/**
 		 * Kill switch for task update notification.
 		 *
-		 *  @param TEditorial_Task|false $task The task.
-		 *  @param WP_Post|null          $post The related post (if any).
+		 * @param TEditorial_Task|false $task The task.
+		 * @param WP_Post|null          $post The related post (if any).
 		 *
 		 * @since 1.4.2
 		 */

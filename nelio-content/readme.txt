@@ -5,7 +5,7 @@ Tags: editorial calendar, social media, social media scheduler, auto post, conte
 Requires PHP: 7.4
 Requires at least: 6.7
 Tested up to: 6.9
-Stable tag: 4.3.0
+Stable tag: 4.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -57,6 +57,7 @@ Perfect for **bloggers, marketers, agencies, and multi-author sites** that need 
 * **VK** - Post to your profile or community wall.
 * **OK.ru** – Post to your profile or group.
 * **Plurk** - Post to your profile.
+* **Webhooks** – Send requests to external servers and integrations.
 * **Buffer** – Share your content to your connected Buffer profiles
 * **Hootsuite** – Share your content to your connected Hootsuite profiles
 
@@ -285,7 +286,14 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Changelog ==
 
+= 4.3.1 (March 9, 2026) =
+* Hide targe selector when not needed.
+* Allow profile aliases with spaces.
+* Increase Bluesky character limit to 300 characters.
+* Improve style in message previews.
+
 = 4.3.0 (March 2, 2026) =
+* Add **Webhooks support**.
 * Add support for posting videos to Facebook Pages.
 * Add custom placeholders for WooCommerce products.
 * Add custom placeholders for LearnDash courses.
@@ -838,5 +846,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 4.3.0 (March 2, 2026) =
-Add Facebook video support, new custom placeholders and hooks, plus validation and bug fixes.
+= 4.3.1 (March 9, 2026) =
+Minor fixes.
