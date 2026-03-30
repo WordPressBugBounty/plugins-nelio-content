@@ -378,13 +378,13 @@ class Nelio_Content_Admin {
 
 		$svg_icon_file = nelio_content()->plugin_path . '/assets/dist/images/logo.svg';
 		if ( ! file_exists( $svg_icon_file ) ) {
-			return 'admin-generic';
+			return 'dashicons-admin-generic';
 		}
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$icon = file_get_contents( $svg_icon_file );
 		if ( empty( $icon ) ) {
-			return 'admin-generic';
+			return 'dashicons-admin-generic';
 		}
 
 		return 'data:image/svg+xml;base64,' . base64_encode( $icon );

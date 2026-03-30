@@ -150,7 +150,14 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 	public function create_external_calendar( $request ) {
 
 		/** @var string */
-		$url      = $request['url'];
+		$url = $request['url'];
+		if ( ! wp_http_validate_url( $url ) ) {
+			return new WP_Error(
+				'invalid-url',
+				_x( 'Invalid URL', 'text', 'nelio-content' )
+			);
+		}
+
 		$response = wp_remote_request( $url, array( 'method' => 'GET' ) );
 
 		if ( is_wp_error( $response ) ) {
@@ -187,6 +194,7 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 
 		/** @var string */
 		$url = $request['url'];
+
 		/** @var string */
 		$name = trim( $request['name'] ?? '' );
 
@@ -241,7 +249,22 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 	 */
 	public function get_events( $request ) {
 		/** @var string */
-		$url      = $request['url'];
+		$url = $request['url'];
+
+		if ( ! wp_http_validate_url( $url ) ) {
+			return new WP_Error(
+				'invalid-url',
+				_x( 'Invalid URL', 'text', 'nelio-content' )
+			);
+		}
+
+		if ( ! $this->get_external_calendar( $url ) ) {
+			return new WP_Error(
+				'invalid-url',
+				_x( 'Invalid URL', 'text', 'nelio-content' )
+			);
+		}
+
 		$response = wp_remote_request( $url, array( 'method' => 'GET' ) );
 
 		if ( is_wp_error( $response ) ) {
