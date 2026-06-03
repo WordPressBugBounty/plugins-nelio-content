@@ -79,11 +79,10 @@ function nelio_content_generate_api_auth_token( $mode = 'regular' ) {
 	}
 
 	// If we don't, let's see if there's a transient.
-	$transient_name     = 'nc_api_token_' . get_current_user_id();
-	$token              = get_transient( $transient_name );
-	$transient_exp_date = get_option( '_transient_timeout_' . $transient_name );
+	$transient_name = 'nc_api_token_' . get_current_user_id();
+	$token          = get_transient( $transient_name );
 
-	if ( ! empty( $transient_exp_date ) && ! empty( $token ) && is_string( $token ) ) {
+	if ( ! empty( $token ) && is_string( $token ) ) {
 		return $token;
 	}
 
@@ -121,6 +120,13 @@ function nelio_content_generate_api_auth_token( $mode = 'regular' ) {
 		$response = wp_remote_request( $url, $data );
 		$response = nelio_content_extract_response_body( $response );
 		if ( is_wp_error( $response ) ) {
+			$error_data = $response->get_error_data();
+			$error_data = is_array( $error_data ) ? $error_data : array();
+			$code       = $error_data['code'] ?? null;
+			if ( 403 === $code ) {
+				$token = 'unauthorized';
+				break;
+			}
 			sleep( 3 );
 			continue;
 		}
@@ -249,6 +255,10 @@ function nelio_content_extract_response_body( $response ) {
 			/* translators: %s: The placeholder is a string explaining the error returned by the API. */
 				_x( 'There was an error while accessing Nelio Content’s API: %s.', 'error', 'nelio-content' ),
 				$summary
+			),
+			array(
+				'code'    => absint( $code ),
+				'message' => $message,
 			)
 		);
 	}

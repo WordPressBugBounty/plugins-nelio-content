@@ -50,12 +50,37 @@ class Nelio_Content_Cloud {
 	 */
 	public function init() {
 
+		add_filter( 'pre_http_request', array( $this, 'prevent_unauthorized_requests' ), 10, 3 );
 		add_action( 'admin_init', array( $this, 'add_hooks_for_updating_site_in_cloud' ) );
 
 		add_action( 'nelio_content_save_post', array( $this, 'maybe_sync_post' ) );
 		add_action( 'nelio_content_update_post_in_cloud', array( $this, 'maybe_sync_post' ) );
 		add_action( 'init', array( $this, 'add_hooks_for_updating_post_in_cloud_on_publish' ) );
 		add_action( 'init', array( $this, 'maybe_add_profile_status_checker' ) );
+	}
+
+	/**
+	 * Prevents unauthorized requests to the Nelio Content API.
+	 *
+	 * @param mixed                $preempt Preempt value.
+	 * @param array<string, mixed> $args    Arguments for the HTTP request.
+	 * @param string               $url     The URL of the HTTP request.
+	 *
+	 * @return mixed
+	 */
+	public function prevent_unauthorized_requests( $preempt, $args, $url ) {
+		if ( strpos( $url, 'https://api.neliocontent.com' ) !== 0 ) {
+			return $preempt;
+		}
+
+		/** @var array{Authorization?: string} $headers */
+		$headers       = $args['headers'] ?? array();
+		$authorization = $headers['Authorization'] ?? '';
+		if ( 'Bearer unauthorized' !== $authorization ) {
+			return $preempt;
+		}
+
+		return new WP_Error( 'forbidden', '403 Forbidden', array( 'code' => 403 ) );
 	}
 
 	/**
