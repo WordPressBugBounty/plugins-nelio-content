@@ -439,11 +439,21 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 			return true;
 		}
 
-		$post_type  = $request['type'] ?? '';
-		$post_type  = is_string( $post_type ) ? $post_type : '';
-		$post_type  = get_post_type_object( $post_type );
-		$capability = ! empty( $post_type ) ? $post_type->cap->create_posts : null;
-		return is_string( $capability ) && current_user_can( $capability );
+		$post_type = $this->get_valid_post_type_object( $request['type'] ?? '' );
+		if ( empty( $post_type ) ) {
+			return false;
+		}
+
+		$capability = $post_type->cap->create_posts;
+		if ( ! is_string( $capability ) || ! current_user_can( $capability ) ) {
+			return false;
+		}
+
+		if ( ! $this->can_current_user_assign_author( $post_type, absint( $request['authorId'] ?? 0 ) ) ) {
+			return false;
+		}
+
+		return $this->can_current_user_set_post_status( $post_type, $request['status'] ?? 'draft' );
 	}
 
 	/**
@@ -515,10 +525,82 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 			return false;
 		}
 
-		$capability = in_array( get_post_status( $post_id ), array( 'publish', 'future' ), true )
-			? $post_type->cap->edit_published_posts
-			: $post_type->cap->edit_posts;
-		return is_string( $capability ) && current_user_can( $capability, $post_id );
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		if ( ! $this->can_current_user_assign_author( $post_type, absint( $request['authorId'] ?? 0 ) ) ) {
+			return false;
+		}
+
+		if ( ! $request->has_param( 'status' ) ) {
+			return true;
+		}
+
+		return $this->can_current_user_set_post_status( $post_type, $request['status'] );
+	}
+
+	/**
+	 * Returns a valid managed post type object.
+	 *
+	 * @param mixed $post_type Post type.
+	 *
+	 * @return WP_Post_Type|null
+	 */
+	private function get_valid_post_type_object( $post_type ) {
+
+		$post_type = is_string( $post_type ) ? $post_type : '';
+		if ( ! $this->is_valid_post_type( $post_type ) ) {
+			return null;
+		}
+
+		$post_type = get_post_type_object( $post_type );
+		return ! empty( $post_type ) ? $post_type : null;
+	}
+
+	/**
+	 * Checks if current user can set the given author.
+	 *
+	 * @param WP_Post_Type $post_type Post type.
+	 * @param int          $author_id Author ID.
+	 *
+	 * @return bool
+	 */
+	private function can_current_user_assign_author( $post_type, $author_id ) {
+
+		if ( empty( $author_id ) ) {
+			return true;
+		}
+
+		if ( ! get_userdata( $author_id ) ) {
+			return false;
+		}
+
+		if ( get_current_user_id() === $author_id ) {
+			return true;
+		}
+
+		$capability = $post_type->cap->edit_others_posts;
+		return is_string( $capability ) && current_user_can( $capability );
+	}
+
+	/**
+	 * Checks if current user can set the given post status.
+	 *
+	 * @param WP_Post_Type $post_type Post type.
+	 * @param mixed        $status    Post status.
+	 *
+	 * @return bool
+	 */
+	private function can_current_user_set_post_status( $post_type, $status ) {
+
+		$status = is_string( $status ) ? $status : '';
+		if ( ! in_array( $status, array( 'private', 'publish', 'future' ), true ) ) {
+			return true;
+		}
+
+		$capability = $post_type->cap->publish_posts;
+		return is_string( $capability ) && current_user_can( $capability );
 	}
 
 	/**
@@ -729,6 +811,31 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		/** @var string */
 		$type = $request->get_param( 'type' );
 
+		$post_type = $this->get_valid_post_type_object( $type );
+		if ( empty( $post_type ) ) {
+			return new WP_Error(
+				'invalid-post-type',
+				_x( 'Invalid post type.', 'text', 'nelio-content' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! $this->can_current_user_assign_author( $post_type, $author_id ) ) {
+			return new WP_Error(
+				'rest-cannot-edit-others',
+				_x( 'You’re not allowed to create posts as this user.', 'text', 'nelio-content' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		if ( ! $this->can_current_user_set_post_status( $post_type, $status ) ) {
+			return new WP_Error(
+				'rest-cannot-publish',
+				_x( 'You’re not allowed to publish posts in this post type.', 'text', 'nelio-content' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
 		/**
 		 * Modifies the title that will be used in the given post.
 		 *
@@ -849,6 +956,39 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		$post = $this->maybe_get_post( $post_id );
 		if ( is_wp_error( $post ) ) {
 			return $post;
+		}
+
+		$post_type = $this->get_valid_post_type_object( $post->post_type );
+		if ( empty( $post_type ) ) {
+			return new WP_Error(
+				'invalid-post-type',
+				_x( 'Invalid post type.', 'text', 'nelio-content' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return new WP_Error(
+				'rest-cannot-edit',
+				_x( 'You’re not allowed to edit this post.', 'text', 'nelio-content' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		if ( ! $this->can_current_user_assign_author( $post_type, $author_id ) ) {
+			return new WP_Error(
+				'rest-cannot-edit-others',
+				_x( 'You’re not allowed to update posts as this user.', 'text', 'nelio-content' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		if ( ! $this->can_current_user_set_post_status( $post_type, $status ) ) {
+			return new WP_Error(
+				'rest-cannot-publish',
+				_x( 'You’re not allowed to publish posts in this post type.', 'text', 'nelio-content' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
 		}
 
 		$post_data = array(
