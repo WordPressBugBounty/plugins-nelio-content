@@ -22,6 +22,14 @@ return array(
 	),
 
 	array(
+		'type'    => 'checkbox',
+		'name'    => 'can_view_all_calendar_posts',
+		'label'   => '',
+		'desc'    => esc_html_x( 'Allow all plugin users to view all posts in the Editorial Calendar and Content Board', 'command', 'nelio-content' ),
+		'default' => false,
+	),
+
+	array(
 		'type'     => 'custom',
 		'name'     => 'use_ics_subscription',
 		'label'    => esc_html_x( 'iCal Calendar Feed', 'text', 'nelio-content' ),

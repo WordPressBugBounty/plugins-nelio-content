@@ -269,14 +269,54 @@ function nelio_content_add_post_meta_once( $post_id, $meta_key, $meta_value ) {
  * @since 4.0.8
  */
 function nelio_content_update_post_meta_array( $post_id, $meta_key, $meta_values ) {
-	delete_metadata( 'post', $post_id, $meta_key );
-	foreach ( $meta_values as $value ) {
-		if ( ! add_post_meta( $post_id, $meta_key, $value, false ) ) {
-			return false;
+	$meta_values = array_values( array_unique( $meta_values, SORT_REGULAR ) );
+	$lock        = nelio_content_acquire_post_meta_array_lock( $post_id, $meta_key );
+
+	try {
+		delete_metadata( 'post', $post_id, $meta_key );
+		foreach ( $meta_values as $value ) {
+			if ( ! add_post_meta( $post_id, $meta_key, $value, false ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	} finally {
+		if ( $lock ) {
+			delete_option( $lock );
 		}
 	}
+}
 
-	return true;
+/**
+ * Acquires a short-lived lock to update a post meta array.
+ *
+ * @param int    $post_id  the post ID related to the given meta.
+ * @param string $meta_key the meta key.
+ *
+ * @return string|false the lock name if acquired, false otherwise.
+ */
+function nelio_content_acquire_post_meta_array_lock( $post_id, $meta_key ) {
+	$lock       = 'nc_meta_array_lock_' . md5( "{$post_id}:{$meta_key}" );
+	$expiration = 15;
+	$timeout    = 2;
+	$start      = microtime( true );
+
+	do {
+		if ( add_option( $lock, time(), '', false ) ) {
+			return $lock;
+		}
+
+		$locked_at = absint( get_option( $lock ) );
+		if ( ! empty( $locked_at ) && time() - $locked_at > $expiration ) {
+			delete_option( $lock );
+			continue;
+		}
+
+		usleep( 100000 );
+	} while ( microtime( true ) - $start < $timeout );
+
+	return false;
 }
 
 /**

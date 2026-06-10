@@ -17,6 +17,8 @@ use function Nelio_Content\Helpers\not;
  */
 class Nelio_Content_Admin {
 
+	const WORDS_PER_MINUTE = 265;
+
 	/**
 	 * This instance.
 	 *
@@ -268,20 +270,22 @@ class Nelio_Content_Admin {
 		);
 
 		$site_settings = array(
-			'activePlugins'      => $this->get_active_plugins(),
-			'adminUrl'           => admin_url(),
-			'firstDayOfWeek'     => $this->get_first_day_of_week(),
-			'homeUrl'            => home_url(),
-			'id'                 => nelio_content_get_site_id(),
-			'isMultiAuthor'      => $this->is_multi_author(),
-			'isStaging'          => nelio_content_is_staging(),
-			'language'           => nelio_content_get_language(),
-			'now'                => gmdate( 'c' ),
-			'postTypes'          => $this->get_post_types(),
-			'postTypesByContext' => $this->get_post_types_by_context(),
-			'restUrl'            => untrailingslashit( get_rest_url() ),
-			'roles'              => $this->get_roles(),
-			'timezone'           => nelio_content_get_timezone(),
+			'activePlugins'           => $this->get_active_plugins(),
+			'adminUrl'                => admin_url(),
+			'canViewAllCalendarPosts' => $settings->get( 'can_view_all_calendar_posts' ),
+			'firstDayOfWeek'          => $this->get_first_day_of_week(),
+			'homeUrl'                 => home_url(),
+			'id'                      => nelio_content_get_site_id(),
+			'isMultiAuthor'           => $this->is_multi_author(),
+			'isStaging'               => nelio_content_is_staging(),
+			'language'                => nelio_content_get_language(),
+			'now'                     => gmdate( 'c' ),
+			'postTypes'               => $this->get_post_types(),
+			'postTypesByContext'      => $this->get_post_types_by_context(),
+			'restUrl'                 => untrailingslashit( get_rest_url() ),
+			'roles'                   => $this->get_roles(),
+			'timezone'                => nelio_content_get_timezone(),
+			'wordsPerMinute'          => $this->get_words_per_minute(),
 		);
 
 		$user_settings = array(
@@ -413,6 +417,21 @@ class Nelio_Content_Admin {
 		$settings = Nelio_Content_Settings::instance();
 		$ga_data  = $settings->get( 'google_analytics_data' );
 		return ! empty( $ga_data['id'] );
+	}
+
+	/**
+	 * Gets the average number of words per reading minute.
+	 *
+	 * @return int
+	 */
+	private function get_words_per_minute() {
+		/**
+		 * Filters the average number of words per reading minute.
+		 *
+		 * @param int $words_per_minute Average number of words per reading minute.
+		 */
+		$words_per_minute = apply_filters( 'nelio_content_words_per_minute', self::WORDS_PER_MINUTE );
+		return max( 1, absint( $words_per_minute ) );
 	}
 
 	/**

@@ -470,6 +470,10 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		}
 
 		$post_id = absint( $request['id'] );
+		if ( $this->can_current_user_view_calendar_post( $post_id ) ) {
+			return true;
+		}
+
 		return current_user_can( 'read_post', $post_id );
 	}
 
@@ -766,7 +770,10 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 				continue;
 			}
 
-			if ( ! current_user_can( 'read_post', $post->ID ) ) {
+			if (
+				! current_user_can( 'read_post', $post->ID ) &&
+				! $this->can_current_user_view_calendar_post( $post->ID )
+			) {
 				continue;
 			}
 
@@ -777,6 +784,42 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		}
 
 		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Returns whether the current user can view the post through the calendar.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return bool
+	 */
+	private function can_current_user_view_calendar_post( $post_id ) {
+
+		if ( ! nelio_content_can_current_user_use_plugin() ) {
+			return false;
+		}
+
+		$settings = Nelio_Content_Settings::instance();
+		if ( ! $settings->get( 'can_view_all_calendar_posts' ) ) {
+			return false;
+		}
+
+		$post_type = get_post_type( $post_id );
+		if ( empty( $post_type ) ) {
+			return false;
+		}
+
+		if ( ! in_array( $post_type, nelio_content_get_post_types( 'calendar' ), true ) ) {
+			return false;
+		}
+
+		$post_type_object = get_post_type_object( $post_type );
+		if ( empty( $post_type_object ) ) {
+			return false;
+		}
+
+		$capability = $post_type_object->cap->read;
+		return is_string( $capability ) && current_user_can( $capability );
 	}
 
 	/**
