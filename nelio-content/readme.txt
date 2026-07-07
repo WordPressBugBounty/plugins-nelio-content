@@ -5,7 +5,7 @@ Tags: editorial calendar, social media, social media scheduler, auto post, conte
 Requires PHP: 7.4
 Requires at least: 6.7
 Tested up to: 7.0
-Stable tag: 4.3.6
+Stable tag: 4.3.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -285,6 +285,10 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 4.3.7 (July 7, 2026) =
+* Include series functionality in classic editor.
+* Change X publishing due to recent changes in X’s API pricing. X posts now use a dedicated posting quota that premium users may purchase. If you are not subscribed to and do not purchase additional quota, Nelio Content will not be able to publish posts to X.
 
 = 4.3.6 (June 10, 2026) =
 * Render extra details of posts in calendar and content board.
@@ -865,5 +869,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 4.3.6 (June 10, 2026) =
-Improvements in editorial calendar and content board.
+= 4.3.7 (July 7, 2026) =
+Change X publishing due to recent changes in X’s API pricing.

@@ -112,12 +112,21 @@ class Nelio_Content_Settings_Page extends Nelio_Content_Abstract_Page {
 			nelio_content()->plugin_version
 		);
 
+		$aux = Nelio_Content_Account_REST_Controller::instance();
+
 		nelio_content_enqueue_script_with_auto_deps( $handle, $script, true );
 		wp_add_inline_script(
 			$handle,
 			sprintf(
-				'NelioContent.initPage( %s );',
-				wp_json_encode( $target_id )
+				'social--profiles' === $subpage ? 'NelioContent.initPage( %s, %s );' : 'NelioContent.initPage( %s );',
+				wp_json_encode( $target_id ),
+				wp_json_encode(
+					array(
+						'isSubscribed' => nelio_content_is_subscribed(),
+						'siteId'       => nelio_content_get_site_id(),
+						'twitterQuota' => $aux->get_twitter_quota(),
+					)
+				)
 			)
 		);
 	}

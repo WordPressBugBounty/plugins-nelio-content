@@ -170,6 +170,32 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 
 		register_rest_route(
 			nelio_content()->rest_namespace,
+			'/subscription/twitter-quota',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'buy_more_quota' ),
+					'permission_callback' => 'nelio_content_can_current_user_manage_account',
+					'args'                => array(
+						'quantity' => array(
+							'type'              => 'string|number',
+							'required'          => true,
+							'sanitize_callback' => fn( $v ) => '' . absint( $v ),
+							'validate_callback' => fn( $v ) => ! empty( $v ),
+						),
+						'currency' => array(
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => fn( $v ) => trim( sanitize_text_field( $v ) ),
+							'validate_callback' => fn( $v ) => ! empty( $v ),
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			nelio_content()->rest_namespace,
 			'/subscription/sites',
 			array(
 				array(
@@ -249,6 +275,40 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		nelio_content_update_subscription( $account['plan'], $account['limits'] );
 
 		return new WP_REST_Response( $account, 200 );
+	}
+
+	/**
+	 * Retrieves the Twitter quota for the site.
+	 *
+	 * @return int|WP_Error The total Twitter quota (including extra quota) or a WP_Error on failure.
+	 */
+	public function get_twitter_quota() {
+
+		$data = array(
+			'method'    => 'GET',
+			'timeout'   => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+			'sslverify' => ! nelio_content_does_api_use_proxy(),
+			'headers'   => array(
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
+				'accept'        => 'application/json',
+				'content-type'  => 'application/json',
+			),
+		);
+
+		$url      = nelio_content_get_api_url( '/site/' . nelio_content_get_site_id(), 'wp' );
+		$response = wp_remote_request( $url, $data );
+		$response = nelio_content_extract_response_body( $response );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		// Update subscription information with response.
+		/** @var TAWS_Site */
+		$site_info = $response;
+		$account   = $this->create_account_object( $site_info );
+		nelio_content_update_subscription( $account['plan'], $account['limits'] );
+
+		return absint( $account['twitterQuota'] ?? 0 ) + absint( $account['twitterQuotaExtra'] ?? 0 );
 	}
 
 	/**
@@ -586,6 +646,52 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Buys additional X quota for a subscription.
+	 *
+	 * @param WP_REST_Request<array<string,mixed>> $request Full data about the request.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function buy_more_quota( $request ) {
+
+		$quantity = $request['quantity'];
+		$currency = $request['currency'];
+
+		$params = array(
+			'siteId'   => nelio_content_get_site_id(),
+			'quantity' => $quantity,
+			'currency' => $currency,
+		);
+
+		$body = wp_json_encode( $params );
+		assert( ! empty( $body ) );
+
+		$data = array(
+			'method'    => 'POST',
+			'timeout'   => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+			'sslverify' => ! nelio_content_does_api_use_proxy(),
+			'headers'   => array(
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
+				'accept'        => 'application/json',
+				'content-type'  => 'application/json',
+			),
+			'body'      => $body,
+		);
+
+		$url      = nelio_content_get_api_url( '/fastspring/twitter-quota', 'wp' );
+		$response = wp_remote_request( $url, $data );
+
+		// If the response is an error, leave.
+		$response = nelio_content_extract_response_body( $response );
+		if ( is_wp_error( $response ) ) {
+			return $response; // @codeCoverageIgnore
+		}
+
+		$twitter_quota = $this->get_twitter_quota();
+		return new WP_REST_Response( array( 'twitterQuota' => $twitter_quota ), 200 );
+	}
+
+	/**
 	 * Obtains all sites connected to a subscription.
 	 *
 	 * @return WP_REST_Response|WP_Error
@@ -783,28 +889,31 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		$photo = ! empty( $photo ) ? $photo : '';
 
 		return array(
-			'creationDate'        => $site['creation'],
-			'currency'            => $site['subscription']['currency'] ?? 'USD',
-			'deactivationDate'    => $site['subscription']['deactivationDate'] ?? '',
-			'email'               => $site['subscription']['account']['email'],
-			'endDate'             => $site['subscription']['endDate'] ?? '',
-			'firstname'           => $site['subscription']['account']['firstname'] ?? '',
-			'isAgency'            => ! empty( $site['subscription']['isAgency'] ),
-			'lastname'            => $site['subscription']['account']['lastname'] ?? '',
-			'license'             => $site['subscription']['license'],
-			'limits'              => $limits,
-			'mode'                => $site['subscription']['mode'],
-			'nextChargeDate'      => $site['subscription']['nextChargeDate'] ?? '',
-			'nextChargeTotal'     => $site['subscription']['nextChargeTotal'] ?? $site['subscription']['nextChargeTotalDisplay'] ?? '',
-			'period'              => $site['subscription']['intervalUnit'],
-			'photo'               => $photo,
-			'plan'                => nelio_content_get_plan( $site['subscription']['product'] ),
-			'productId'           => $site['subscription']['product'],
-			'state'               => $site['subscription']['state'],
-			'sitesAllowed'        => ! empty( $sites_allowed ) ? $sites_allowed : 1,
-			'siteId'              => nelio_content_get_site_id(),
-			'subscription'        => $site['subscription']['id'],
-			'urlToManagePayments' => nelio_content_get_api_url( '/fastspring/' . $site['subscription']['id'] . '/url', 'browser' ),
+			'creationDate'         => $site['creation'],
+			'currency'             => $site['subscription']['currency'] ?? 'USD',
+			'deactivationDate'     => $site['subscription']['deactivationDate'] ?? '',
+			'email'                => $site['subscription']['account']['email'],
+			'endDate'              => $site['subscription']['endDate'] ?? '',
+			'firstname'            => $site['subscription']['account']['firstname'] ?? '',
+			'isAgency'             => ! empty( $site['subscription']['isAgency'] ),
+			'lastname'             => $site['subscription']['account']['lastname'] ?? '',
+			'license'              => $site['subscription']['license'],
+			'limits'               => $limits,
+			'mode'                 => $site['subscription']['mode'],
+			'nextChargeDate'       => $site['subscription']['nextChargeDate'] ?? '',
+			'nextChargeTotal'      => $site['subscription']['nextChargeTotal'] ?? $site['subscription']['nextChargeTotalDisplay'] ?? '',
+			'period'               => $site['subscription']['intervalUnit'],
+			'photo'                => $photo,
+			'plan'                 => nelio_content_get_plan( $site['subscription']['product'] ),
+			'productId'            => $site['subscription']['product'],
+			'twitterQuota'         => absint( $site['subscription']['twitterQuota'] ?? 0 ),
+			'twitterQuotaExtra'    => absint( $site['subscription']['twitterQuotaExtra'] ?? 0 ),
+			'twitterQuotaPerMonth' => absint( $site['subscription']['twitterQuotaPerMonth'] ?? 0 ),
+			'state'                => $site['subscription']['state'],
+			'sitesAllowed'         => ! empty( $sites_allowed ) ? $sites_allowed : 1,
+			'siteId'               => nelio_content_get_site_id(),
+			'subscription'         => $site['subscription']['id'],
+			'urlToManagePayments'  => nelio_content_get_api_url( '/fastspring/' . $site['subscription']['id'] . '/url', 'browser' ),
 		);
 	}
 

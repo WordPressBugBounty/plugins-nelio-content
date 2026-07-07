@@ -218,6 +218,7 @@ class Nelio_Content_Admin {
 			'nelio-content-constants',
 			'nelio-content-data',
 			'nelio-content-date',
+			'nelio-content-i18n',
 			'nelio-content-networks',
 			'nelio-content-post-quick-editor',
 			'nelio-content-premium-hooks-for-pages',
@@ -233,6 +234,14 @@ class Nelio_Content_Admin {
 			$file_without_ext = is_string( $file_without_ext ) ? $file_without_ext : '';
 			nelio_content_register_script_with_auto_deps( $script, $file_without_ext, true );
 		}
+
+		wp_localize_script(
+			'nc-i18n',
+			'ncI18n',
+			array(
+				'locale' => str_replace( '_', '-', get_locale() ),
+			)
+		);
 
 		wp_register_style(
 			'nelio-content-components',

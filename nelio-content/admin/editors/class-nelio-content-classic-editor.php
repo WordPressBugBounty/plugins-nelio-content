@@ -63,6 +63,7 @@ class Nelio_Content_Classic_Editor {
 		}
 
 		$this->add_meta_box( 'social-media', _x( 'Social Media', 'text', 'nelio-content' ), $settings->get( 'social_post_types' ) );
+		$this->add_meta_box( 'series', _x( 'Series', 'text', 'nelio-content' ), $settings->get( 'series_post_types' ) );
 		$this->add_meta_box( 'editorial-comments', _x( 'Editorial Comments', 'text', 'nelio-content' ), $settings->get( 'comment_post_types' ) );
 		$this->add_meta_box( 'editorial-tasks', _x( 'Editorial Tasks', 'text', 'nelio-content' ), $settings->get( 'task_post_types' ) );
 		$this->add_meta_box( 'links', _x( 'References', 'text', 'nelio-content' ), $settings->get( 'reference_post_types' ) );
