@@ -269,7 +269,7 @@ class Nelio_Content_Admin {
 			'apiRoot'                 => nelio_content_get_api_url( '', 'browser' ),
 			'areAutoTutorialsEnabled' => $settings->get( 'are_auto_tutorials_enabled' ),
 			'authenticationToken'     => nelio_content_generate_api_auth_token(),
-			'isGAConnected'           => $this->is_ga_connected(),
+			'isGAConnected'           => nelio_content_is_ga_connected(),
 			'limits'                  => nelio_content_get_site_limits(),
 			'nonReferenceDomains'     => $post_helper->get_non_reference_domains(),
 			'pluginUrl'               => untrailingslashit( nelio_content()->plugin_url ),
@@ -415,17 +415,6 @@ class Nelio_Content_Admin {
 		$plugins = array_keys( array_filter( $plugins ) );
 		$plugins = array_map( fn( $p ) => substr( $p, 0, -4 ), $plugins );
 		return $plugins;
-	}
-
-	/**
-	 * Whether GA is connected.
-	 *
-	 * @return bool
-	 */
-	private function is_ga_connected() {
-		$settings = Nelio_Content_Settings::instance();
-		$ga_data  = $settings->get( 'google_analytics_data' );
-		return ! empty( $ga_data['id'] );
 	}
 
 	/**

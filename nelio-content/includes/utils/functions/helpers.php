@@ -499,6 +499,29 @@ function nelio_content_url_to_postid( $url ) {
 }
 
 /**
+ * Whether Google Analytics is connected.
+ *
+ * @return bool
+ */
+function nelio_content_is_ga_connected() {
+	$settings = Nelio_Content_Settings::instance();
+	$ga_data  = $settings->get( 'google_analytics_data' );
+	return ! empty( $ga_data['id'] );
+}
+
+/**
+ * Returns the total pageviews meta key for the connected Google Analytics property.
+ *
+ * @return string
+ */
+function nelio_content_get_ga_pageviews_total_meta_key() {
+	$settings = Nelio_Content_Settings::instance();
+	$ga_data  = $settings->get( 'google_analytics_data' );
+	$ga4_prop = $ga_data['id'];
+	return "_nc_pageviews_total_{$ga4_prop}";
+}
+
+/**
  * Returns the supported post types in the given context.
  *
  * @param TPost_Type_Context|'cloud'|'editor' $context Expected context or list of expected contexts separated by comma.

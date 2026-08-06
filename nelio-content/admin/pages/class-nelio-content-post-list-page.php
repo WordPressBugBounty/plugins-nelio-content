@@ -27,13 +27,22 @@ class Nelio_Content_Post_List_Page {
 	 */
 	public function init() {
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_social_assets' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_post_list_assets' ) );
 
 		add_filter( 'manage_pages_columns', array( $this, 'add_page_column_for_auto_share' ) );
 		add_action( 'manage_pages_custom_column', array( $this, 'add_value_in_column_for_auto_share' ), 10, 2 );
+		add_filter( 'manage_pages_columns', array( $this, 'add_page_columns_for_analytics' ), 11 );
+		add_action( 'manage_pages_custom_column', array( $this, 'add_value_in_column_for_analytics' ), 10, 2 );
 
 		add_filter( 'manage_posts_columns', array( $this, 'add_post_column_for_auto_share' ), 10, 2 );
 		add_action( 'manage_posts_custom_column', array( $this, 'add_value_in_column_for_auto_share' ), 10, 2 );
+		add_filter( 'manage_posts_columns', array( $this, 'add_post_columns_for_analytics' ), 11, 2 );
+		add_action( 'manage_posts_custom_column', array( $this, 'add_value_in_column_for_analytics' ), 10, 2 );
+		foreach ( nelio_content_get_post_types( 'analytics' ) as $post_type ) {
+			add_filter( "manage_edit-{$post_type}_sortable_columns", array( $this, 'add_analytics_sortable_columns' ) );
+		}
+		add_action( 'pre_get_posts', array( $this, 'set_analytics_order_in_query' ) );
+		add_filter( 'posts_clauses', array( $this, 'add_analytics_order_clauses' ), 10, 2 );
 
 		add_filter( 'post_class', array( $this, 'add_class_with_auto_share_info' ), 10, 3 );
 		add_action( 'bulk_edit_custom_box', array( $this, 'maybe_add_quick_or_bulk_edit_for_auto_share' ), 10, 2 );
@@ -46,44 +55,48 @@ class Nelio_Content_Post_List_Page {
 	}
 
 	/**
-	 * Callback to enqueue social assets.
+	 * Callback to enqueue post list assets.
 	 *
 	 * @return void
 	 */
-	public function maybe_enqueue_social_assets() {
+	public function maybe_enqueue_post_list_assets() {
 
-		if ( ! $this->is_current_screen_social_post_list() ) {
+		$is_social_post_list    = $this->is_current_screen_social_post_list();
+		$is_analytics_post_list = $this->is_current_screen_analytics_post_list();
+		if ( ! $is_social_post_list && ! $is_analytics_post_list ) {
 			return;
 		}
 
-		$custom_css  = '';
-		$custom_css .= '.column-nc_auto_share { width: 10% !important; }';
-		$custom_css .= '.nc-auto-share { color:grey; }';
-		$custom_css .= '.nc-auto-share--is-enabled { color:green; font-weight:bold; }';
-		$custom_css .= 'input[name="nc_auto_share"] + label + div.nc-auto-share-end { display: none; }';
-		$custom_css .= 'input[name="nc_auto_share"]:checked + label + div.nc-auto-share-end { display: block; }';
-		$custom_css .= 'label[for=nc_auto_share] { display: inline !important; }';
-		wp_add_inline_style( 'list-tables', $custom_css );
+		if ( $is_social_post_list ) {
+			$custom_css  = '';
+			$custom_css .= '.column-nc_auto_share { width: 10% !important; }';
+			$custom_css .= '.nc-auto-share { color:grey; }';
+			$custom_css .= '.nc-auto-share--is-enabled { color:green; font-weight:bold; }';
+			$custom_css .= 'input[name="nc_auto_share"] + label + div.nc-auto-share-end { display: none; }';
+			$custom_css .= 'input[name="nc_auto_share"]:checked + label + div.nc-auto-share-end { display: block; }';
+			$custom_css .= 'label[for=nc_auto_share] { display: inline !important; }';
+			wp_add_inline_style( 'list-tables', $custom_css );
 
-		wp_add_inline_script(
-			'inline-edit-post',
-			'jQuery && jQuery(document).ready( function($) {' .
-			'  ied = inlineEditPost.edit;' .
-			'  inlineEditPost.edit = function(pid) { ' .
-			'    ied.apply( this, arguments );' .
-			'    if ( "object" === typeof pid ) pid = this.getId( pid );' .
-			'    $field = $("input[name=nc_auto_share]");' .
-			'    checked = $("#post-"+pid).hasClass("nc-is-auto-shared");' .
-			'    $field.prop( "checked", checked );' .
-			'    ' .
-			'    post = document.getElementById("post-"+pid);' .
-			'    re = /^.*(nc-auto-share-end--is-([^ ]+)).*$/;' .
-			'    val = re.test( post.className ) ? post.className.replace( re, "$2" ) : "default";' .
-			'    select = document.querySelector("div.nc-auto-share-end select");' .
-			'    select.value = val;' .
-			'  };' .
-			'} );'
-		);
+			wp_add_inline_script(
+				'inline-edit-post',
+				'jQuery && jQuery(document).ready( function($) {' .
+				'  ied = inlineEditPost.edit;' .
+				'  inlineEditPost.edit = function(pid) { ' .
+				'    ied.apply( this, arguments );' .
+				'    if ( "object" === typeof pid ) pid = this.getId( pid );' .
+				'    $field = $("input[name=nc_auto_share]");' .
+				'    checked = $("#post-"+pid).hasClass("nc-is-auto-shared");' .
+				'    $field.prop( "checked", checked );' .
+				'    ' .
+				'    post = document.getElementById("post-"+pid);' .
+				'    re = /^.*(nc-auto-share-end--is-([^ ]+)).*$/;' .
+				'    val = re.test( post.className ) ? post.className.replace( re, "$2" ) : "default";' .
+				'    select = document.querySelector("div.nc-auto-share-end select");' .
+				'    select.value = val;' .
+				'  };' .
+				'} );'
+			);
+		}
 
 		wp_enqueue_style(
 			'nelio-content-post-list-page',
@@ -140,6 +153,53 @@ class Nelio_Content_Post_List_Page {
 		}
 
 		$columns['nc_auto_share'] = _x( 'Auto Share', 'text', 'nelio-content' );
+		return $columns;
+	}
+
+	/**
+	 * Callback to add analytics columns on pages.
+	 *
+	 * @param array<string,string> $columns Columns.
+	 *
+	 * @return array<string,string>
+	 */
+	public function add_page_columns_for_analytics( $columns ) {
+		return $this->add_post_columns_for_analytics( $columns, 'page' );
+	}
+
+	/**
+	 * Callback to add analytics columns.
+	 *
+	 * @param array<string,string> $columns   Columns.
+	 * @param string               $post_type Post type.
+	 *
+	 * @return array<string,string>
+	 */
+	public function add_post_columns_for_analytics( $columns, $post_type ) {
+		$post_types = nelio_content_get_post_types( 'analytics' );
+		if ( ! in_array( $post_type, $post_types, true ) ) {
+			return $columns;
+		}
+
+		if ( nelio_content_is_ga_connected() ) {
+			$columns['nc_pageviews'] = _x( 'Pageviews', 'text', 'nelio-content' );
+		}
+		$columns['nc_engagement'] = _x( 'Engagement', 'text', 'nelio-content' );
+		return $columns;
+	}
+
+	/**
+	 * Callback to mark analytics columns as sortable.
+	 *
+	 * @param array<string,string> $columns Sortable columns.
+	 *
+	 * @return array<string,string>
+	 */
+	public function add_analytics_sortable_columns( $columns ) {
+		if ( nelio_content_is_ga_connected() ) {
+			$columns['nc_pageviews'] = 'nc_pageviews';
+		}
+		$columns['nc_engagement'] = 'nc_engagement';
 		return $columns;
 	}
 
@@ -215,6 +275,116 @@ class Nelio_Content_Post_List_Page {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Callback to add value in analytics columns.
+	 *
+	 * @param string $column  Column name.
+	 * @param int    $post_id Post ID.
+	 *
+	 * @return void
+	 */
+	public function add_value_in_column_for_analytics( $column, $post_id ) {
+
+		if ( ! in_array( $column, array( 'nc_pageviews', 'nc_engagement' ), true ) ) {
+			return;
+		}
+
+		/** @var array<int,TPost_Stats> $stats_by_post_id */
+		static $stats_by_post_id = array();
+		if ( ! isset( $stats_by_post_id[ $post_id ] ) ) {
+			$analytics                    = Nelio_Content_Analytics_Helper::instance();
+			$stats_by_post_id[ $post_id ] = $analytics->get_post_stats( $post_id );
+		}
+		$stats = $stats_by_post_id[ $post_id ];
+
+		if ( 'nc_pageviews' === $column ) {
+			$type  = 'pageviews';
+			$value = $stats['pageviews']['total'] ?? 0;
+		} else {
+			$type  = 'engagement';
+			$value = $stats['engagement']['total'] ?? 0;
+		}
+
+		$statistics = wp_json_encode( $stats );
+		$statistics = is_string( $statistics ) ? $statistics : '{}';
+		printf(
+			'<div class="%1$s" data-post-id="%2$d" data-analytics-type="%3$s" data-statistics="%4$s">%5$s</div>',
+			esc_attr( 'nelio-content-post-list-analytics' ),
+			absint( $post_id ),
+			esc_attr( $type ),
+			esc_attr( $statistics ),
+			esc_html( strval( $value ) )
+		);
+	}
+
+	/**
+	 * Callback to prepare analytics order in post list queries.
+	 *
+	 * @param WP_Query $query Query.
+	 *
+	 * @return void
+	 */
+	public function set_analytics_order_in_query( $query ) {
+
+		if ( ! is_admin() || ! $query->is_main_query() ) {
+			return;
+		}
+
+		$orderby = $query->get( 'orderby' );
+		if ( ! in_array( $orderby, array( 'nc_pageviews', 'nc_engagement' ), true ) ) {
+			return;
+		}
+
+		$post_type = $this->get_post_type_in_query( $query );
+		if ( ! in_array( $post_type, nelio_content_get_post_types( 'analytics' ), true ) ) {
+			return;
+		}
+
+		if ( 'nc_pageviews' === $orderby ) {
+			if ( ! nelio_content_is_ga_connected() ) {
+				return;
+			}
+			$meta_key = nelio_content_get_ga_pageviews_total_meta_key();
+		} else {
+			$meta_key = '_nc_engagement_total';
+		}
+
+		$order = $query->get( 'order' );
+		$order = is_string( $order ) ? strtoupper( $order ) : 'DESC';
+		$order = in_array( $order, array( 'ASC', 'DESC' ), true ) ? $order : 'DESC';
+
+		$query->set( 'nc_analytics_orderby_meta_key', $meta_key );
+		$query->set( 'nc_analytics_order', $order );
+	}
+
+	/**
+	 * Callback to order post list queries by analytics values.
+	 *
+	 * @param array<string,string> $clauses Query clauses.
+	 * @param WP_Query             $query   Query.
+	 *
+	 * @return array<string,string>
+	 */
+	public function add_analytics_order_clauses( $clauses, $query ) {
+
+		$meta_key = $query->get( 'nc_analytics_orderby_meta_key' );
+		if ( empty( $meta_key ) || ! is_string( $meta_key ) ) {
+			return $clauses;
+		}
+
+		$order = $query->get( 'nc_analytics_order' );
+		$order = is_string( $order ) ? strtoupper( $order ) : 'DESC';
+		$order = in_array( $order, array( 'ASC', 'DESC' ), true ) ? $order : 'DESC';
+
+		/** @var wpdb $wpdb */
+		global $wpdb;
+		// @phpstan-ignore-next-line Variable table names prevent this from being a literal string.
+		$clauses['join']   .= $wpdb->prepare( " LEFT JOIN {$wpdb->postmeta} AS nc_analytics_order_meta ON ({$wpdb->posts}.ID = nc_analytics_order_meta.post_id AND nc_analytics_order_meta.meta_key = %s)", $meta_key );
+		$clauses['orderby'] = "CAST(COALESCE(nc_analytics_order_meta.meta_value, '0') AS UNSIGNED) {$order}, {$wpdb->posts}.post_date DESC";
+
+		return $clauses;
 	}
 
 	/**
@@ -473,12 +643,52 @@ class Nelio_Content_Post_List_Page {
 	}
 
 	/**
+	 * Returns the post type in a WP query.
+	 *
+	 * @param WP_Query $query Query.
+	 *
+	 * @return string
+	 */
+	private function get_post_type_in_query( $query ) {
+		$post_type = $query->get( 'post_type' );
+		if ( empty( $post_type ) ) {
+			return 'post';
+		}
+
+		if ( is_array( $post_type ) ) {
+			$post_type = 1 === count( $post_type ) ? reset( $post_type ) : '';
+			return is_string( $post_type ) ? $post_type : '';
+		}
+
+		return is_string( $post_type ) ? $post_type : '';
+	}
+
+	/**
 	 * Whether current screen is post list and the post type is included in Nelio Content’s social context.
 	 *
 	 * @return bool
 	 */
 	private function is_current_screen_social_post_list() {
+		return $this->is_current_screen_post_list( 'social' );
+	}
 
+	/**
+	 * Whether current screen is post list and the post type is included in Nelio Content’s analytics context.
+	 *
+	 * @return bool
+	 */
+	private function is_current_screen_analytics_post_list() {
+		return $this->is_current_screen_post_list( 'analytics' );
+	}
+
+	/**
+	 * Whether current screen is post list and the post type is included in Nelio Content’s given context.
+	 *
+	 * @param TPost_Type_Context $context Context.
+	 *
+	 * @return bool
+	 */
+	private function is_current_screen_post_list( $context ) {
 		$screen = get_current_screen();
 		if ( ! isset( $screen->id ) ) {
 			return false;
@@ -490,7 +700,7 @@ class Nelio_Content_Post_List_Page {
 			return false;
 		}
 
-		$post_types = nelio_content_get_post_types( 'social' );
+		$post_types = nelio_content_get_post_types( $context );
 		$screen     = preg_replace( '/^edit-/', '', $screen );
 		if ( ! in_array( $screen, $post_types, true ) ) {
 			return false;
