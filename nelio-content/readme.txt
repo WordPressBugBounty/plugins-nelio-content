@@ -5,7 +5,7 @@ Tags: editorial calendar, social media, social media scheduler, auto post, conte
 Requires PHP: 7.4
 Requires at least: 6.7
 Tested up to: 7.1
-Stable tag: 4.4.0
+Stable tag: 4.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -285,6 +285,9 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 4.4.1 (August 31, 2026) =
+* Fix error in unscheduled posts component.
 
 = 4.4.0 (August 18, 2026) =
 * Improve styles in some components.
@@ -878,5 +881,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 4.4.0 (August 18, 2026) =
-Improve styles in some components
+= 4.4.1 (August 31, 2026) =
+Fix error in unscheduled posts component.
