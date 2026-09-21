@@ -138,6 +138,25 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		register_rest_route(
 			nelio_content()->rest_namespace,
+			'/post/batch',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_posts' ),
+					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
+					'args'                => array(
+						'ids' => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => array( $this, 'sanitize_ids' ),
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			nelio_content()->rest_namespace,
 			'/post',
 			array(
 				array(
@@ -682,6 +701,23 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Sanitizes a comma-separated list of IDs.
+	 *
+	 * @param mixed $ids Comma-separated list of IDs.
+	 *
+	 * @return list<int>
+	 */
+	public function sanitize_ids( $ids ) {
+
+		$ids = is_string( $ids ) ? explode( ',', $ids ) : array();
+		$ids = array_map( 'absint', $ids );
+		$ids = array_filter( $ids );
+		$ids = array_unique( $ids );
+
+		return array_values( $ids );
+	}
+
+	/**
 	 * Returns the requested post.
 	 *
 	 * @param WP_REST_Request<array{id:int,aws?:bool}> $request Full data about the request.
@@ -767,6 +803,43 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 			$query->the_post();
 
 			if ( empty( $post ) || '0000-00-00 00:00:00' === $post->post_date_gmt ) {
+				continue;
+			}
+
+			if (
+				! current_user_can( 'read_post', $post->ID ) &&
+				! $this->can_current_user_view_calendar_post( $post->ID )
+			) {
+				continue;
+			}
+
+			$aux = $post_helper->post_to_json( $post );
+			if ( ! empty( $aux ) ) {
+				array_push( $result, $aux );
+			}
+		}
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Gets all specified posts.
+	 *
+	 * @param WP_REST_Request<array{ids:list<int>}> $request Full data about the request.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_posts( $request ) {
+
+		/** @var list<int> */
+		$post_ids = $request->get_param( 'ids' );
+
+		$post_helper = Nelio_Content_Post_Helper::instance();
+		$result      = array();
+
+		foreach ( $post_ids as $post_id ) {
+			$post = get_post( $post_id );
+			if ( empty( $post ) ) {
 				continue;
 			}
 

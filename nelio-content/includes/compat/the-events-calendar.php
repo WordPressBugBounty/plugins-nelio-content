@@ -59,8 +59,8 @@ function post_to_internal_event( $data ) {
 
 	return array(
 		'id'              => 'tribe_event-' . $id,
-		'backgroundColor' => '#334aff',
-		'color'           => '#fff',
+		'backgroundColor' => '#eceeff',
+		'mainColor'       => '#8694ff',
 		'date'            => $start_date . ' +00:00',
 		'description'     => $data->post_excerpt,
 		'editLink'        => admin_url( 'post.php?post=' . $id . '&action=edit' ),

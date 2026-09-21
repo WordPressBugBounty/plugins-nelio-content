@@ -1,3 +1,200 @@
+= 2.5.2 (April 6, 2023) =
+* **Bug Fix**. Fix bug when creating hashtags from tags.
+* **Bug Fix**. Add reshare settings in page list screen.
+
+= 2.5.1 (March 16, 2023) =
+* **New Feature**. Add setting to check for scheduled WordPress posts not properly published with a “missed schedule” error and automatically publish them.
+* **New Feature**. Export and import social templates.
+* **New Feature**. Show newsletters from MailPoet on the editorial calendar.
+* **New Feature**. Show events from The Events Calendar on the editorial calendar.
+* **New Feature**. Add filter `nelio_content_internal_events` to show additional events on the editorial calendar.
+
+= 2.5.0 (February 27, 2023) =
+* **New Feature**. Support custom fields as placeholders in social messages using the `nelio_content_supported_post_metas` filter.
+* **New Feature**. Support custom placeholders in social messages using the `nelio_content_custom_placeholders` filter.
+* **Improvement**. Double click a network to select all its profiles in the social message editor.
+
+= 2.4.2 (February 10, 2023) =
+* **Bug Fix**. Fix bug when opening a task related to a post in the calendar, which was stuck on loading state.
+* **Bug Fix**. Fix bug when trying to reuse previous messages to fill the content of another message related to a post.
+* **Bug Fix**. Show only an exact date selector when creating a task for a published post.
+* **Improvement**. Compute Facebook engagement analytics using access token.
+* **Improvement**. Allow selecting a related post when creating a task in the editorial calendar.
+
+= 2.4.1 (February 6, 2023) =
+* **Bug Fix**. Add dependency array in preview hook to load shared link after pasting a URL.
+* **Bug Fix**. Fix social store’s reducer to show correct profile count after adding new profile(s).
+* **Bug Fix**. Remove HTML tags from `og:` and `twitter:` meta values.
+* **Bug Fix**. Fix error in useEffect callback that (incorrectly) returned a promise.
+* **Improvement**. Colorize `{author}` placeholder in template list.
+* **Improvement**. Show profile name when hovering it in social message editor.
+* **Improvement**. Add unscheduled posts in the calendar.
+
+= 2.4.0 (January 9, 2023) =
+* **Mastodon Support**. Add Mastodon support.
+* **Bug Fix**. Ignore references with no URL to fix WSOD in Gutenberg.
+* **Bug Fix**. Support _User Submitted Posts_ to properly detect featured image when submitted posts are automatically published.
+
+= 2.3.6 (November 24, 2022) =
+* **Bug Fix**. Fix bug in BuddyBoss search results, which were empty when the plugin was active.
+* **Bug Fix**. Enable Nelio Content actions in Classic Editor when text is selected.
+
+= 2.3.5 (November 9, 2022) =
+* **WordPress 6.1 Compatibility**. Add compatibility with WordPress 6.1.
+* **Improvement**. Fix styles to improve the look-and-feel of Nelio Content’s walkthroughs.
+* **Bug Fix**. Improve user capability management in calendar to make sure users can’t do what they’re not allowed to do.
+
+= 2.3.4 (October 24, 2022) =
+**Bug Fix**. Improve query to check if site is multi author. Thanks, [David Anderson](https://wordpress.org/support/topic/very-inefficient-sql-query/).
+
+= 2.3.3 (September 19, 2022) =
+* **Bug Fix**. Hide no-reshare warning message when end date hasn’t come yet.
+
+= 2.3.2 (September 6, 2022) =
+* **Telegram Support**. Add Telegram support.
+* **New Feature**. Add setting to disable auto tutorials.
+* **Improvement**. Tweak quality checks to better describe social timeline status.
+* **Improvement**. Add “permalinks” attribute in AWS posts with `nelio_content_post_permalink_on_network` and `nelio_content_post_permalink_on_{$network}` filters to customize post permalinks used on social media.
+* **Improvement**. Use OAuth2 for Google Analytics authentication.
+* **Improvement**. Add pulse effect in multiple profile selector to catch user’s attention.
+* **Bug Fix**. Keep existing templates after adding a new one.
+* **Bug Fix**. Allow template selection in social message editor when template is valid for any post category.
+* **Bug Fix**. Hide permalink in LinkedIn when it’s the last part of the message.
+* **Bug Fix**. Tweak date component to make sure selected date is in range.
+* **Bug Fix**. Grant access to account page to admin users only.
+* **Bug Fix**. Preview and edit unscheduled posts in calendar.
+
+= 2.3.1 (July 25, 2022) =
+* **New Feature**. Add `the_nelio_content` to filter the post content.
+* **Improvement**. Hide incompatible placeholders in template editor.
+* **Bug Fix**. Prevent exit editor warning about unsaved changes when nothing changed.
+
+= 2.3.0 (July 18, 2022) =
+* **Improvement**. Refactor code to use TypeScript.
+* **TikTok Support**. Add TikTok support to share videos from WordPress.
+* **Instagram Support**. Add native Instagram support (i.e. no Buffer account required).
+* **Bug Fix**. Display correct product name in account screen.
+
+= 2.2.12 (June 20, 2022) =
+* **Bug Fix**. Fix “Google My Business” and “Reddit” connection endpoints to allow connecting new profiles of said networks.
+
+= 2.2.11 (June 3, 2022) =
+* **Bug Fix**. Compute tweet length correctly using npm package `twitter-text`.
+* **Bug Fix**. Show correct action in “Social Media” panel (Gutenberg only) when there are social profiles available.
+* **Bug Fix**. Show “Add tags” and “Add categories” actions in social message editor when related post type supports them.
+
+= 2.2.10 (May 25, 2022) =
+* **Improvement**. Remove unnecessary dependencies to `@wordpress/editor` and `@wordpress/edit-post`.
+* Tested up to WordPress 6.0.
+
+= 2.2.9 (May 19, 2022) =
+* **Improvement**. Refactor source code to use React hooks instead of Higher-Order Components.
+* **Improvement**. Use store names as provided by WordPress packages insted of hardcoded alternatives.
+* **Improvement**. Enforce user permissions related to social timeline in edit post screen.
+* **Improvement**. Add pause/resume social publication button in settings screen.
+* **Bug Fix**. Reschedule editorial tasks in Agenda’s calendar view.
+* **Bug Fix**. Maintain selected target in social message editor after adding an image while using the single profile selector component.
+* **Bug Fix**. Fix styling issue in social message timeline.
+* Update link to Nelio Content’s Terms and Conditions.
+* Bump minimum required WordPress version to 5.6.
+
+= 2.2.8 (April 11, 2022) =
+* **New Feature**. Add new setting to customize the duration of automatic social sharing to promote a post.
+* **Bug Fix**. Tweak `useEffect` callbacks to return either nothing or an “undo” function.
+* **Bug Fix**. Add safe guard to check if `$attach_id` in EFI hook is numeric.
+* **Bug Fix**. Remove post content from reshare algorithm to prevent API error.
+
+= 2.2.7 (March 30, 2022) =
+* **Bug Fix**. Fix JS undefined import in WordPress 5.5.x.
+* **Improvement**. Disable translation enqueuing on scripts that don’t have `wp-i18n` as a dependency.
+
+= 2.2.6 (March 14, 2022) =
+* **New Feature**. Customize automation sources used to generate automatic social messages.
+* **New Feature**. Add `nelio_content_default_automation_sources` filter to define default automation sources per post type.
+* **Improvement**. Remove unsupported social message placeholders based on shared post type.
+* **Improvement**. Show _Categories_ and _Tags_ settings on quick post editor if edited post type supports it.
+* **Bug Fix**. Fix undefined function bug in TinyMCE script.
+* **Bug Fix**. Load plugin scripts post types (other than _Post_) using the classic editor.
+* **Bug Fix**. Sort social messages chronologically in timeline after generating them.
+* **Bug Fix**. Remove items from the calendar after unscheduling their related post.
+
+= 2.2.5 (March 8, 2022) =
+* **Bug Fix**. Fix ReactDom warning.
+* **Bug Fix**. Fix JS error message when invoking `core/editor`’s `editPost` action.
+* **Bug Fix**. Enqueue TinyMCE scripts in the classic editor and Gutenberg, because it can show up in both.
+
+= 2.2.4 (March 7, 2022) =
+* **New Feature**. Add `{author}` placeholder in social messages.
+* **New Feature**. Add `nelio_content_post_author_name` filter to filter the name of a post’s author.
+* **Improvement**. Tweak styles in multi-value select to allow vertical growth when required.
+* **Bug Fix**. Fix issue while enqueuing TinyMCE scripts.
+
+= 2.2.3 (March 3, 2022) =
+* **Bug Fix**. Fix settings initialization issue that incorrectly checked if the settings object was already “ready” and resulted in a PHP notice when using default values.
+* **Bug Fix**. Tweak settings object to use empty array as default value in `calendar_post_types`.
+* **Bug Fix**. Enqueue TinyMCE script correctly to include Nelio Content’s action buttons in classic editor.
+* **Bug Fix**. Remove duplicated “Calendar” menu item in front-end admin bar.
+* **Bug Fix**. Fix “Clear Filters” action in calendar to properly clear post statuses too.
+* **Improvement**. Add new filter `nelio_content_available_post_types_setting` to customize which post types might be used in Nelio Content.
+* **Improvement**. Add walkthrough guides to get new users up to speed.
+
+= 2.2.2 (February 15, 2022) =
+* **Improvement**. Add support for recurring external events.
+* **Improvement**. Add template selector in social message editor.
+* **Improvement**. Extend post editor in calendar view to set categories and tags.
+* **Improvement**. Extend post editor in calendar view to browse related tasks and suggested references.
+* **Bug Fix**. Enable today and future dates when editing a post in the calendar.
+* **Bug Fix**. Reload tasks and social messages related to a post after rescheduling it using the post editor in calendar.
+
+= 2.2.1 (January 27, 2022) =
+* **WordPress 5.9 Compatibility**. Add compatibility with WordPress 5.9.
+* **Improvement**. Use WordPress’ time format in calendar.
+* **Bug Fix**. Fix bug in calendar filters with social messages.
+
+= 2.2.0 (January 12, 2022) =
+* **Pinterest support**. Add support for Pinterest.
+* **New Feature**. Add `{categories}` placeholder in social message and social template editors.
+* **New Feature**. Add filter in calendar to filter posts by status.
+* **Improvement**. Update message previews to match social networks.
+* **Improvement**. Add new option in plugin settings to include Open Graph and Twitter meta tags on your shared pages.
+* **Improvement**. Show post references in calendar view.
+* **Bug Fix**. Lock add image button in social message editor while saving.
+
+= 2.1.1 (November 30, 2021) =
+* **Bug Fix**. Preview post’s featured image in social message editor when editing Instagram messages.
+* **Bug Fix**. Preview featured images in post selector when EFI is enabled.
+* **Bug Fix**. Extract images from post content correctly.
+
+= 2.1.0 (November 22, 2021) =
+* **New Feature**. Add external events to the Editorial Calendar using an ICS URL.
+* **Bug Fix**. Update variable in loop to prevent infinite loop when site has less than 7 posts.
+
+= 2.0.25 (October 21, 2021) =
+* **Improvement**. Tweak _“Go Premium”_ buttons in the UI.
+* **Improvement**. Refactor auto-sharer component.
+
+= 2.0.24 (October 6, 2021) =
+* **Bug Fix**. Bug fix in database datetime ([view support thread](https://wordpress.org/support/topic/bug-in-plugin-19/)).
+
+= 2.0.23 (September 30, 2021) =
+* **Bug Fix**. Initialize plugin in Gutenberg correctly when editing new post.
+* **Bug Fix**. Compute tweet length correctly in social message editor (links are 23 chars long).
+
+= 2.0.22 (September 28, 2021) =
+* **New Feature**. Add cloud notifications.
+* **New Feature**. Add Agenda View in Editorial Calendar.
+* **Improvement**. Increase LinkedIn char count limit from 600 to 3,000.
+* **Bug Fix**. Transform post tags into social hashtags when using the `{tags}` placeholder.
+* **Bug Fix**. Fix an error in classic editor where the post shown in the UI wasn’t the post requested by the user.
+* **Bug Fix**. Properly set and get post’s auto share property in classic editor.
+
+= 2.0.21 (July 19, 2021) =
+* **WordPress 5.8 Support**. [Add `regenerator-runtime` dependency in WordPress 5.8+](https://make.wordpress.org/core/2021/06/28/miscellaneous-developer-focused-changes-in-wordpress-5-8/).
+* **Improvement.** Add filter `nelio_content_first_day_of_week_in_calendar` to change the first day of the week in the editorial calendar.
+
+= 2.0.20 (April 30, 2021) =
+* **Bug Fix**. Use proper sanitize function in REST API in subscription upgrade.
+
 = 2.0.19 (April 14, 2021) =
 * **Improvement**. Add placeholder selector in template editor dialog.
 * **Improvement**. Add new option to attach external images in social messages using their URLs.

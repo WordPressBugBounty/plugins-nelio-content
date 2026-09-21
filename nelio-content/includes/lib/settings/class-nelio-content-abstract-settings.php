@@ -214,7 +214,7 @@ abstract class Nelio_Content_Abstract_Settings {
 	/**
 	 * Returns the "name" of the settings script (as used in `wp_register_script`).
 	 *
-	 * @return string the "name" of the settings script (as used in `wp_register_script`).
+	 * @return non-empty-string the "name" of the settings script (as used in `wp_register_script`).
 	 *
 	 * @since  1.0.0
 	 */

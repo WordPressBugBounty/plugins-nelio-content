@@ -531,7 +531,7 @@ class Nelio_Content_Analytics_REST_Controller extends WP_REST_Controller {
 
 		$query  = new WP_Query( $args );
 		$result = array(
-			'ids'   => wp_list_pluck( $query->posts, 'ID' ),
+			'ids'   => array_map( fn( $p ) => is_int( $p ) ? $p : $p->ID, $query->posts ?? array() ),
 			'more'  => $page < $query->max_num_pages,
 			'total' => absint( $query->found_posts ),
 			'ppp'   => $ppp,

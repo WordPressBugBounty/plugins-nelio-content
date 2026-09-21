@@ -17,7 +17,7 @@ class Nelio_Content {
 	/**
 	 * Plugin’s main file.
 	 *
-	 * @var string
+	 * @var non-falsy-string
 	 */
 	public $plugin_file;
 
@@ -59,7 +59,7 @@ class Nelio_Content {
 	/**
 	 * Plugin’s REST namespace.
 	 *
-	 * @var string
+	 * @var non-falsy-string
 	 */
 	public $rest_namespace;
 

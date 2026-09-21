@@ -60,18 +60,17 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 
 		register_rest_route(
 			nelio_content()->rest_namespace,
-			'/author/(?P<id>[\d]+)',
+			'/author/batch',
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_author' ),
+					'callback'            => array( $this, 'get_authors' ),
 					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
 					'args'                => array(
-						'id' => array(
+						'ids' => array(
 							'required'          => true,
-							'type'              => 'number',
-							'validate_callback' => 'nelio_content_can_be_natural_number',
-							'sanitize_callback' => 'absint',
+							'type'              => 'string',
+							'sanitize_callback' => array( $this, 'sanitize_ids' ),
 						),
 					),
 				),
@@ -111,30 +110,24 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Retrieves the specified author.
+	 * Retrieves the specified authors.
 	 *
-	 * @param WP_REST_Request<array{id:int}> $request Full data about the request.
+	 * @param WP_REST_Request<array{ids:list<int>}> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response
 	 */
-	public function get_author( $request ) {
+	public function get_authors( $request ) {
 
-		/** @var int */
-		$author_id = $request['id'];
+		/** @var list<int> */
+		$author_ids = $request->get_param( 'ids' );
 
-		$author = $this->json( get_userdata( $author_id ) );
-		if ( ! $author ) {
-			return new WP_Error(
-				'author-not-found',
-				sprintf(
-					/* translators: %d: Author id. */
-					_x( 'Author %d not found.', 'text', 'nelio-content' ),
-					$author_id
-				)
-			);
-		}
+		$authors = array_map(
+			fn( $author_id ) => $this->json( get_userdata( $author_id ) ),
+			$author_ids
+		);
+		$authors = array_values( array_filter( $authors ) );
 
-		return new WP_REST_Response( $author, 200 );
+		return new WP_REST_Response( $authors, 200 );
 	}
 
 	/**
@@ -238,6 +231,23 @@ class Nelio_Content_Author_REST_Controller extends WP_REST_Controller {
 		 * @since 2.0.0
 		 */
 		return apply_filters( 'nelio_content_get_priority_authors', array() );
+	}
+
+	/**
+	 * Sanitizes a comma-separated list of IDs.
+	 *
+	 * @param mixed $ids Comma-separated list of IDs.
+	 *
+	 * @return list<int>
+	 */
+	public function sanitize_ids( $ids ) {
+
+		$ids = is_string( $ids ) ? explode( ',', $ids ) : array();
+		$ids = array_map( 'absint', $ids );
+		$ids = array_filter( $ids );
+		$ids = array_unique( $ids );
+
+		return array_values( $ids );
 	}
 
 	/**

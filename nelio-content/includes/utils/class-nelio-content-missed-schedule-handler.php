@@ -104,7 +104,7 @@ class Nelio_Content_Missed_Schedule_Handler {
 		// Null script for inline script to come afterward.
 		wp_register_script(
 			self::ACTION,
-			'',
+			' ',
 			array(),
 			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			null,

@@ -39,15 +39,6 @@ class EnumSchema extends Schema {
 			);
 		}
 
-		if ( ! is_string( $value ) && ! is_int( $value ) ) {
-			throw new \Exception(
-				sprintf(
-					'Expected string or int, but %s found.',
-					esc_html( gettype( $value ) )
-				)
-			);
-		}
-
 		if ( ! in_array( $value, $this->values, true ) ) {
 			throw new \Exception(
 				sprintf(

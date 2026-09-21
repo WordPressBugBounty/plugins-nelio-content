@@ -152,11 +152,8 @@ class Nelio_Content_External_Featured_Image_Helper {
 			return false;
 		}
 
-		if ( isset( $images[ $position ] ) ) {
-			return $images[ $position ];
-		} else {
-			return false;
-		}
+		/** @var array<string|false> $images */
+		return $images[ $position ] ?? false;
 	}
 
 	/**

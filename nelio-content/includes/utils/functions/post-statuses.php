@@ -73,7 +73,7 @@ function nelio_content_get_statuses() {
 			'icon'      => 'trash',
 			'colors'    => array(
 				'main'       => '#c44',
-				'background' => '#fee',
+				'background' => '#fdf8f8',
 			),
 			'core'      => true,
 			'postTypes' => 'all-types',
@@ -86,7 +86,7 @@ function nelio_content_get_statuses() {
 			'icon'      => 'drafts',
 			'colors'    => array(
 				'main'       => '#c44',
-				'background' => '#fee',
+				'background' => '#fdf8f8',
 			),
 			'core'      => true,
 			'postTypes' => 'all-types',
@@ -99,7 +99,7 @@ function nelio_content_get_statuses() {
 			'icon'      => 'pending',
 			'colors'    => array(
 				'main'       => '#f9d510',
-				'background' => '#fffdf1',
+				'background' => '#fffdf5',
 			),
 			'core'      => true,
 			'postTypes' => 'all-types',
@@ -112,7 +112,7 @@ function nelio_content_get_statuses() {
 			'icon'      => 'scheduled',
 			'colors'    => array(
 				'main'       => '#447d37',
-				'background' => '#e5f0e7',
+				'background' => '#f7faf6',
 			),
 			'core'      => true,
 			'postTypes' => 'all-types',
@@ -125,7 +125,7 @@ function nelio_content_get_statuses() {
 			'icon'      => 'published',
 			'colors'    => array(
 				'main'       => '#447d37',
-				'background' => '#e5f0e7',
+				'background' => '#f7faf6',
 			),
 			'core'      => true,
 			'postTypes' => 'all-types',
@@ -138,7 +138,7 @@ function nelio_content_get_statuses() {
 			'icon'      => 'notAllowed',
 			'colors'    => array(
 				'main'       => '#447d37',
-				'background' => '#e5f0e7',
+				'background' => '#f7faf6',
 			),
 			'core'      => true,
 			'postTypes' => 'all-types',

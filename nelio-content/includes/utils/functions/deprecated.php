@@ -197,10 +197,10 @@ function nc_make_settings_title( $title, $icon ) {
 /**
  * Registers a script loading the dependencies automatically.
  *
- * @param string                                          $handle    the script handle name.
- * @param string                                          $file_name the JS name of a script in $plugin_path/assets/dist/js/. Don't include the extension or the path.
- * @param array{strategy?: string, in_footer?: bool}|bool $args      (optional) An array of additional script loading strategies.
- *                                                        Otherwise, it may be a boolean in which case it determines whether the script is printed in the footer. Default: `false`.
+ * @param non-empty-string                                         $handle    the script handle name.
+ * @param string                                                   $file_name the JS name of a script in $plugin_path/assets/dist/js/. Don't include the extension or the path.
+ * @param array{strategy?: 'async'|'defer', in_footer?: bool}|bool $args      (optional) An array of additional script loading strategies.
+ *                                                                            Otherwise, it may be a boolean in which case it determines whether the script is printed in the footer. Default: `false`.
  *
  * @return void
  *
@@ -230,10 +230,10 @@ function nc_get_script_version( $file_name ) {
 /**
  * Enqueues a script loading the dependencies automatically.
  *
- * @param string                                          $handle    the script handle name.
- * @param string                                          $file_name the JS name of a script in $plugin_path/assets/dist/js/. Don't include the extension or the path.
- * @param array{strategy?: string, in_footer?: bool}|bool $args      (optional) An array of additional script loading strategies.
- *                                                                   Otherwise, it may be a boolean in which case it determines whether the script is printed in the footer. Default: `false`.
+ * @param non-empty-string                                         $handle    the script handle name.
+ * @param string                                                   $file_name the JS name of a script in $plugin_path/assets/dist/js/. Don't include the extension or the path.
+ * @param array{strategy?: 'async'|'defer', in_footer?: bool}|bool $args      (optional) An array of additional script loading strategies.
+ *                                                                            Otherwise, it may be a boolean in which case it determines whether the script is printed in the footer. Default: `false`.
  *
  * @return void
  *

@@ -55,6 +55,7 @@ class Nelio_Content_Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_assets' ), 5 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_editor_dialog_styles' ), 99 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_media_scripts' ), 99 );
+		add_action( 'admin_post_nc_create_billing_session', array( $this, 'open_billing_session' ) );
 		add_filter( 'option_page_capability_nelio-content_group', array( $this, 'get_settings_capability' ) );
 	}
 
@@ -276,6 +277,7 @@ class Nelio_Content_Admin {
 			'premiumStatus'           => $this->get_premium_status(),
 			'subscriptionPlan'        => nelio_content_get_subscription() ? nelio_content_get_subscription() : 'none',
 			'seriesTaxonomySlug'      => $settings->get( 'series_taxonomy_slug' ),
+			'version'                 => nelio_content()->plugin_version,
 		);
 
 		$site_settings = array(
@@ -371,6 +373,67 @@ class Nelio_Content_Admin {
 				);
 			}
 		}
+	}
+
+	/**
+	 * Opens a billing session from a chrome-less admin-post page.
+	 *
+	 * @return void
+	 */
+	public function open_billing_session() {
+
+		if ( ! nelio_content_can_current_user_manage_account() ) {
+			$this->die_on_billing_session_error( _x( 'You’re not allowed to manage this subscription.', 'user', 'nelio-content' ) );
+		}
+
+		$nonce = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) );
+		if ( ! wp_verify_nonce( $nonce, 'nc_create_billing_session_' . get_current_user_id() ) ) {
+			$this->die_on_billing_session_error( _x( 'Invalid billing session request.', 'text', 'nelio-content' ) );
+		}
+
+		$subscription = sanitize_text_field( wp_unslash( $_GET['subscription'] ?? '' ) );
+		if ( empty( $subscription ) ) {
+			$this->die_on_billing_session_error( _x( 'Invalid billing session request.', 'text', 'nelio-content' ) );
+		}
+
+		$url = Nelio_Content_Account_REST_Controller::instance()->get_billing_session_url( $subscription );
+		if ( is_wp_error( $url ) ) {
+			$this->die_on_billing_session_error( $url->get_error_message() );
+		}
+
+		nocache_headers();
+		header( 'Referrer-Policy: no-referrer' );
+		wp_redirect( $url ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
+		exit;
+	}
+
+	/**
+	 * Renders a minimal error page for billing session errors.
+	 *
+	 * @param string $message Error message.
+	 *
+	 * @return never
+	 */
+	private function die_on_billing_session_error( $message ) {
+
+		status_header( 403 );
+		nocache_headers();
+		header( 'Referrer-Policy: no-referrer' );
+		?>
+		<!doctype html>
+		<html <?php language_attributes(); ?>>
+			<head>
+				<meta charset="<?php bloginfo( 'charset' ); ?>" />
+				<meta name="viewport" content="width=device-width, initial-scale=1" />
+				<meta name="referrer" content="no-referrer" />
+				<title><?php echo esc_html_x( 'Billing Session Error', 'text', 'nelio-content' ); ?></title>
+			</head>
+			<body>
+				<p><?php echo esc_html( $message ); ?></p>
+			</body>
+		</html>
+		<?php
+		exit;
 	}
 
 	/**
@@ -681,6 +744,7 @@ class Nelio_Content_Admin {
 		 */
 		$new_permission = apply_filters( 'nelio_content_task_editor_permission', $permission, get_current_user_id() );
 
+		/** @var string $new_permission */
 		if ( in_array( $new_permission, array( 'all', 'post-type', 'none' ), true ) ) {
 			$permission = $new_permission;
 		}
@@ -769,7 +833,7 @@ class Nelio_Content_Admin {
 				: ".nelio-content-colored-post[data-post-type=\"{$type}\"]";
 			foreach ( $statuses as $status ) {
 				$result .= sprintf(
-					'%1$s{background-color:%2$s;border-top-color:%3$s}',
+					'%1$s{--bg-color:%2$s;--main-color:%3$s}',
 					"{$type_selector}[data-status=\"{$status['slug']}\"]",
 					$status['colors']['background'] ?? '',
 					$status['colors']['main'] ?? ''

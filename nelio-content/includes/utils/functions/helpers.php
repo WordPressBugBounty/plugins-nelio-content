@@ -148,10 +148,10 @@ function nelio_content_make_settings_title( $title, $icon ) {
 /**
  * Registers a script loading the dependencies automatically.
  *
- * @param string                                          $handle    the script handle name.
- * @param string                                          $file_name the JS name of a script in $plugin_path/assets/dist/js/. Don't include the extension or the path.
- * @param array{strategy?: string, in_footer?: bool}|bool $args      (optional) An array of additional script loading strategies.
- *                                                        Otherwise, it may be a boolean in which case it determines whether the script is printed in the footer. Default: `false`.
+ * @param non-empty-string                                         $handle    the script handle name.
+ * @param string                                                   $file_name the JS name of a script in $plugin_path/assets/dist/js/. Don't include the extension or the path.
+ * @param array{strategy?: 'async'|'defer', in_footer?: bool}|bool $args      (optional) An array of additional script loading strategies.
+ *                                                                            Otherwise, it may be a boolean in which case it determines whether the script is printed in the footer. Default: `false`.
  *
  * @return void
  *
@@ -165,7 +165,7 @@ function nelio_content_register_script_with_auto_deps( $handle, $file_name, $arg
 	}
 
 	$asset = ! empty( $asset ) && is_array( $asset ) ? $asset : array();
-	/** @var array{dependencies:list<string>, version:string} */
+	/** @var array{dependencies:list<non-empty-string>, version:string} */
 	$asset = wp_parse_args(
 		$asset,
 		array(
@@ -224,10 +224,10 @@ function nelio_content_get_script_version( $file_name ) {
 /**
  * Enqueues a script loading the dependencies automatically.
  *
- * @param string                                          $handle    the script handle name.
- * @param string                                          $file_name the JS name of a script in $plugin_path/assets/dist/js/. Don't include the extension or the path.
- * @param array{strategy?: string, in_footer?: bool}|bool $args      (optional) An array of additional script loading strategies.
- *                                                                   Otherwise, it may be a boolean in which case it determines whether the script is printed in the footer. Default: `false`.
+ * @param non-empty-string                                         $handle    the script handle name.
+ * @param string                                                   $file_name the JS name of a script in $plugin_path/assets/dist/js/. Don't include the extension or the path.
+ * @param array{strategy?: 'async'|'defer', in_footer?: bool}|bool $args      (optional) An array of additional script loading strategies.
+ *                                                                            Otherwise, it may be a boolean in which case it determines whether the script is printed in the footer. Default: `false`.
  *
  * @return void
  *

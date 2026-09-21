@@ -56,8 +56,9 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	 */
 	public function register_routes() {
 
+		$namespace = nelio_content()->rest_namespace;
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
 			'/site',
 			array(
 				array(
@@ -69,7 +70,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
 			'/site/free',
 			array(
 				array(
@@ -88,7 +89,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
 			'/site/use-license',
 			array(
 				array(
@@ -107,7 +108,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
 			'/site/remove-license',
 			array(
 				array(
@@ -126,7 +127,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
 			'/subscription/upgrade',
 			array(
 				array(
@@ -145,7 +146,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
 			'/subscription',
 			array(
 				array(
@@ -157,7 +158,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
 			'/subscription/uncancel',
 			array(
 				array(
@@ -169,7 +170,19 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
+			'/subscription/(?P<id>[\w\-]+)/billing-session',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'create_billing_session' ),
+					'permission_callback' => 'nelio_content_can_current_user_manage_account',
+				),
+			)
+		);
+
+		register_rest_route(
+			$namespace,
 			'/subscription/twitter-quota',
 			array(
 				array(
@@ -195,7 +208,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
 			'/subscription/sites',
 			array(
 				array(
@@ -207,7 +220,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
 			'/subscription/invoices',
 			array(
 				array(
@@ -219,7 +232,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
 			'/authentication-token',
 			array(
 				array(
@@ -231,7 +244,7 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			nelio_content()->rest_namespace,
+			$namespace,
 			'/products',
 			array(
 				array(
@@ -692,6 +705,88 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Creates a billing session for a subscription.
+	 *
+	 * @param WP_REST_Request<array{id:string}> $request Full data about the request.
+	 *
+	 * @return array{url:string}|WP_Error
+	 */
+	public function create_billing_session( $request ) {
+
+		$subscription = $request['id'];
+		$subscription = is_string( $subscription ) ? $subscription : '';
+		$location     = $this->get_billing_session_url( $subscription );
+		if ( is_wp_error( $location ) ) {
+			return $location;
+		}
+
+		return array( 'url' => $location );
+	}
+
+	/**
+	 * Gets the billing session URL for a subscription.
+	 *
+	 * @param string $subscription Subscription ID.
+	 *
+	 * @return string|WP_Error
+	 */
+	public function get_billing_session_url( $subscription ) {
+
+		$site = $this->get_site();
+		if ( is_wp_error( $site ) ) {
+			return $site; // @codeCoverageIgnore
+		}
+
+		$site_subscription = $site['subscription']['id'] ?? '';
+		if ( empty( $site_subscription ) || $subscription !== $site_subscription ) {
+			return new WP_Error(
+				'invalid-subscription',
+				_x( 'Unable to create a billing session for this subscription.', 'text', 'nelio-content' )
+			);
+		}
+
+		$data = array(
+			'method'      => 'GET',
+			'timeout'     => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+			'redirection' => 0,
+			'sslverify'   => ! nelio_content_does_api_use_proxy(),
+			'headers'     => array(
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
+				'accept'        => 'application/json',
+				'content-type'  => 'application/json',
+			),
+		);
+
+		$url      = nelio_content_get_api_url( '/fastspring/' . $subscription . '/url', 'wp' );
+		$response = wp_remote_request( $url, $data );
+
+		if ( is_wp_error( $response ) ) {
+			return new WP_Error(
+				'server-error',
+				_x( 'Unable to access Nelio Content’s API.', 'text', 'nelio-content' )
+			); // @codeCoverageIgnore
+		}
+
+		$location = wp_remote_retrieve_header( $response, 'location' );
+		$location = is_array( $location ) ? reset( $location ) : $location;
+		$location = is_string( $location ) ? $location : '';
+
+		if ( empty( $location ) ) {
+			$body     = nelio_content_extract_response_body( $response );
+			$location = is_array( $body ) && isset( $body['url'] ) && is_string( $body['url'] ) ? $body['url'] : '';
+		}
+
+		if ( empty( $location ) || ! wp_http_validate_url( $location ) ) {
+			return new WP_Error(
+				'server-error',
+				_x( 'Unable to create a billing session.', 'text', 'nelio-content' )
+			);
+		}
+
+		return $location;
+	}
+
+	/**
 	 * Obtains all sites connected to a subscription.
 	 *
 	 * @return WP_REST_Response|WP_Error
@@ -913,8 +1008,36 @@ class Nelio_Content_Account_REST_Controller extends WP_REST_Controller {
 			'sitesAllowed'         => ! empty( $sites_allowed ) ? $sites_allowed : 1,
 			'siteId'               => nelio_content_get_site_id(),
 			'subscription'         => $site['subscription']['id'],
-			'urlToManagePayments'  => nelio_content_get_api_url( '/fastspring/' . $site['subscription']['id'] . '/url', 'browser' ),
 		);
+	}
+
+	/**
+	 * Gets site data from AWS.
+	 *
+	 * @return TAWS_Site|WP_Error
+	 */
+	private function get_site() {
+
+		$data = array(
+			'method'    => 'GET',
+			'timeout'   => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+			'sslverify' => ! nelio_content_does_api_use_proxy(),
+			'headers'   => array(
+				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
+				'accept'        => 'application/json',
+				'content-type'  => 'application/json',
+			),
+		);
+
+		$url      = nelio_content_get_api_url( '/site/' . nelio_content_get_site_id(), 'wp' );
+		$response = wp_remote_request( $url, $data );
+		$response = nelio_content_extract_response_body( $response );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		/** @var TAWS_Site */
+		return $response;
 	}
 
 	/**

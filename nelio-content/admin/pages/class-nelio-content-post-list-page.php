@@ -524,7 +524,7 @@ class Nelio_Content_Post_List_Page {
 		if ( $can_edit_social ) {
 			$actions['nc-share'] = sprintf(
 				'<span class="nelio-content-share-post" data-post-id="%s" title="%s">%s</span>',
-				esc_attr( $post->ID ),
+				esc_attr( "$post->ID" ),
 				esc_attr( _x( 'Social Media', 'text', 'nelio-content' ) ),
 				esc_html( _x( 'Social Media', 'text', 'nelio-content' ) )
 			);
@@ -540,7 +540,7 @@ class Nelio_Content_Post_List_Page {
 		}
 
 		$custom_statuses = $this->get_post_custom_statuses( $post->post_type );
-		$custom_statuses = wp_list_pluck( $custom_statuses, 'slug' );
+		$custom_statuses = array_map( fn( $cs ) => $cs['slug'], $custom_statuses );
 		$custom_statuses = array_values( array_unique( $custom_statuses ) );
 		if ( in_array( $post->post_status, $custom_statuses, true ) ) {
 			$title        = _draft_or_post_title( $post );
@@ -570,7 +570,7 @@ class Nelio_Content_Post_List_Page {
 	 */
 	public function display_post_custom_states( $states, $post ) {
 		$custom_statuses       = $this->get_post_custom_statuses( $post->post_type );
-		$custom_statuses_slugs = wp_list_pluck( $custom_statuses, 'slug' );
+		$custom_statuses_slugs = array_map( fn( $cs ) => $cs['slug'], $custom_statuses );
 		$custom_statuses_slugs = array_values( array_unique( $custom_statuses_slugs ) );
 
 		if ( empty( $custom_statuses_slugs ) ) {

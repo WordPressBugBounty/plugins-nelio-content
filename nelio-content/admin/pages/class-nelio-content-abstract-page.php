@@ -131,7 +131,7 @@ abstract class Nelio_Content_Abstract_Page {
 
 		printf(
 			'<div class="%s wrap">',
-			esc_attr( $this->slug )
+			esc_attr( implode( ' ', array_unique( array( 'nelio-content-page-wrapper', $this->slug ) ) ) )
 		);
 
 		printf(

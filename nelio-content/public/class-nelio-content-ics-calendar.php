@@ -494,7 +494,7 @@ class Nelio_Content_Ics_Calendar {
 			}
 
 			$key   = 'tax_' . $taxonomy->name;
-			$value = implode( ', ', wp_list_pluck( $terms, 'name' ) );
+			$value = implode( ', ', array_map( fn( $t ) => $t->name, $terms ) );
 
 			// Used when editing editorial metadata and post meta.
 			if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {

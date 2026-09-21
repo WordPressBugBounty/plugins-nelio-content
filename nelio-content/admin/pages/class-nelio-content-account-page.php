@@ -35,8 +35,9 @@ class Nelio_Content_Account_Page extends Nelio_Content_Abstract_Page {
 
 		$script   = 'NelioContent.initPage( "nelio-content-account-page", %s );';
 		$settings = array(
-			'isSubscribed' => nelio_content_is_subscribed(),
-			'siteId'       => nelio_content_get_site_id(),
+			'billingSessionNonce' => wp_create_nonce( 'nc_create_billing_session_' . get_current_user_id() ),
+			'isSubscribed'        => nelio_content_is_subscribed(),
+			'siteId'              => nelio_content_get_site_id(),
 		);
 
 		wp_enqueue_style(

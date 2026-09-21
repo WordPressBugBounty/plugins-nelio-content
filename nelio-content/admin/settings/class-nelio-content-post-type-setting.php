@@ -66,6 +66,7 @@ class Nelio_Content_Post_Type_Setting extends Nelio_Content_Abstract_React_Setti
 
 		$value = isset( $input[ $this->name ] ) ? $input[ $this->name ] : '';
 		$value = is_array( $value ) ? $value : sanitize_text_field( $input[ $this->name ] );
+		/** @var array<string> $value */
 		$value = is_array( $value ) ? $value : explode( ',', $value );
 		$value = array_values( array_intersect( $value, $types ) );
 		if ( empty( $value ) && $this->props['isMandatory'] ) {
