@@ -60,6 +60,9 @@ class Nelio_Content_Install {
 
 		add_action( 'nelio_content_installed', array( $this, 'update_to_nc3_6' ), 10, 2 );
 		add_action( 'nelio_content_updated', array( $this, 'update_to_nc3_6' ), 10, 2 );
+
+		add_action( 'nelio_content_installed', array( $this, 'update_to_nc4_5_1' ), 10, 2 );
+		add_action( 'nelio_content_updated', array( $this, 'update_to_nc4_5_1' ), 10, 2 );
 	}
 
 	/**
@@ -360,6 +363,44 @@ class Nelio_Content_Install {
 		unset( $options['use_notifications'] );
 		update_option( 'nelio-content_settings', $options );
 	}//end update_to_nc3_6()
+
+	/** @var bool */
+	private $did_migrate_to_nc4_5_1 = false;
+
+	/**
+	 * Updates to Nelio Content 4.5.1.
+	 *
+	 * @param string $current_version Current version.
+	 * @param string $prev_version    Previous version.
+	 *
+	 * @return void
+	 */
+	public function update_to_nc4_5_1( $current_version, $prev_version ) {
+		if ( $this->did_migrate_to_nc4_5_1 ) {
+			return;
+		}
+		$this->did_migrate_to_nc4_5_1 = true;
+
+		if ( ! version_compare( $prev_version, '4.5.1', '<' ) ) {
+			return;
+		}
+
+		$this->migrate_reusable_message_post_type();
+	}//end update_to_nc4_5_1()
+
+	/**
+	 * Migrates reusable messages to their registered post type.
+	 *
+	 * @return void
+	 */
+	private function migrate_reusable_message_post_type() {
+		/** @var wpdb $wpdb */
+		global $wpdb;
+
+		$query = "UPDATE {$wpdb->posts} SET post_type = 'nc_reusable_message' WHERE post_type = 'nc_reusable_social'";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query( $query );
+	}
 
 	/**
 	 * Migrates post statuses.

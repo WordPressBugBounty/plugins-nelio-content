@@ -381,6 +381,9 @@ class Nelio_Content_Analytics_Helper {
 		if ( is_array( $social_data ) ) {
 			$social_data = array_filter( $social_data );
 			foreach ( $social_data as $network => $value ) {
+				if ( ! is_string( $network ) ) {
+					continue;
+				}
 				$pageviews[ $network ] = $raw ? strval( absint( $value ) ) : $this->human_number( absint( $value ) );
 			}
 		}

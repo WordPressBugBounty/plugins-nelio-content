@@ -12,6 +12,8 @@ use Nelio_Content\Zod\Zod as Z;
 
 class Nelio_Content_Reusable_Message {
 
+	const POST_TYPE = 'nc_reusable_message';
+
 	/**
 	 * The reusable message (post) ID.
 	 *
@@ -78,7 +80,7 @@ class Nelio_Content_Reusable_Message {
 
 		/** @var TReusable_Social_Message */
 		$parsed = $parsed['data'];
-		if ( ! empty( $parsed['id'] ) && 'nc_reusable_social' !== get_post_type( absint( $parsed['id'] ) ) ) {
+		if ( ! empty( $parsed['id'] ) && self::POST_TYPE !== get_post_type( absint( $parsed['id'] ) ) ) {
 			return new WP_Error( 'invalid-id', sprintf( 'Post %d is not a Reusable Message', $parsed['id'] ) );
 		}
 
@@ -102,7 +104,7 @@ class Nelio_Content_Reusable_Message {
 		$args = array(
 			'post_content' => base64_encode( $body ),
 			'post_excerpt' => $this->attrs['textComputed'] ?? '',
-			'post_type'    => 'nc_reusable_social',
+			'post_type'    => self::POST_TYPE,
 			'post_status'  => 'draft',
 		);
 

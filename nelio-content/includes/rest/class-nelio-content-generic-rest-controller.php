@@ -550,6 +550,7 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 			"DELETE FROM $wpdb->posts
 			WHERE post_type IN (
 				'nc_reference',
+				'nc_reusable_message',
 				'nc_reusable_social',
 				'nc_future_action',
 				'nc_task_preset'

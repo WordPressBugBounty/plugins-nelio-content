@@ -78,12 +78,24 @@ function nelio_content_generate_api_auth_token( $mode = 'regular' ) {
 		return $token;
 	}
 
-	// If we don't, let's see if there's a transient.
+	// If we don't, if we have it as a transient, use it as long as it hasn’t expired yet.
 	$transient_name = 'nc_api_token_' . get_current_user_id();
 	$token          = get_transient( $transient_name );
 
 	if ( ! empty( $token ) && is_string( $token ) ) {
-		return $token;
+		$parts    = explode( '.', $token );
+		$payload  = strtr( $parts[1] ?? '', '-_', '+/' );
+		$payload .= str_repeat( '=', ( 4 - strlen( $payload ) % 4 ) % 4 );
+		$payload  = base64_decode( $payload, true );
+		if ( false !== $payload ) {
+			$payload = json_decode( $payload, true );
+			if ( is_array( $payload ) && isset( $payload['exp'] ) ) {
+				$expiration = absint( $payload['exp'] ) - 30 * MINUTE_IN_SECONDS;
+				if ( time() < $expiration ) {
+					return $token;
+				}
+			}
+		}
 	}
 
 	// If we don't have a token, let's get a new one.

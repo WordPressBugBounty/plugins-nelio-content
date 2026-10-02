@@ -55,7 +55,7 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_reusable_message' ),
-					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
+					'permission_callback' => array( $this, 'can_current_user_update_reusable_message_from_request' ),
 					'args'                => array(
 						'message' => array(
 							'required'          => true,
@@ -67,7 +67,7 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'remove_reusable_message' ),
-					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
+					'permission_callback' => array( $this, 'can_current_user_delete_reusable_message_from_request' ),
 					'args'                => array(
 						'id' => array(
 							'required'          => true,
@@ -105,6 +105,76 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 	}
 
 	/**
+	 * Whether the current user can update the reusable message in the request.
+	 *
+	 * @param WP_REST_Request<array{message:mixed}> $request Request.
+	 *
+	 * @return true|WP_Error
+	 */
+	public function can_current_user_update_reusable_message_from_request( $request ) {
+		if ( ! nelio_content_can_current_user_use_plugin() ) {
+			return new WP_Error(
+				'rest_forbidden',
+				_x( 'You are not allowed to edit reusable messages.', 'text', 'nelio-content' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$message = $request->get_param( 'message' );
+		$id      = $message instanceof Nelio_Content_Reusable_Message
+			? $message->ID
+			: ( is_array( $message ) && isset( $message['id'] ) ? absint( $message['id'] ) : 0 );
+
+		if ( empty( $id ) ) {
+			return current_user_can( 'create_nc_reusable_messages' ) // phpcs:ignore WordPress.WP.Capabilities.Unknown
+				? true
+				: new WP_Error(
+					'rest_forbidden',
+					_x( 'You are not allowed to create reusable messages.', 'text', 'nelio-content' ),
+					array( 'status' => 403 )
+				);
+		}
+
+		return $this->can_current_user_update_reusable_message( $id )
+			? true
+			: new WP_Error(
+				'rest_forbidden',
+				_x( 'You are not allowed to edit this message.', 'text', 'nelio-content' ),
+				array( 'status' => 403 )
+			);
+	}
+
+	/**
+	 * Whether the current user can delete the reusable message in the request.
+	 *
+	 * @param WP_REST_Request<array{id:int}> $request Request.
+	 *
+	 * @return true|WP_Error
+	 */
+	public function can_current_user_delete_reusable_message_from_request( $request ) {
+		$message_id = absint( $request->get_param( 'id' ) );
+		if ( Nelio_Content_Reusable_Message::POST_TYPE !== get_post_type( $message_id ) ) {
+			return new WP_Error(
+				'invalid-reusable-message',
+				sprintf(
+					/* translators: %s: Post ID. */
+					_x( 'Item #%s is not a reusable social message.', 'text', 'nelio-content' ),
+					$message_id
+				),
+				array( 'status' => 404 )
+			);
+		}
+
+		return $this->can_current_user_delete_reusable_message( $message_id )
+			? true
+			: new WP_Error(
+				'rest_forbidden',
+				_x( 'You are not allowed to delete this message.', 'text', 'nelio-content' ),
+				array( 'status' => 403 )
+			);
+	}
+
+	/**
 	 * Callback to validate reusable social message.
 	 *
 	 * @param array<mixed> $message Message.
@@ -135,11 +205,18 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 	 *
 	 * @param WP_REST_Request<array{message:Nelio_Content_Reusable_Message}> $request Request.
 	 *
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_reusable_message( $request ) {
 		$message = $request->get_param( 'message' );
 		assert( $message instanceof Nelio_Content_Reusable_Message );
+		if ( ! empty( $message->ID ) && ! $this->can_current_user_update_reusable_message( $message->ID ) ) {
+			return new WP_Error(
+				'rest_forbidden',
+				_x( 'You are not allowed to edit this message.', 'text', 'nelio-content' ),
+				array( 'status' => 403 )
+			);
+		}
 		$message->save();
 		return new WP_REST_Response( $message->json(), 200 );
 	}
@@ -153,20 +230,25 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 	 */
 	public function remove_reusable_message( $request ) {
 		$message_id = absint( $request->get_param( 'id' ) );
-		if ( 'nc_reusable_social' !== get_post_type( $message_id ) ) {
+		if ( Nelio_Content_Reusable_Message::POST_TYPE !== get_post_type( $message_id ) ) {
 			return new WP_Error(
+				'invalid-reusable-message',
 				sprintf(
-				/* translators: %s: Post ID. */
-					_x(
-						'Item #%s is not a reusable social message.',
-						'text',
-						'nelio-content'
-					),
+					/* translators: %s: Post ID. */
+					_x( 'Item #%s is not a reusable social message.', 'text', 'nelio-content' ),
 					$message_id
-				)
+				),
+				array( 'status' => 404 )
 			);
 		}
-		wp_delete_post( $message_id );
+		if ( ! $this->can_current_user_delete_reusable_message( $message_id ) ) {
+			return new WP_Error(
+				'rest_forbidden',
+				_x( 'You are not allowed to delete this message.', 'text', 'nelio-content' ),
+				array( 'status' => 403 )
+			);
+		}
+		wp_delete_post( $message_id, true );
 		return new WP_REST_Response( true, 200 );
 	}
 
@@ -220,7 +302,7 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 		$wpq = new WP_Query(
 			array(
 				'fields'         => 'ids',
-				'post_type'      => 'nc_reusable_social',
+				'post_type'      => Nelio_Content_Reusable_Message::POST_TYPE,
 				'posts_per_page' => $count,
 				// phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
 				'post__not_in'   => $excluded_ids,
@@ -237,5 +319,45 @@ class Nelio_Content_Reusable_Message_REST_Controller extends WP_REST_Controller 
 			'messages' => array_values( $messages ),
 			'more'     => 1 < $wpq->max_num_pages,
 		);
+	}
+
+	/**
+	 * Whether the current user can update the given reusable message.
+	 *
+	 * @param int $message_id Message ID.
+	 *
+	 * @return boolean
+	 */
+	private function can_current_user_update_reusable_message( $message_id ) {
+		$message = get_post( $message_id );
+		if ( ! $message || Nelio_Content_Reusable_Message::POST_TYPE !== $message->post_type ) {
+			return false;
+		}
+
+		if ( ! current_user_can( 'edit_post', $message_id ) ) {
+			return false;
+		}
+
+		return absint( $message->post_author ) === get_current_user_id() || nelio_content_can_current_user_manage_plugin();
+	}
+
+	/**
+	 * Whether the current user can delete the given reusable message.
+	 *
+	 * @param int $message_id Message ID.
+	 *
+	 * @return boolean
+	 */
+	private function can_current_user_delete_reusable_message( $message_id ) {
+		$message = get_post( $message_id );
+		if ( ! $message || Nelio_Content_Reusable_Message::POST_TYPE !== $message->post_type ) {
+			return false;
+		}
+
+		if ( ! current_user_can( 'delete_post', $message_id ) ) {
+			return false;
+		}
+
+		return absint( $message->post_author ) === get_current_user_id() || nelio_content_can_current_user_manage_plugin();
 	}
 }

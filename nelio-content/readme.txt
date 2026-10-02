@@ -5,7 +5,7 @@ Tags: editorial calendar, social media, social media scheduler, auto post, conte
 Requires PHP: 7.4
 Requires at least: 6.7
 Tested up to: 7.1
-Stable tag: 4.5.0
+Stable tag: 4.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,12 @@ Perfect for **bloggers, marketers, agencies, and multi-author sites** that need 
 * Do you have a support request? [SUPPORT FORUM](https://wordpress.org/support/plugin/nelio-content/)
 * What do our users say about us? [REVIEWS](https://wordpress.org/support/plugin/nelio-content/reviews/)
 * Are you interested in the premium version? [ABOUT NELIO CONTENT PREMIUM](https://neliosoftware.com/content/pricing/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content)
+
+**Use of Nelio Content's service**
+
+Nelio Content connects your WordPress site with Nelio Software's external service to provide social media scheduling and auto-posting, social profile connections, social automations, analytics-related integrations, and account or subscription management. The service handles communication with the supported social networks and other integrations so your scheduled messages can be published at the right time.
+
+Some editorial features, such as the calendar and post planning tools, run inside WordPress. Service-backed features require connecting your site to Nelio Content and may send the information needed to provide those features to Nelio Software and the third-party services you choose to connect. Please review the [Nelio Content Terms and Conditions](https://neliosoftware.com/legal-information/nelio-content-terms-conditions/) and [Privacy Policy](https://neliosoftware.com/privacy-policy-cookies/) for details.
 
 **Supported Networks** for cross-posting
 
@@ -286,6 +292,13 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 
 == Changelog ==
+
+= 4.5.1 (October 2, 2026) =
+* Fix authorization checks when editing or deleting reusable social messages.
+* Fix external calendar refresh so newly added calendars display their events without reloading the page.
+* Improve asset loading in the calendar and social message editor.
+* Check cached authentication token expiration before reuse to prevent 403 errors when accessing Nelio Content’s API.
+* Migrate reusable social messages to the registered post type.
 
 = 4.5.0 (September 21, 2026) =
 * Add a search bar to quickly find content in the editorial calendar.
@@ -700,5 +713,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 4.5.0 (September 21, 2026) =
-Redesigned calendar, LINE support and performance improvements.
+= 4.5.1 (October 2, 2026) =
+Several updates and performance improvements.
