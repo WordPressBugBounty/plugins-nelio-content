@@ -5,29 +5,31 @@ Tags: editorial calendar, social media, social media scheduler, auto post, conte
 Requires PHP: 7.4
 Requires at least: 6.7
 Tested up to: 7.1
-Stable tag: 4.5.1
+Stable tag: 4.5.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Editorial calendar and social media auto-posting for WordPress. Plan content, schedule shares, and grow reach with powerful automations.
+WordPress editorial calendar and social media auto-posting plugin. Schedule posts, share to social networks, and streamline content workflows.
 
 == Description ==
 
-**PLAN, WRITE, PUBLISH, AND DISTRIBUTE CONTENT WITHOUT LEAVING WORDPRESS – THE EDITORIAL CALENDAR WORDPRESS SHOULD HAVE SHIPPED WITH**
+**Plan your WordPress content and automate social media sharing from one editorial calendar.**
 
-[Nelio Content](https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content) is your **editorial calendar** and **social media scheduler** in one plugin. Create content, **auto post to Facebook, LinkedIn, Instagram, X**, and more, and keep your pipeline full with helpful **automations**. Save hours each week, stay consistent, and grow traffic with every publish.
+[Nelio Content](https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content) combines a **WordPress editorial calendar**, **social media scheduling and auto-posting**, and **content workflow tools**. Plan and schedule blog posts, share content to Facebook Pages, LinkedIn, Instagram, Pinterest, Threads, Bluesky, and other supported networks, and keep editorial work organized without switching between separate tools.
 
-**Why teams choose Nelio Content**
+Whether you publish your own blog or coordinate a multi-author WordPress site, Nelio Content helps you manage the process from draft to publication and promotion.
 
-* **Editorial calendar** with drag-and-drop scheduling for posts, tasks, and social shares
-* **Social media auto-posting & re-sharing** (share on publish and over time)
-* **Content assistant & checklists** to improve quality while you write
-* **Integrated analytics** and quick re-promote-top-posts actions
-* **Native WordPress** experience—no juggling separate tools
+**Why use Nelio Content?**
 
-Perfect for **bloggers, marketers, agencies, and multi-author sites** that need a reliable **WordPress editorial calendar** and a **social media scheduler** that just works.
+* **Plan WordPress posts visually.** Drag and drop posts in the editorial calendar, track unscheduled ideas, and organize your publishing schedule.
+* **Schedule and auto-post to social media.** Prepare messages for connected profiles, share when a post is published, and schedule additional promotion.
+* **Keep posts and social messages in sync.** Adjust your content schedule without manually rebuilding every related social message.
+* **Improve your editorial workflow.** Use content checklists and, with Premium, editorial tasks, comments, a content board, and other collaboration features.
+* **Review content performance.** Bring supported Google Analytics and social engagement metrics into your WordPress workflow.
 
-🔗 HELPFUL LINKS:
+**Built for bloggers, WordPress publishers, marketing teams, and agencies** who want to manage editorial planning and social distribution in one place.
+
+**Helpful Links**
 
 * Do you need help getting started? [HELP DOCUMENTATION](https://neliosoftware.com/content/help/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content)
 * Do you have a support request? [SUPPORT FORUM](https://wordpress.org/support/plugin/nelio-content/)
@@ -40,9 +42,9 @@ Nelio Content connects your WordPress site with Nelio Software's external servic
 
 Some editorial features, such as the calendar and post planning tools, run inside WordPress. Service-backed features require connecting your site to Nelio Content and may send the information needed to provide those features to Nelio Software and the third-party services you choose to connect. Please review the [Nelio Content Terms and Conditions](https://neliosoftware.com/legal-information/nelio-content-terms-conditions/) and [Privacy Policy](https://neliosoftware.com/privacy-policy-cookies/) for details.
 
-**Supported Networks** for cross-posting
+**Supported Social Networks and Integrations**
 
-* **X (formerly Twitter)** – Post to your X account
+* **X (formerly Twitter)** – Post to your X account (requires the applicable X posting quota; see the plan and quota details)
 * **Facebook** – Post to your Facebook pages
 * **LinkedIn** – Post to your profile or company page
 * **Instagram** – Post to your Business Account
@@ -51,7 +53,7 @@ Some editorial features, such as the calendar and post planning tools, run insid
 * **Tumblr** – Post to your blog with canonical-backlinks to your original post
 * **Telegram** – Post to your Telegram groups and Telegram channels
 * **Bluesky** – Post to your Bluesky account
-* **Google My Business** – Post to your Google My Business Location
+* **Google Business Profile** – Post to your business location
 * **Blogger** – Post to your blog with backlinks to your original post
 * **Pinterest** – Post to all your different Pinboards
 * **Reddit** – Post to your subreddits
@@ -68,18 +70,16 @@ Some editorial features, such as the calendar and post planning tools, run insid
 * **Buffer** – Share your content to your connected Buffer profiles
 * **Hootsuite** – Share your content to your connected Hootsuite profiles
 
-Connecting your social media networks is a breeze with Nelio Content. Integrate directly through the plugin or use Buffer or Hootsuite for added flexibility.
+Connect supported social networks directly through Nelio Content or use integrations such as Buffer and Hootsuite. Available publication formats and account requirements vary by network.
 
 [youtube https://www.youtube.com/watch?v=7SzwJQ55jus]
 
-Maximize the potential of your blog with our complete set of powerful features. Focus on the content that works best with its **integrated analytics** while saving tons of time thanks to the impressive **editorial calendar**.
-
-**Download Nelio Content for free** today to optimize your WordPress site and social media (see what’s [included in the free version](https://wordpress.org/plugins/nelio-content/faq/)). For even more features and enhanced support, [upgrade to Nelio Content Premium](https://neliosoftware.com/content/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content).
+**Start with Nelio Content Free** to organize your WordPress editorial calendar and share posts to supported social networks, subject to the free plan's profile and automation limits. Choose [Nelio Content Premium](https://neliosoftware.com/content/pricing/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content) when you need more social profiles, advanced social automation, and collaboration tools.
 
 
 = What You Can Do with Nelio Content =
 
-Nelio Content is an essential tool for content creators, offering powerful features to streamline and enhance your content strategy.
+Explore the editorial planning, social scheduling, and content promotion tools included in Nelio Content.
 
 **NELIO CONTENT FREE**
 
@@ -101,7 +101,7 @@ View the RSS feeds of your favorite blogs directly in your WordPress so you can 
 * Create new draft posts using feed content as references.
 * Suggest helpful links to authors as references.
 
-Our Content Assistant offers actionable recommendations to improve your posts. It analyzes your content to ensure it’s optimized for SEO and reader engagement, making your blog stand out:
+The Content Assistant provides a writing checklist and tools to prepare WordPress posts and their social promotion:
 
 * Use external image URLs for featured images.
 * Check post quality as you write it.
@@ -118,7 +118,7 @@ Use [Social Automations](http://neliosoftware.com/content/social-automations/?ut
 * Share on up to 3 social networks, including **X (formerly Twitter)**, **Facebook**, **LinkedIn**, **Instagram**, **Mastodon**, **Telegram**, **Pinterest**, **Reddit** or **Threads**, to name a few.
 * Use popular link shortener services: Bitly, TinyURL, Rebrandly, YOURLS, Shlink, Short.io, T.ly, and Polr.
 
-Nelio Content integrates essential metrics that you can use to refine your content strategy and boost engagement.
+Bring supported content and social metrics into WordPress to review performance and decide what to promote again:
 
 * View key statistics on your WordPress dashboard.
 * Track pageviews from Google Analytics.
@@ -158,16 +158,16 @@ Advanced tools for automatic content promotion:
 * Reshare automatically top old content on social networks.
 * Create multiple social automation templates with #hashtags, @handles, and emojis.
 * Select different versions of the same image to share in each social network, each with a different size.
-* Customize publication and resharing frecuency.
+* Customize publication and resharing frequency.
 * Configure multiple automation group settings for content-sharing.
 
 Unlike generic social tools, Nelio Content connects your editorial calendar and social media automation directly to your WordPress posts.
 
-By using Nelio Content, you can effectively plan, create, optimize, and promote your content, saving time and increasing your reach.
+Manage the steps from planning and writing to publishing and re-sharing your WordPress content in one workflow.
 
-= Trusted by thousands of WordPress sites and featured by respected WordPress publications =
+= Reviews and Real-World Examples =
 
-If you’re not convinced yet, take a look at what others say about Nelio Content.
+Read third-party reviews and an example of how publishers use Nelio Content:
 
 * [A Nelio Content Review](https://digisavvy.com/2022/03/21/nelio-content-review/) (digisavvy.com)
 * [Nelio Content Automates and Assists with Content Creation and Social Marketing](https://wpmayor.com/nelio-content-automates-assists-content-creation-social-marketing/) (wpmayor.com)
@@ -206,17 +206,19 @@ You’ll find a [detailed and comprehensive guide](https://neliosoftware.com/con
 
 Please report security bugs found in the source code of the Nelio Content plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/66a66277-871a-4118-a385-d56b4d81339d). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
-= Is Nelio Content a free plugin? =
+= What is included in Nelio Content Free? =
 
-Yes. Nelio Content can be used completely for free using the version available at WordPress.org which provides essential features for content creation and social media management. However, to access advanced capabilities and unlock its full potential, you’ll need to purchase a [premium plan](https://neliosoftware.com/content/pricing/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content).
+Nelio Content Free includes the editorial calendar, content planning tools, and social sharing with free-plan limits. The free version lets you share to up to **3 supported social networks** and includes basic social automations. For example, it can publish one automatically generated message per connected social profile when a WordPress post is published.
 
-With any [premium plan](https://neliosoftware.com/content/pricing/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content) you can connect up to 15 social profiles from any of the integrated social networks.
+Premium adds advanced automation and editorial collaboration features, and supports **up to 15 social profiles** under the applicable plan. See the [pricing and plan details](https://neliosoftware.com/content/pricing/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content) before choosing a subscription.
+
+= Can Nelio Content publish WordPress posts automatically to social media? =
+
+Yes. Connect supported social profiles and configure social messages or automation templates for your WordPress content. Nelio Content can publish social messages when your post is published and schedule additional messages, subject to your plan's limits and each network's requirements.
 
 = What are Social Automations? =
 
-Social Automations is Nelio Content’s powerful feature that revolutionizes social media promotion.
-
-After you create a new post, Nelio Content automatically analyzes its content to extract the most relevant sentences. It then generates a series of unique social media messages tailored to promote your post effectively across platforms. Unlike basic Social Templates, these messages are crafted using the specific content of your post, maximizing engagement and reach.
+Social Automations help generate and schedule promotional messages using your WordPress post content, highlights, excerpts, and reusable templates. Premium adds more flexible timelines, resharing, and automation settings.
 
 = Can Nelio Content auto post to Facebook from WordPress? =
 
@@ -224,7 +226,7 @@ Yes. Connect your Facebook Page and Nelio Content can auto-post when you publish
 
 = Can I schedule Instagram posts from WordPress? =
 
-Yes. Connect your Instagram Business Account to schedule Instagram posts (images and videos). You can pick different media per network and preview before publishing.
+Yes. Connect a supported Instagram Business Account to prepare and schedule posts. Supported media formats and publishing options depend on Instagram account requirements and network limitations.
 
 = Does it support LinkedIn Company Pages? =
 
@@ -232,7 +234,7 @@ Yes. You can auto post to LinkedIn Profiles and Company Pages. Templates let you
 
 = Can I re-share old posts automatically? =
 
-Yes. Use Automations to create recurring timelines that re-share evergreen content across your social profiles.
+Yes. Premium social automations can generate and schedule messages to re-share previously published WordPress content.
 
 = Does it support Threads, Mastodon, Pinterest, TikTok, Telegram, Slack, Discord, VK, and Bluesky? =
 
@@ -246,17 +248,17 @@ Yes. Nelio Content supports Gutenberg and custom post types; you can manage them
 
 Yes but with some limitations. With the free version you have a unique set of social templates that can be used for automatic message generation. Only one message per connected social profile will be published at the same time as the post is.
 
-= How is this different from Buffer/Hootsuite? =
+= How is Nelio Content different from Buffer or Hootsuite? =
 
-Those are great social tools. Nelio Content lives in WordPress, tying your editorial calendar, posts, tasks, and social sharing together—so planning and promotion happen in one place. (You can still connect Buffer/Hootsuite if you prefer.)
+Nelio Content connects social publishing with your WordPress posts and editorial calendar. You can plan posts and related social messages together, use WordPress content in automations, and manage your editorial workflow inside WordPress. Buffer and Hootsuite integrations are also available.
 
-= Does it auto-add UTM parameters for analytics? =
+= Can I add UTM parameters for analytics? =
 
-Yes. You can add custom URL parameters so shares are tracked in Google Analytics.
+Yes. You can configure custom URL parameters, including UTM parameters, for links in social messages and analyze the resulting traffic in your analytics setup.
 
-= What about multi-author workflows? =
+= Can I use Nelio Content with a team or multiple authors? =
 
-Use tasks, comments, custom statuses, and the **content board** to coordinate who’s doing what and track progress.
+Yes. The editorial calendar supports multi-author planning. Premium adds editorial tasks, comments, and a content board for tracking work across different editorial stages.
 
 = How fast is your support? =
 
@@ -272,7 +274,7 @@ Yes, you can cancel your subscription at any time. You can do it from the WordPr
 
 = More questions? =
 
-If you have more questions, just take a look at our [Knowledge Base](https://neliosoftware.com/content/help/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content), where you’ll find all the information you need. If we earned your trust, a short ⭐⭐⭐⭐⭐ review really helps others find us and keeps development moving. Thank you!
+If you have more questions, visit our [Knowledge Base](https://neliosoftware.com/content/help/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content). If you have used Nelio Content, you can also share your honest experience in a [WordPress.org review](https://wordpress.org/support/plugin/nelio-content/reviews/).
 
 
 == Screenshots ==
@@ -281,7 +283,7 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 2. **Focus on what truly matters.** The Editorial Calendar connects every related element, so you instantly see which social messages and tasks belong to each post.
 3. **Social Sharing.** Connect all your profiles to Nelio Content and streamline social sharing from your WordPress dashboard.
 4. **Timeline of Scheduled Social Messages.** Easily view and add social messages for any post with a clear, intuitive timeline.
-5. **Integrated Social Message Editor.** Pick multiple profiles, craft your message, preview it, and schedule automatic posting in seconds.
+5. **Integrated Social Message Editor.** Select social profiles, write and preview your message, and schedule publishing from WordPress.
 6. **Automation Groups.** Define your own rules for social sharing using automation groups, and effortlessly create templates adapted to every channel.
 7. **Google Analytics and Social Media Metrics.** Get valuable performance data from Google Analytics and your social channels right inside your dashboard, and instantly promote your most engaging content.
 8. **Editorial Tools.** Boost productivity with a full suite of features — tasks, comments, quality analysis, notifications, and references designed for editors.
@@ -293,6 +295,9 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Changelog ==
 
+= 4.5.2 (October 20, 2026) =
+* Minor fixes
+
 = 4.5.1 (October 2, 2026) =
 * Fix authorization checks when editing or deleting reusable social messages.
 * Fix external calendar refresh so newly added calendars display their events without reloading the page.
@@ -301,7 +306,6 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 * Migrate reusable social messages to the registered post type.
 
 = 4.5.0 (September 21, 2026) =
-* Add a search bar to quickly find content in the editorial calendar.
 * Add a text filter to the editorial calendar to search visible items by title, author, or category, including unscheduled posts.
 * Add profile labels to group profiles for quick selection and deselection in the social message editor.
 * Add LINE support.
@@ -713,5 +717,5 @@ If you have more questions, just take a look at our [Knowledge Base](https://nel
 
 == Upgrade Notice ==
 
-= 4.5.1 (October 2, 2026) =
-Several updates and performance improvements.
+= 4.5.2 (October 20, 2026) =
+Minor fixes.

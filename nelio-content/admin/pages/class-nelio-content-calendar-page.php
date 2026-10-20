@@ -28,6 +28,7 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 	// @Overrides
 	protected function add_page_specific_hooks() {
 
+		$this->handle_review_notice();
 		remove_all_filters( 'admin_notices' );
 
 		add_filter( 'admin_footer_text', '__return_empty_string', 99 );
@@ -39,6 +40,7 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 
 		$script   = 'NelioContent.initPage( "nelio-content-page", %s );';
 		$settings = array(
+			'reviewNoticeUrl'                => $this->get_review_notice_url(),
 			'icsLinks'                       => $this->get_ics_links(),
 			'focusDay'                       => $this->get_focus_day(),
 			'numberOfNonCollapsableMessages' => $this->get_number_of_non_collapsable_messages(),
@@ -61,6 +63,51 @@ class Nelio_Content_Calendar_Page extends Nelio_Content_Abstract_Page {
 			sprintf(
 				$script,
 				wp_json_encode( $settings )
+			)
+		);
+	}
+
+	/**
+	 * Permanently dismisses the review request for the current user.
+	 *
+	 * @return void
+	 */
+	private function handle_review_notice() {
+		if ( empty( $_GET['nc_review_notice'] ) || 'dismiss' !== sanitize_text_field( wp_unslash( $_GET['nc_review_notice'] ) ) ) {
+			return;
+		}
+
+		if ( ! is_user_logged_in() || ! nelio_content_can_current_user_use_plugin() ) {
+			return;
+		}
+
+		check_admin_referer( 'nc_review_notice' );
+		update_user_meta( get_current_user_id(), '_nc_review_notice_dismissed', true );
+		wp_safe_redirect( remove_query_arg( array( 'nc_review_notice', '_wpnonce' ) ) );
+		exit;
+	}
+
+	/**
+	 * Gets the dismissal URL once the installation is at least fourteen days old.
+	 *
+	 * @return string|false
+	 */
+	private function get_review_notice_url() {
+		$installation_time = absint( get_option( 'nc_installation_time', 0 ) );
+		if (
+			! is_user_logged_in() ||
+			! nelio_content_can_current_user_use_plugin() ||
+			! $installation_time ||
+			time() - $installation_time < 14 * DAY_IN_SECONDS ||
+			get_user_meta( get_current_user_id(), '_nc_review_notice_dismissed', true )
+		) {
+			return false;
+		}
+
+		return add_query_arg(
+			array(
+				'nc_review_notice' => 'dismiss',
+				'_wpnonce'         => wp_create_nonce( 'nc_review_notice' ),
 			)
 		);
 	}

@@ -88,6 +88,9 @@ class Nelio_Content_Install {
 	 */
 	public function maybe_update() {
 
+		// Existing installations have no local installation date. Start a conservative waiting period.
+		add_option( 'nc_installation_time', time(), '', false );
+
 		$last_version = get_option( 'nc_version' );
 		$this_version = nelio_content()->plugin_version;
 		if ( defined( 'IFRAME_REQUEST' ) || ( $last_version === $this_version ) ) {
@@ -114,6 +117,8 @@ class Nelio_Content_Install {
 	 * @since  1.0.0
 	 */
 	public function install() {
+
+		add_option( 'nc_installation_time', time(), '', false );
 
 		if ( defined( 'NELIO_CONTENT_INSTALLING' ) ) {
 			return;
