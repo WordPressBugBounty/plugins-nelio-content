@@ -115,7 +115,7 @@ Use [Social Automations](http://neliosoftware.com/content/social-automations/?ut
 * Automatically create social message timelines.
 * Use highlighted sentences, templates, and excerpts for automatically created messages.
 * Customize social templates with #hashtags, @handles, emojis, and much more.
-* Share on up to 3 social networks, including **X (formerly Twitter)**, **Facebook**, **LinkedIn**, **Instagram**, **Mastodon**, **Telegram**, **Pinterest**, **Reddit** or **Threads**, to name a few.
+* Share on all social networks, including **X (formerly Twitter)**, **Facebook**, **LinkedIn**, **Instagram**, **Mastodon**, **Telegram**, **Pinterest**, **Reddit** or **Threads**, to name a few.
 * Use popular link shortener services: Bitly, TinyURL, Rebrandly, YOURLS, Shlink, Short.io, T.ly, and Polr.
 
 Bring supported content and social metrics into WordPress to review performance and decide what to promote again:
@@ -208,7 +208,7 @@ Please report security bugs found in the source code of the Nelio Content plugin
 
 = What is included in Nelio Content Free? =
 
-Nelio Content Free includes the editorial calendar, content planning tools, and social sharing with free-plan limits. The free version lets you share to up to **3 supported social networks** and includes basic social automations. For example, it can publish one automatically generated message per connected social profile when a WordPress post is published.
+Nelio Content Free includes the editorial calendar, content planning tools, and social sharing with free-plan limits. The free version lets you share to up to **7 supported social networks** and includes basic social automations. For example, it can publish one automatically generated message per connected social profile when a WordPress post is published.
 
 Premium adds advanced automation and editorial collaboration features, and supports **up to 15 social profiles** under the applicable plan. See the [pricing and plan details](https://neliosoftware.com/content/pricing/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content) before choosing a subscription.
 
