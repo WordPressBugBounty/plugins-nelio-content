@@ -1,0 +1,633 @@
+{
+	"twitter": {
+		"limit": 280,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"multi-image",
+			"video",
+			"buffer-connection",
+			"hootsuite-connection",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [
+			"image/jpeg",
+			"image/jpg",
+			"image/png",
+			"image/gif",
+			"image/webp"
+		],
+		"supportedVideoTypes": [ "video" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [
+					"image/jpeg",
+					"image/jpg",
+					"image/png",
+					"image/gif",
+					"image/webp"
+				],
+				"maxSizeMiB": 5,
+				"maxSizeMiBByMime": {
+					"image/gif": 15
+				}
+			},
+			"video": {
+				"mimeTypes": [ "video" ],
+				"minDuration": 0.5,
+				"maxDuration": 140,
+				"maxSizeMiB": 512
+			}
+		}
+	},
+	"facebook": {
+		"limit": 10000,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"buffer-connection",
+			"hootsuite-connection",
+			"video",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [
+					"image/jpeg",
+					"image/jpg",
+					"image/png",
+					"image/gif",
+					"image/tiff"
+				],
+				"maxSizeMiB": 4
+			},
+			"video": {
+				"mimeTypes": [ "video/mp4" ]
+			}
+		}
+	},
+	"linkedin": {
+		"limit": 3000,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"buffer-connection",
+			"hootsuite-connection",
+			"multi-image",
+			"video",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [
+					"image/jpeg",
+					"image/jpg",
+					"image/png",
+					"image/gif"
+				]
+			},
+			"video": {
+				"mimeTypes": [ "video/mp4" ],
+				"minDuration": 3,
+				"maxDuration": 1800,
+				"minSizeKiB": 75,
+				"maxSizeMiB": 500
+			}
+		}
+	},
+	"gmb": {
+		"limit": 1500,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"buffer-connection",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [ "image/jpeg", "image/jpg", "image/png" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image/jpeg", "image/jpg", "image/png" ],
+				"minSizeKiB": 10,
+				"maxSizeMiB": 5,
+				"minWidth": 250,
+				"minHeight": 250
+			}
+		}
+	},
+	"pinterest": {
+		"limit": 500,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"multi-image",
+			"multi-target",
+			"buffer-connection",
+			"link-shortener"
+		],
+		"requires": [ [ "multi-target", "text", "image" ] ],
+		"supportedImageTypes": [ "image" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image" ]
+			}
+		}
+	},
+	"reddit": {
+		"limit": 500,
+		"supports": [
+			"automations",
+			"image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [ "image" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image" ]
+			}
+		}
+	},
+	"instagram": {
+		"limit": 2000,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"buffer-connection",
+			"hootsuite-connection",
+			"multi-image",
+			"multi-media",
+			"video",
+			"link-shortener"
+		],
+		"requires": [ [ "text", "image" ] ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image/jpeg", "image/jpg" ],
+				"maxSizeMiB": 8
+			},
+			"video": {
+				"mimeTypes": [ "video/mp4", "video/quicktime" ]
+			}
+		}
+	},
+	"telegram": {
+		"limit": 4096,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"multi-image",
+			"video",
+			"multi-media",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [ "image" ],
+		"supportedVideoTypes": [ "video" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image" ],
+				"maxSizeMiB": 5
+			},
+			"video": {
+				"mimeTypes": [ "video" ],
+				"maxSizeMiB": 20
+			}
+		}
+	},
+	"line": {
+		"limit": 4096,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [ "image/png", "image/jpeg" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image/png", "image/jpeg" ],
+				"maxSizeMiB": 10
+			}
+		}
+	},
+	"medium": {
+		"limit": 4096,
+		"supports": [ "preview", "related-post", "medium-tags" ],
+		"requires": [ [ "preview", "related-post" ] ],
+		"abilitySupported": true
+	},
+	"blogger": {
+		"limit": 10000,
+		"supports": [ "preview", "related-post" ],
+		"requires": [ [ "preview", "related-post" ] ],
+		"abilitySupported": true
+	},
+	"tiktok": {
+		"limit": 2000,
+		"supports": [
+			"recurrence",
+			"reusability",
+			"text",
+			"preview",
+			"video",
+			"image",
+			"multi-image",
+			"link-shortener"
+		],
+		"requires": [ [ "video" ], [ "image" ], [ "multi-image" ] ],
+		"supportedImageTypes": [ "image/jpeg", "image/jpg", "image/webp" ],
+		"supportedVideoTypes": [ "video/mp4", "video/webm", "video/quicktime" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image/jpeg", "image/jpg", "image/webp" ],
+				"maxSizeMiB": 20,
+				"maxHeight": 1080
+			},
+			"video": {
+				"mimeTypes": [ "video/mp4", "video/webm", "video/quicktime" ],
+				"maxDuration": 600
+			}
+		}
+	},
+	"tumblr": {
+		"limit": 500,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [ "image" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image" ]
+			}
+		}
+	},
+	"mastodon": {
+		"limit": 500,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"multi-image",
+			"video",
+			"buffer-connection",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [ "image" ],
+		"supportedVideoTypes": [
+			"video/mp4",
+			"video/x-m4v",
+			"video/quicktime",
+			"video/webm"
+		],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image" ],
+				"maxSizeMiB": 16
+			},
+			"video": {
+				"mimeTypes": [
+					"video/mp4",
+					"video/x-m4v",
+					"video/quicktime",
+					"video/webm"
+				],
+				"maxSizeMiB": 99
+			}
+		}
+	},
+	"bluesky": {
+		"limit": 300,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"multi-image",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [ "image" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image" ],
+				"maxSizeMiB": 1
+			}
+		}
+	},
+	"threads": {
+		"limit": 300,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"hootsuite-connection",
+			"video",
+			"multi-image",
+			"multi-media",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [ "image/jpeg", "image/jpg", "image/png" ],
+		"supportedVideoTypes": [ "video/mp4", "video/quicktime" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image/jpeg", "image/jpg", "image/png" ],
+				"maxSizeMiB": 8
+			},
+			"video": {
+				"mimeTypes": [ "video/mp4", "video/quicktime" ],
+				"maxDuration": 300
+			}
+		}
+	},
+	"vk": {
+		"limit": 10000,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"video",
+			"multi-image",
+			"multi-media",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [
+			"image/jpeg",
+			"image/jpg",
+			"image/png",
+			"image/gif"
+		],
+		"supportedVideoTypes": [
+			"video/x-msvideo",
+			"video/mp4",
+			"video/3gpp",
+			"video/mpeg",
+			"video/quicktime",
+			"video/x-flv",
+			"video/x-ms-wmv"
+		],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [
+					"image/jpeg",
+					"image/jpg",
+					"image/png",
+					"image/gif"
+				],
+				"maxSizeMiB": 50,
+				"maxDimensionSum": 14000
+			},
+			"video": {
+				"mimeTypes": [
+					"video/x-msvideo",
+					"video/mp4",
+					"video/3gpp",
+					"video/mpeg",
+					"video/quicktime",
+					"video/x-flv",
+					"video/x-ms-wmv"
+				]
+			}
+		}
+	},
+	"plurk": {
+		"limit": 280,
+		"supports": [
+			"automations",
+			"network-template",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"preview",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"abilitySupported": true
+	},
+	"discord": {
+		"limit": 2000,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"multi-image",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [ "image" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image" ]
+			}
+		}
+	},
+	"ok": {
+		"limit": 3000,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"multi-image",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [ "image" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image" ]
+			}
+		}
+	},
+	"slack": {
+		"limit": 2000,
+		"supports": [
+			"automations",
+			"image",
+			"network-image",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"multi-image",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"supportedImageTypes": [ "image" ],
+		"abilitySupported": true,
+		"media": {
+			"image": {
+				"mimeTypes": [ "image" ]
+			}
+		}
+	},
+	"band": {
+		"limit": 2000,
+		"supports": [
+			"automations",
+			"network-template",
+			"preview",
+			"profile-template",
+			"recurrence",
+			"related-post",
+			"reusability",
+			"text",
+			"link-shortener"
+		],
+		"requires": [ [ "text" ] ],
+		"abilitySupported": true
+	},
+	"webhook": {
+		"limit": 10000,
+		"supports": [ "automations", "related-post", "reusability" ],
+		"requires": [],
+		"abilitySupported": true
+	}
+}

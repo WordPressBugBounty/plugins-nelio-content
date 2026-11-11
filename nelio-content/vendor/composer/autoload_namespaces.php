@@ -6,5 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Twitter\\Text\\' => array($vendorDir . '/nojimage/twitter-text-php/lib'),
     'ICal' => array($vendorDir . '/johngrogg/ics-parser/src'),
 );

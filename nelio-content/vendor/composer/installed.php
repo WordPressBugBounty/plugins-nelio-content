@@ -28,5 +28,14 @@
             'reference' => null,
             'dev_requirement' => false,
         ),
+        'nojimage/twitter-text-php' => array(
+            'pretty_version' => 'v3.4.0',
+            'version' => '3.4.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../nojimage/twitter-text-php',
+            'aliases' => array(),
+            'reference' => '0fb06292cc27ad2e8a4ac6c1ee3fe399ccb6d90e',
+            'dev_requirement' => false,
+        ),
     ),
 );

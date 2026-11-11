@@ -110,6 +110,11 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 					'callback'            => array( $this, 'run_new_comment_action' ),
 					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
 					'args'                => array(
+						'id'       => array(
+							'required'          => true,
+							'type'              => 'string',
+							'validate_callback' => fn( $id ) => is_string( $id ) && wp_is_uuid( $id ),
+						),
 						'authorId' => array(
 							'required'          => true,
 							'type'              => 'number',
@@ -117,13 +122,12 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 							'sanitize_callback' => 'absint',
 						),
 						'comment'  => array(
-							'required'          => true,
-							'type'              => 'string',
-							'sanitize_callback' => flow( 'sanitize_text_field', 'trim' ),
+							'required' => true,
+							'type'     => 'string',
 						),
 						'date'     => array(
 							'required'          => true,
-							'type'              => 'date',
+							'type'              => 'string',
 							'validate_callback' => 'nelio_content_is_datetime',
 						),
 						'postId'   => array(
@@ -146,6 +150,11 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 					'callback'            => array( $this, 'run_update_task_action' ),
 					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
 					'args'                => array(
+						'id'         => array(
+							'required'          => true,
+							'type'              => 'string',
+							'validate_callback' => fn( $id ) => is_string( $id ) && wp_is_uuid( $id ),
+						),
 						'assigneeId' => array(
 							'required'          => true,
 							'type'              => 'number',
@@ -165,9 +174,9 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 							'sanitize_callback' => 'nelio_content_bool',
 						),
 						'dateDue'    => array(
-							'required'          => true,
-							'type'              => 'date',
-							'validate_callback' => 'nelio_content_is_datetime',
+							'required'          => false,
+							'type'              => 'string',
+							'validate_callback' => fn( $date ) => '' === $date || nelio_content_is_datetime( $date ),
 						),
 						'isNewTask'  => array(
 							'required'          => true,
@@ -178,13 +187,12 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 						'postId'     => array(
 							'required'          => false,
 							'type'              => 'number',
-							'validate_callback' => 'nelio_content_can_be_natural_number',
+							'validate_callback' => fn( $id ) => 0 === $id || nelio_content_can_be_natural_number( $id ),
 							'sanitize_callback' => 'absint',
 						),
 						'task'       => array(
-							'required'          => true,
-							'type'              => 'string',
-							'sanitize_callback' => flow( 'sanitize_text_field', 'trim' ),
+							'required' => true,
+							'type'     => 'string',
 						),
 					),
 				),
@@ -340,29 +348,40 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request<array<mixed>> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function run_new_comment_action( $request ) {
 
-		assert( is_string( $request['id'] ) );
-		assert( is_int( $request['authorId'] ) );
-		assert( is_string( $request['comment'] ) );
-		assert( is_string( $request['date'] ) );
-		assert( is_int( $request['postId'] ) );
+		$saved = Nelio_Content_Editorial_Notification_Verifier::comment( $request->get_params() );
+		return is_wp_error( $saved ) ? $saved : $this->notify_comment( $saved );
+	}
 
-		$comment = array(
-			'id'      => $request['id'],
-			'author'  => $request['authorId'],
-			'comment' => $request['comment'],
-			'date'    => $request['date'],
-			'post'    => $request['postId'],
-		);
-
-		$key = 'nc_new_comment_notify_' . $request['id'];
+	/**
+	 * Shares notification deduplication with confirmed ability saves.
+	 * Keeps legacy hook aliases while supplying the names used by the notification service.
+	 *
+	 * @param array{id:string,authorId:int,comment:string,date:string,postId:int} $saved Saved comment.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function notify_comment( $saved ) {
+		if ( get_current_user_id() !== $saved['authorId'] || ! Nelio_Content_Editorial_Notification_Verifier::can_comment( $saved['postId'] ) ) {
+			return Nelio_Content_Editorial_Notification_Verifier::denied();
+		}
+		$key = 'nc_new_comment_notify_' . $saved['id'];
 		if ( get_transient( $key ) ) {
 			return new WP_REST_Response( array( 'deduped' => true ), 200 );
 		}
-		set_transient( $key, 1, 1 * HOUR_IN_SECONDS );
+		set_transient( $key, 1, HOUR_IN_SECONDS );
+		$post_type = get_post_type( $saved['postId'] );
+		$comment   = array_merge(
+			$saved,
+			array(
+				'author'   => $saved['authorId'],
+				'post'     => $saved['postId'],
+				'postType' => false !== $post_type ? $post_type : '',
+				'timezone' => wp_timezone_string(),
+			)
+		);
 
 		/**
 		 * It runs when an editorial comment has been created.
@@ -382,30 +401,44 @@ class Nelio_Content_Generic_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @param WP_REST_Request<array<mixed>> $request Full data about the request.
 	 *
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function run_update_task_action( $request ) {
 
-		assert( is_string( $request['id'] ) );
-		assert( is_int( $request['assigneeId'] ) );
-		assert( is_int( $request['assignerId'] ) );
-		assert( is_string( $request['dateDue'] ) );
-		assert( is_string( $request['task'] ) );
-		assert( is_int( $request['postId'] ?? 0 ) );
+		$is_new = ! empty( $request['isNewTask'] );
+		$saved  = Nelio_Content_Editorial_Notification_Verifier::task( $request->get_params(), $is_new );
+		if ( is_wp_error( $saved ) ) {
+			return $saved;
+		}
+		$version = $saved['timestamp'];
+		unset( $saved['timestamp'] );
+		return $this->notify_task( $saved, $is_new, $version );
+	}
 
-		$task = array(
-			'id'         => $request['id'],
-			'assigneeId' => $request['assigneeId'],
-			'assignerId' => $request['assignerId'],
-			'completed'  => ! empty( $request['completed'] ),
-			'dateDue'    => $request['dateDue'],
-			'postId'     => $request['postId'] ?? 0,
-			'task'       => $request['task'],
-		);
+	/**
+	 * Runs the existing task notification hooks only after a confirmed save.
+	 *
+	 * @param array{id:string,assigneeId:int,assignerId:int,completed:bool,dateDue:string,postId?:int,task:string} $task Saved task.
+	 * @param bool                                                                                                 $is_new Whether the task was created.
+	 * @param string                                                                                               $version Saved Cloud version when available.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function notify_task( $task, $is_new, $version = '' ) {
+		if ( ! Nelio_Content_Editorial_Notification_Verifier::can_task( $task, $is_new ) ) {
+			return Nelio_Content_Editorial_Notification_Verifier::denied();
+		}
+		// The same saved version represents one event, regardless of the caller's event label.
+		if ( '' !== $version ) {
+			$event_key = 'nc_task_event_notify_' . md5( $task['id'] . ':' . $version );
+			if ( get_transient( $event_key ) ) {
+				return new WP_REST_Response( array( 'deduped' => true ), 200 );
+			}
+			set_transient( $event_key, 1, HOUR_IN_SECONDS );
+		}
+		$task['postId'] = $task['postId'] ?? 0;
+		if ( $is_new ) {
 
-		if ( ! empty( $request['isNewTask'] ) ) {
-
-			$key = 'nc_new_task_notify_' . $request['id'];
+			$key = 'nc_new_task_notify_' . $task['id'];
 			if ( get_transient( $key ) ) {
 				return new WP_REST_Response( array( 'deduped' => true ), 200 );
 			}

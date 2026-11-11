@@ -101,11 +101,6 @@ function nelio_content_can_current_user_use_plugin() {
 		return false;
 	}
 
-	static $can_edit_managed_post_type;
-	if ( is_bool( $can_edit_managed_post_type ) ) {
-		return $can_edit_managed_post_type;
-	}
-
 	$post_types = nelio_content_get_post_types( 'calendar' );
 	foreach ( $post_types as $name ) {
 		$type = get_post_type_object( $name );
@@ -114,12 +109,10 @@ function nelio_content_can_current_user_use_plugin() {
 		}
 
 		if ( is_string( $type->cap->edit_posts ) && current_user_can( $type->cap->edit_posts ) ) {
-			$can_edit_managed_post_type = true;
 			return true;
 		}
 	}
 
-	$can_edit_managed_post_type = false;
 	return false;
 }
 

@@ -151,6 +151,7 @@ class Nelio_Content {
 
 		$this->init_common_helpers();
 		$this->init_rest_controllers();
+		( new Nelio_Content_Abilities() )->init();
 		$this->init_compat_fixes();
 		$this->register_post_types();
 

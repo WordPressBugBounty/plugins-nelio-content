@@ -194,15 +194,14 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 		);
 
 		$args = array(
-			'method'  => 'GET',
-			'headers' => array(
+			'method'    => 'GET',
+			'sslverify' => true,
+			'headers'   => array(
 				'User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.81 Safari/537.36',
 			),
 		);
 
-		add_filter( 'https_ssl_verify', '__return_false' );
 		$response = @wp_safe_remote_request( $url, $args ); // phpcs:disable WordPress.PHP.NoSilencedErrors.Discouraged
-		remove_filter( 'https_ssl_verify', '__return_false' );
 
 		// If we couldn't open the page, let's return an empty result object.
 		if ( is_wp_error( $response ) ) {
@@ -217,22 +216,46 @@ class Nelio_Content_Shared_Link_REST_Controller extends WP_REST_Controller {
 
 		$page = $response['body'];
 
-		// Fix the page encoding (if necessary).
-		if ( isset( $response['headers']['content-type'] ) ) {
-
-			$content_type = $response['headers']['content-type'];
-
-			if ( preg_match( '/charset=([a-zA-Z0-9-]+)/i', $content_type, $matches ) ) {
-
-				$charset = $matches[1];
-				if ( stripos( $charset, 'utf' ) !== 0 ) {
-					$page = mb_convert_encoding( $page, 'UTF-8', $charset );
-				}
+		// Convert declared character sets only after resolving a supported name or alias.
+		$content_type = wp_remote_retrieve_header( $response, 'content-type' );
+		if ( is_string( $content_type ) && preg_match( '/(?:^|;)\s*charset\s*=\s*(["\']?)([^;\s"\']*)\1/i', $content_type, $matches ) ) {
+			$page = $this->convert_to_utf8( $page, $matches[2] );
+			if ( false === $page ) {
+				return false;
 			}
 		}
 
-		$result['content'] = is_string( $page ) ? $page : '';
+		$result['content'] = $page;
 		return $result;
+	}
+
+	/**
+	 * Resolves external charset names without passing unknown values to mbstring.
+	 *
+	 * @param string $page Downloaded page.
+	 * @param string $charset Declared character set.
+	 * @return string|false UTF-8 content, or false for an unsupported encoding.
+	 */
+	private function convert_to_utf8( $page, $charset ) {
+		foreach ( mb_list_encodings() as $encoding ) {
+			// These mbstring encodings describe transfer formats, not HTML character sets.
+			if ( in_array( $encoding, array( 'BASE64', 'UUENCODE', 'HTML-ENTITIES', 'Quoted-Printable' ), true ) ) {
+				continue;
+			}
+			$names = array_merge( array( $encoding ), mb_encoding_aliases( $encoding ) );
+			if ( ! in_array( strtolower( $charset ), array_map( 'strtolower', $names ), true ) ) {
+				continue;
+			}
+			if ( 'UTF-8' === $encoding ) {
+				return $page;
+			}
+			try {
+				return mb_convert_encoding( $page, 'UTF-8', $encoding );
+			} catch ( ValueError $e ) {
+				return false;
+			}
+		}
+		return false;
 	}
 
 	/**

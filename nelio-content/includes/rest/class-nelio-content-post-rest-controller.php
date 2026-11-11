@@ -866,7 +866,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return bool
 	 */
-	private function can_current_user_view_calendar_post( $post_id ) {
+	public function can_current_user_view_calendar_post( $post_id ) {
 
 		if ( ! nelio_content_can_current_user_use_plugin() ) {
 			return false;
@@ -1332,15 +1332,11 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 			return new WP_Error( 'gmt-error', _x( 'Unable to compute GMT time', 'text', 'nelio-content' ) );
 		}
 
-		wp_update_post(
-			array(
-				'ID'            => $post_id,
-				'post_date'     => $day . ' ' . $time,
-				'post_date_gmt' => get_gmt_from_date( gmdate( 'Y-m-d H:i:s', $gmt_time ) ),
-				'edit_date'     => true,
-			)
-		);
-		$this->trigger_save_post_action( $post_id, false );
+		$date  = new DateTimeImmutable( gmdate( 'Y-m-d H:i:s', $gmt_time ), wp_timezone() );
+		$saved = $this->set_post_publication_date( $post_id, $date );
+		if ( is_wp_error( $saved ) ) {
+			return $saved;
+		}
 
 		$post        = get_post( $post_id );
 		$post_helper = Nelio_Content_Post_Helper::instance();
@@ -1353,6 +1349,56 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		}
 
 		return new WP_REST_Response( $json, 200 );
+	}
+
+	/**
+	 * Shares the calendar date-only update and normal save notification with abilities.
+	 *
+	 * @param int               $post_id Existing post ID. The caller authorizes the operation.
+	 * @param DateTimeImmutable $date Target instant, with an explicit timezone.
+	 * @return WP_Post|WP_Error
+	 */
+	public function set_post_publication_date( $post_id, $date ) {
+		$local = $date->setTimezone( wp_timezone() )->format( 'Y-m-d H:i:s' );
+		$utc   = $date->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+		$post  = get_post( $post_id );
+		if ( ! $post ) {
+			return new WP_Error( 'nelio_content_invalid_post', _x( 'The post is unavailable.', 'user', 'nelio-content' ) );
+		}
+		if ( $local === $post->post_date && $utc === $post->post_date_gmt ) {
+			return $post;
+		}
+		$notified = false;
+		$observe  = function ( $saved_id ) use ( $post_id, &$notified ) {
+			if ( $saved_id === $post_id ) {
+				$notified = true;
+			}
+		};
+		add_action( 'nelio_content_save_post', $observe, PHP_INT_MAX );
+		try {
+			$result = wp_update_post(
+				array(
+					'ID'            => $post_id,
+					'post_date'     => $local,
+					'post_date_gmt' => $utc,
+					'edit_date'     => true,
+				),
+				true
+			);
+		} finally {
+			remove_action( 'nelio_content_save_post', $observe, PHP_INT_MAX );
+		}
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		if ( ! $notified ) {
+			$this->trigger_save_post_action( $post_id, false );
+		}
+		$post = get_post( $post_id );
+		if ( ! $post || $local !== $post->post_date || $utc !== $post->post_date_gmt ) {
+			return new WP_Error( 'nelio_content_reschedule_unconfirmed', _x( 'The requested date could not be verified after saving. Inspect the post before retrying.', 'user', 'nelio-content' ) );
+		}
+		return $post;
 	}
 
 	/**
@@ -1436,6 +1482,79 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Queries one bounded source page of unscheduled calendar posts.
+	 * Exact ID/URL matches are included only if they are genuinely unscheduled.
+	 * Visibility is applied after paging, so callers can continue past empty pages.
+	 *
+	 * @param string       $search Title fragment, post ID or local post URL.
+	 * @param int          $offset Source offset, including any exact match.
+	 * @param int          $limit Source page size.
+	 * @param list<string> $post_types Requested configured calendar types.
+	 * @return array{posts:list<WP_Post>,total:int,has_more:bool}
+	 */
+	public function query_unscheduled_posts( $search, $offset, $limit, $post_types ) {
+		$post_types = array_values( array_intersect( $post_types, nelio_content_get_post_types( 'calendar' ) ) );
+		if ( empty( $post_types ) ) {
+			return array(
+				'posts'    => array(),
+				'total'    => 0,
+				'has_more' => false,
+			);
+		}
+		$search = trim( $search );
+		$offset = max( 0, $offset );
+		$limit  = max( 1, min( 100, $limit ) );
+		$id     = ctype_digit( $search ) ? absint( $search ) : 0;
+		if ( ! $id && filter_var( $search, FILTER_VALIDATE_URL ) ) {
+			$id = nelio_content_url_to_postid( $search );
+		}
+		$pinned   = $id ? get_post( $id ) : null;
+		$excluded = array_merge( array( 'auto-draft', 'inherit', 'trash' ), get_post_stati( array( 'exclude_from_search' => true ) ) );
+		if ( $pinned && ( '0000-00-00 00:00:00' !== $pinned->post_date_gmt || ! in_array( $pinned->post_type, $post_types, true ) || in_array( $pinned->post_status, $excluded, true ) || ! current_user_can( 'read_post', $pinned->ID ) ) ) {
+			$pinned = null;
+		}
+		$include_pinned   = $pinned && 0 === $offset;
+		$source_limit     = $limit - ( $include_pinned ? 1 : 0 );
+		$args             = array(
+			'post_title__like'          => $search,
+			'nelio_content_unscheduled' => true,
+			'post_type'                 => $post_types,
+			'post_status'               => 'any',
+			// phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Excludes at most one exact match to keep pages unique.
+			'post__not_in'              => $pinned ? array( $pinned->ID ) : array(),
+			'posts_per_page'            => max( 1, $source_limit ),
+			'offset'                    => max( 0, $offset - ( $pinned ? 1 : 0 ) ),
+			'orderby'                   => array(
+				'date' => 'DESC',
+				'ID'   => 'DESC',
+			),
+			'ignore_sticky_posts'       => true,
+		);
+		$callback         = array( $this, 'add_title_filter_to_wp_query' );
+		$already_filtered = false !== has_filter( 'posts_where', $callback );
+		if ( ! $already_filtered ) {
+			add_filter( 'posts_where', $callback, 10, 2 );
+		}
+		try {
+			$query = new WP_Query( $args );
+		} finally {
+			if ( ! $already_filtered ) {
+				remove_filter( 'posts_where', $callback, 10 );
+			}
+		}
+		$posts = array_slice( array_values( array_filter( $query->posts ?? array(), fn( $p ) => $p instanceof WP_Post ) ), 0, $source_limit );
+		if ( $include_pinned ) {
+			array_unshift( $posts, $pinned );
+		}
+		$total = $query->found_posts + ( $pinned ? 1 : 0 );
+		return array(
+			'posts'    => $posts,
+			'total'    => $total,
+			'has_more' => $offset + $limit < $total,
+		);
+	}
+
+	/**
 	 * Searches posts.
 	 *
 	 * @param string                                                                   $query Query.
@@ -1452,6 +1571,27 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 	 * )
 	 */
 	private function search_wp_posts( $query, $args ) {
+
+		if ( array( 'nc_unscheduled' ) === $args['status'] ) {
+			$page   = $this->query_unscheduled_posts( $query, ( $args['page'] - 1 ) * $args['per_page'], $args['per_page'], $args['post_types'] );
+			$posts  = array();
+			$helper = Nelio_Content_Post_Helper::instance();
+			foreach ( $page['posts'] as $post ) {
+				if ( current_user_can( 'read_post', $post->ID ) ) {
+					$json = $helper->post_to_json( $post );
+					if ( $json ) {
+						$posts[] = $json;
+					}
+				}
+			}
+			return array(
+				'results'    => $posts,
+				'pagination' => array(
+					'more'  => $page['has_more'],
+					'pages' => (int) ceil( $page['total'] / $args['per_page'] ),
+				),
+			);
+		}
 
 		/** @var WP_Post|null */
 		global $post;
@@ -1481,14 +1621,6 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		);
 
 		$args['post_status'] = $status;
-		if ( count( $status ) === 1 && 'nc_unscheduled' === $status[0] ) {
-			$args['post_status'] = 'any';
-			$args['date_query']  = array(
-				'column'    => 'post_date_gmt',
-				'before'    => '0000-00-00',
-				'inclusive' => true,
-			);
-		}
 
 		add_filter( 'posts_where', array( $this, 'add_title_filter_to_wp_query' ), 10, 2 );
 		$wp_query = new WP_Query( $args );
@@ -1589,12 +1721,15 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 
 		/** @var string|null */
 		$search_term = $wp_query->get( 'post_title__like' );
-		if ( $search_term ) {
+		if ( is_string( $search_term ) && '' !== $search_term ) {
 			$search_term = esc_sql( $wpdb->esc_like( $search_term ) );
 			$search_term = ' \'%' . $search_term . '%\'';
 			$where       = $where . ' AND ' . $wpdb->posts . '.post_title LIKE ' . $search_term;
 		}
 
+		if ( true === $wp_query->get( 'nelio_content_unscheduled' ) ) {
+			$where .= " AND {$wpdb->posts}.post_date_gmt = '0000-00-00 00:00:00'";
+		}
 		return $where;
 	}
 

@@ -719,7 +719,7 @@ class Nelio_Content_Admin {
 	 *
 	 * @return 'none'|'post-type'|'all'
 	 */
-	private function get_task_editor_permission() {
+	public function get_task_editor_permission() {
 		$permission = 'none';
 		if ( nelio_content_can_current_user_use_plugin() ) {
 			$permission = 'post-type';

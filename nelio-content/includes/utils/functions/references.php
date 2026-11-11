@@ -32,45 +32,78 @@ function nelio_content_get_reference( $id ) {
  * @since 4.0.8
  */
 function nelio_content_get_reference_by_url( $url ) {
-
-	/** @var WP_Post $post */
-	global $post;
-	$result = false;
-
-	// Look for an existing reference with the given URL.
-	$args  = array(
-		'post_type'   => 'nc_reference',
-		'post_parent' => 0,
-		'post_status' => 'any',
-		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-		'meta_key'    => '_nc_url',
-		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		'meta_value'  => $url,
-	);
-	$query = new WP_Query( $args );
-
-	if ( $query->have_posts() ) {
-
-		while ( $query->have_posts() ) {
-			$query->the_post();
-			$result = new Nelio_Content_Reference( $post );
-			break;
-		}
+	$post = nelio_content_get_reference_post_by_url( $url );
+	if ( ! $post || is_wp_error( $post ) ) {
+		return false;
 	}
-
-	wp_reset_postdata();
-
-	// If we didn't find the reference, let's check if it's an internal link.
-	if ( ! $result ) {
-
-		$reference = nelio_content_url_to_postid( $url );
-		if ( $reference ) {
-			$result = new Nelio_Content_Reference( $reference );
-			$result->set_url( $url );
-		}
+	$result = new Nelio_Content_Reference( $post );
+	if ( ! $result->is_external() ) {
+		$result->set_url( $url );
 	}
-
 	return $result;
+}
+
+/**
+ * Finds a reference record without constructing bibliographic data or changing it.
+ *
+ * @param string $url Reference URL.
+ * @return WP_Post|false|WP_Error
+ */
+function nelio_content_get_reference_post_by_url( $url ) {
+	global $wpdb;
+	if ( ! $wpdb instanceof wpdb ) {
+		return new WP_Error( 'nelio_content_references_unavailable', _x( 'Existing references could not be retrieved.', 'user', 'nelio-content' ) );
+	}
+	$previous = $wpdb->suppress_errors();
+	try {
+		$query        = new WP_Query(
+			array(
+				'post_type'      => 'nc_reference',
+				'post_parent'    => 0,
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'no_found_rows'  => true,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'       => '_nc_url',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_value'     => $url,
+			)
+		);
+		$lookup_error = $wpdb->last_error;
+		if ( '' !== $lookup_error ) {
+			return new WP_Error( 'nelio_content_references_unavailable', _x( 'Existing references could not be retrieved.', 'user', 'nelio-content' ) );
+		}
+		if ( isset( $query->posts[0] ) && $query->posts[0] instanceof WP_Post ) {
+			return $query->posts[0];
+		}
+		return nelio_content_get_internal_reference_post_by_url( $url );
+	} finally {
+		$wpdb->suppress_errors( $previous );
+	}
+}
+
+/**
+ * Resolves local content without changing its URL metadata or constructing a reference.
+ *
+ * @param string $url Reference URL.
+ * @return WP_Post|false|WP_Error
+ */
+function nelio_content_get_internal_reference_post_by_url( $url ) {
+	global $wpdb;
+	if ( ! $wpdb instanceof wpdb ) {
+		return new WP_Error( 'nelio_content_references_unavailable', _x( 'Internal reference content could not be retrieved.', 'user', 'nelio-content' ) );
+	}
+	$previous = $wpdb->suppress_errors();
+	try {
+		$id   = nelio_content_url_to_postid( $url );
+		$post = $id ? get_post( $id ) : null;
+		if ( '' !== $wpdb->last_error ) {
+			return new WP_Error( 'nelio_content_references_unavailable', _x( 'Internal reference content could not be retrieved.', 'user', 'nelio-content' ) );
+		}
+		return $post ? $post : false;
+	} finally {
+		$wpdb->suppress_errors( $previous );
+	}
 }
 
 /**
@@ -92,27 +125,38 @@ function nelio_content_create_reference( $url ) {
 	$reference = nelio_content_get_reference_by_url( $url );
 
 	if ( empty( $reference ) ) {
-
-		$reference = wp_insert_post(
-			array(
-				'post_title'  => '',
-				'post_type'   => 'nc_reference',
-				'post_status' => 'nc_pending',
-			)
-		);
-
-		if ( $reference ) {
-			// We add the URL using the meta directly, or else the status would be
-			// changed from "pending" to "improvable", because all Reference setters
-			// may update its status.
-			update_post_meta( $reference, '_nc_url', $url );
-			$reference = new Nelio_Content_Reference( $reference );
-		} else {
-			$reference = false;
-		}
+		$post      = nelio_content_insert_reference_post( $url );
+		$reference = is_wp_error( $post ) ? false : new Nelio_Content_Reference( $post );
 	}
 
 	return $reference;
+}
+
+/**
+ * Inserts an external reference after the caller has resolved reuse and permissions.
+ *
+ * @param string $url Reference URL.
+ * @return WP_Post|WP_Error
+ */
+function nelio_content_insert_reference_post( $url ) {
+	$id = wp_insert_post(
+		array(
+			'post_title'  => '',
+			'post_type'   => 'nc_reference',
+			'post_status' => 'nc_pending',
+		),
+		true
+	);
+	if ( is_wp_error( $id ) ) {
+		return new WP_Error( 'nelio_content_reference_unconfirmed', _x( 'The reference could not be created. Inspect the post’s references before retrying.', 'user', 'nelio-content' ) );
+	}
+	// Saving directly preserves the native pending state until enrichment occurs.
+	update_post_meta( $id, '_nc_url', wp_slash( $url ) );
+	$post = get_post( $id );
+	if ( ! $post || 'nc_reference' !== $post->post_type || get_metadata( 'post', $id, '_nc_url', true ) !== $url ) {
+		return new WP_Error( 'nelio_content_reference_unconfirmed', _x( 'The reference URL could not be confirmed. Inspect references before retrying.', 'user', 'nelio-content' ), array( 'reference_id' => $id ) );
+	}
+	return $post;
 }
 
 /**
@@ -241,12 +285,13 @@ function nelio_content_suggest_post_reference( $post_id, $reference_id, $advisor
  *
  * @param integer|WP_Post $post_id      The post from which a certain suggested reference has been discarded.
  * @param integer|WP_Post $reference_id The discarded reference.
+ * @param bool            $keep_included Preserve included relationships and the reference record when discarding only a suggestion.
  *
  * @return void
  *
  * @since 4.0.8
  */
-function nelio_content_discard_post_reference( $post_id, $reference_id ) {
+function nelio_content_discard_post_reference( $post_id, $reference_id, $keep_included = false ) {
 
 	// Making sure we're using the reference's ID.
 	if ( $reference_id instanceof WP_Post ) {
@@ -261,8 +306,10 @@ function nelio_content_discard_post_reference( $post_id, $reference_id ) {
 	// Add the reference in the discarded list.
 	nelio_content_add_post_meta_once( $post_id, '_nc_discarded_reference', $reference_id );
 
-	// And remove it from any other list.
-	nelio_content_delete_post_reference( $post_id, $reference_id );
+	if ( ! $keep_included ) {
+		nelio_content_delete_post_reference( $post_id, $reference_id );
+	}
+	// Suggestion attribution belongs to this post, not to the shared bibliography.
 	delete_post_meta( $post_id, '_nc_suggested_reference', $reference_id );
 	delete_post_meta( $post_id, '_nc_suggested_reference_' . $reference_id . '_meta' );
 }

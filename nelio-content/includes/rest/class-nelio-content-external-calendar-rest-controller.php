@@ -158,7 +158,7 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 			);
 		}
 
-		$response = wp_remote_request( $url, array( 'method' => 'GET' ) );
+		$response = wp_safe_remote_request( $url, array( 'method' => 'GET' ) );
 
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error(
@@ -265,7 +265,7 @@ class Nelio_Content_External_Calendar_REST_Controller extends WP_REST_Controller
 			);
 		}
 
-		$response = wp_remote_request( $url, array( 'method' => 'GET' ) );
+		$response = wp_safe_remote_request( $url, array( 'method' => 'GET' ) );
 
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error(

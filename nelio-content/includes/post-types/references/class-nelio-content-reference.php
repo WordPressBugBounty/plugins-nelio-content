@@ -431,13 +431,6 @@ class Nelio_Content_Reference {
 			return false;
 		}
 
-		// If the post status is "broken", we shouldn't update it.
-		$status = $this->get_status();
-		if ( 'broken' === $status || 'check' === $status ) {
-			return false;
-		}
-
-		// Finally, we simply need to set the reference to "complete" or "improvable".
 		$values = array(
 			$this->get_title(),
 			$this->get_url(),
@@ -447,25 +440,32 @@ class Nelio_Content_Reference {
 			$this->get_publication_date(),
 		);
 
-		// If one of the values is empty, the reference is "improvable".
-		if ( in_array( '', $values, true ) ) {
-			$new_status = 'improvable';
-		} else {
-			$new_status = 'complete';
-		}
-
-		$old_status = $this->get_status();
-		if ( $new_status === $old_status ) {
+		$new_status = self::get_bibliographic_status( $this->post->post_status, $values );
+		if ( $new_status === $this->post->post_status ) {
 			return false;
 		}
 
-		$this->post->post_status = "nc_{$new_status}";
+		$this->post->post_status = $new_status;
 		if ( 0 === $this->ID ) {
 			return false;
 		}
 
 		$this->update_post();
 		return true;
+	}
+
+	/**
+	 * Shares cached completeness rules without constructing or saving a reference.
+	 *
+	 * @param string       $current_status Saved WordPress reference status.
+	 * @param list<string> $values Title, URL, author, email, account and publication date.
+	 * @return string
+	 */
+	public static function get_bibliographic_status( $current_status, $values ) {
+		if ( in_array( str_replace( 'nc_', '', $current_status ), array( 'broken', 'check' ), true ) ) {
+			return $current_status;
+		}
+		return in_array( '', $values, true ) ? 'nc_improvable' : 'nc_complete';
 	}
 
 	/**

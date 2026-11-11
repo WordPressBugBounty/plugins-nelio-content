@@ -21,6 +21,9 @@ class Nelio_Content_Auto_Sharer {
 	const RESET_MESSAGES     = 'nelio_content_social_automations_reset_social_messages';
 	const MAX_SHARES_PER_DAY = 30;
 
+	/** @var list<TAutomation_Group> Groups used by the current scheduling operation. */
+	private $automation_groups = array();
+
 	/**
 	 * This instance.
 	 *
@@ -55,8 +58,8 @@ class Nelio_Content_Auto_Sharer {
 	 * @return void
 	 */
 	public function enable_cron_tasks() {
-		add_action( self::SCHEDULE_WEEK, array( $this, 'schedule_week' ) );
-		add_action( self::RESET_MESSAGES, array( $this, 'schedule_week' ) );
+		add_action( self::SCHEDULE_WEEK, array( $this, 'schedule_week_on_cron' ) );
+		add_action( self::RESET_MESSAGES, array( $this, 'schedule_week_on_cron' ) );
 		$this->add_schedule_week_cron();
 	}
 
@@ -73,83 +76,142 @@ class Nelio_Content_Auto_Sharer {
 	}
 
 	/**
-	 * Callback to schedule week.
+	 * Runs the scheduler as an action callback, whose return value WordPress discards.
 	 *
 	 * @return void
 	 */
-	public function schedule_week() {
-
-		$today       = gmdate( 'Y-m-d', time() );
-		$weekdays    = array( 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' );
-		$end_of_week = ( absint( get_option( 'start_of_week', 0 ) ) + 6 ) % 7;
-		$end_of_week = $weekdays[ $end_of_week ];
-
-		$last_day_to_schedule = gmdate( 'Y-m-d', strtotime( "next {$end_of_week}" ) );
-		$last_scheduled_day   = max( $today, get_option( 'nc_reshare_last_day', $today ) );
-		if ( $last_scheduled_day >= $last_day_to_schedule ) {
-			return;
-		}
-
-		$days_to_schedule = $this->diff_days( $today, $last_day_to_schedule );
-		$posts            = $this->get_posts_for_resharing( $days_to_schedule );
-		if ( empty( $posts ) ) {
-			return;
-		}
-
-		$posts_per_day = $this->array_split( $posts, $days_to_schedule );
-		foreach ( $posts_per_day as $posts ) {
-			$last_scheduled_day = strtotime( $last_scheduled_day . ' +1 day' );
-			if ( false === $last_scheduled_day ) {
-				break;
-			}
-			$last_scheduled_day = gmdate( 'Y-m-d', $last_scheduled_day );
-			$this->schedule_day( $last_scheduled_day, $posts );
-		}
-		update_option( 'nc_reshare_last_day', $last_scheduled_day );
+	public function schedule_week_on_cron() {
+		$this->schedule_week();
 	}
 
 	/**
-	 * This function requests the cloud to generate all the messages for a given
-	 * day, using the given list of posts.
+	 * Queues the remaining days in the current cron scheduling window.
+	 * Cron ignores the result; abilities can report acknowledgements and failures.
 	 *
-	 * @param string          $day   Day to schedule.
-	 * @param list<TAWS_Post> $posts List of posts used to "fill" the day.
+	 * @return array{status:string,queued_days:list<string>,reason:string}|WP_Error
+	 */
+	public function schedule_week() {
+		$lock = Nelio_Content_Automation_Lock::acquire( 'reshare-week' );
+		if ( is_wp_error( $lock ) ) {
+			return $lock;
+		}
+		try {
+			return $this->schedule_remaining_days();
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * Preserves cron selection and quotas, advancing only through acknowledged days.
 	 *
-	 * @return void
+	 * @return array{status:string,queued_days:list<string>,reason:string}|WP_Error
+	 */
+	private function schedule_remaining_days() {
+		$today                = gmdate( 'Y-m-d', time() );
+		$weekdays             = array( 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' );
+		$end_of_week          = ( absint( get_option( 'start_of_week', 0 ) ) + 6 ) % 7;
+		$last_day_to_schedule = gmdate( 'Y-m-d', strtotime( 'next ' . $weekdays[ $end_of_week ] ) );
+		$last_scheduled_day   = max( $today, get_option( 'nc_reshare_last_day', $today ) );
+		if ( $last_scheduled_day >= $last_day_to_schedule ) {
+			return array(
+				'status'      => 'no_change',
+				'queued_days' => array(),
+				'reason'      => 'already_scheduled',
+			);
+		}
+		$days_to_schedule = $this->diff_days( $last_scheduled_day, $last_day_to_schedule );
+		$groups           = nelio_content_get_automation_groups( true );
+		if ( is_wp_error( $groups ) ) {
+			return $groups;
+		}
+		$this->automation_groups = $groups;
+		$posts                   = $this->get_posts_for_resharing( $days_to_schedule );
+		if ( empty( $posts ) ) {
+			return array(
+				'status'      => 'no_change',
+				'queued_days' => array(),
+				'reason'      => 'no_candidates',
+			);
+		}
+		$queued = array();
+		foreach ( $this->array_split( $posts, $days_to_schedule ) as $posts ) {
+			$next_day = strtotime( $last_scheduled_day . ' +1 day' );
+			if ( false === $next_day ) {
+				return new WP_Error( 'nelio_content_invalid_date', _x( 'Unable to determine the next reshare day.', 'user', 'nelio-content' ), array( 'queued_days' => $queued ) );
+			}
+			$day    = gmdate( 'Y-m-d', $next_day );
+			$result = $this->schedule_day( $day, $posts );
+			if ( is_wp_error( $result ) ) {
+				return new WP_Error(
+					$result->get_error_code(),
+					$queued
+						/* translators: 1: Failed day scheduling guidance, 2: Previously acknowledged UTC days. */
+						? sprintf( _x( '%1$s Previously acknowledged days: %2$s.', 'user', 'nelio-content' ), $result->get_error_message(), implode( ', ', $queued ) )
+						: $result->get_error_message(),
+					array(
+						'queued_days' => $queued,
+						'day'         => $day,
+						'outcome'     => 'unknown',
+					)
+				);
+			}
+			$queued[]           = $day;
+			$last_scheduled_day = $day;
+			update_option( 'nc_reshare_last_day', $last_scheduled_day );
+		}
+		return array(
+			'status'      => 'queued',
+			'queued_days' => $queued,
+			'reason'      => '',
+		);
+	}
+
+	/**
+	 * Requests the same asynchronous Cloud day scheduling used by cron.
+	 * A 2xx acknowledgement means queued, not that messages have been generated.
 	 *
-	 * @since  1.3.0
+	 * @param string          $day Day to schedule.
+	 * @param list<TAWS_Post> $posts Posts used to fill the day.
+	 * @return true|WP_Error
 	 */
 	public function schedule_day( $day, $posts ) {
 		$posts = array_map( fn( $p ) => array_merge( $p, array( 'content' => '' ) ), $posts );
 		if ( empty( $posts ) ) {
-			return;
+			return new WP_Error( 'nelio_content_invalid_input', _x( 'No posts are available for this reshare day.', 'user', 'nelio-content' ) );
 		}
-
 		$body = wp_json_encode(
 			array(
 				'day'   => $day,
 				'posts' => $posts,
 			)
 		);
-		assert( ! empty( $body ) );
-
-		$data = array(
-			'method'    => 'POST',
-			'timeout'   => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
-			'sslverify' => ! nelio_content_does_api_use_proxy(),
-			'headers'   => array(
+		if ( false === $body ) {
+			return new WP_Error( 'nelio_content_invalid_input', _x( 'Unable to encode reshare scheduling input.', 'user', 'nelio-content' ) );
+		}
+		$data     = array(
+			'method'              => 'POST',
+			'timeout'             => absint( apply_filters( 'nelio_content_request_timeout', 30 ) ),
+			'sslverify'           => ! nelio_content_does_api_use_proxy(),
+			'limit_response_size' => 2 * MB_IN_BYTES,
+			'headers'             => array(
 				'Authorization' => 'Bearer ' . nelio_content_generate_api_auth_token(),
 				'accept'        => 'application/json',
 				'content-type'  => 'application/json',
 			),
-			'body'      => $body,
+			'body'                => $body,
 		);
-
-		$url = sprintf(
-			nelio_content_get_api_url( '/site/%s/social/auto', 'wp' ),
-			nelio_content_get_site_id()
-		);
-		wp_remote_request( $url, $data );
+		$url      = sprintf( nelio_content_get_api_url( '/site/%s/social/auto', 'wp' ), nelio_content_get_site_id() );
+		$response = wp_remote_request( $url, $data );
+		$status   = is_wp_error( $response ) ? 0 : wp_remote_retrieve_response_code( $response );
+		if ( $status < 200 || $status >= 300 ) {
+			return new WP_Error(
+				'nelio_content_reshare_outcome_unknown',
+				/* translators: %s: Calendar day whose scheduling outcome is unknown. */
+				sprintf( _x( 'Cloud did not confirm reshare scheduling for %s. The request may already be queued. Inspect the calendar before retrying; do not automatically repeat this operation.', 'user', 'nelio-content' ), $day )
+			);
+		}
+		return true;
 	}
 
 	/**
@@ -174,6 +236,47 @@ class Nelio_Content_Auto_Sharer {
 		}
 
 		wp_schedule_event( $tomorrow, 'daily', self::SCHEDULE_WEEK );
+	}
+
+	/**
+	 * Lists deterministic eligibility results without cron sampling, quotas or writes.
+	 * Uses the same eligibility query as all cron candidate buckets.
+	 *
+	 * @param list<string> $profile_ids Profiles the reader may use.
+	 * @param int          $offset Source offset.
+	 * @param int          $limit Maximum IDs to examine, including optional lookahead.
+	 * @return list<int>|WP_Error
+	 */
+	public function get_reshare_candidate_ids( $profile_ids, $offset, $limit ) {
+		if ( empty( $profile_ids ) ) {
+			return array();
+		}
+		$groups = nelio_content_get_automation_groups( true );
+		if ( is_wp_error( $groups ) ) {
+			return $groups;
+		}
+		$allowed = array_flip( $profile_ids );
+		foreach ( $groups as &$group ) {
+			$group['profileSettings'] = array_intersect_key( $group['profileSettings'], $allowed );
+		}
+		unset( $group );
+		$query = $this->get_basic_query( $groups );
+		$query = str_replace( array( '{{joins}}', '{{wheres}}', '{{pids}}' ), array( '', '', '(0)' ), $query );
+		$query = str_replace( 'ORDER BY RAND()', 'ORDER BY p.ID ASC', $query );
+		/** @var wpdb $wpdb */
+		global $wpdb;
+		$pagination = $wpdb->prepare( 'LIMIT %d, %d', max( 0, $offset ), max( 1, min( 101, $limit ) ) );
+		if ( null === $pagination ) {
+			return new WP_Error( 'nelio_content_query_failed', _x( 'Unable to prepare the republication query.', 'user', 'nelio-content' ) );
+		}
+		$query = str_replace( 'LIMIT 0, {{post_count}}', $pagination, $query );
+		// Eligibility uses the same escaped SQL fragments as cron; no raw request text is interpolated.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$ids = $wpdb->get_col( $query );
+		if ( $wpdb->last_error ) {
+			return new WP_Error( 'nelio_content_query_failed', _x( 'Unable to retrieve posts eligible for republication.', 'user', 'nelio-content' ) );
+		}
+		return array_map( 'absint', $ids );
 	}
 
 	/**
@@ -303,17 +406,12 @@ class Nelio_Content_Auto_Sharer {
 	}
 
 	/**
-	 * Gets basic query.
+	 * Gets the shared post eligibility query.
 	 *
+	 * @param list<TAutomation_Group>|null $groups Optional profile-scoped groups; cron uses its current groups.
 	 * @return string
 	 */
-	private function get_basic_query() {
-		/** @var string $query */
-		static $query;
-		if ( ! empty( $query ) ) {
-			return $query;
-		}
-
+	private function get_basic_query( $groups = null ) {
 		/** @var wpdb $wpdb */
 		global $wpdb;
 		$query = '' .
@@ -322,7 +420,7 @@ class Nelio_Content_Auto_Sharer {
 			'ORDER BY RAND() ' .
 			'LIMIT 0, {{post_count}}';
 		$query = $this->add_post_type_filter( $query );
-		$query = $this->add_automation_group_filter( $query );
+		$query = $this->add_automation_group_filter( $query, $groups ?? $this->automation_groups );
 		$query = $this->add_share_filter( $query );
 		$query = $this->add_end_mode_filter( $query );
 
@@ -338,6 +436,9 @@ class Nelio_Content_Auto_Sharer {
 	 */
 	private function add_post_type_filter( $query ) {
 		$post_types = nelio_content_get_post_types( 'social' );
+		if ( empty( $post_types ) ) {
+			return str_replace( '{{wheres}}', 'AND FALSE', $query );
+		}
 		$post_types = array_map(
 			function ( $type ) {
 				$type = esc_sql( sanitize_text_field( $type ) );
@@ -354,12 +455,12 @@ class Nelio_Content_Auto_Sharer {
 	/**
 	 * Adds automation group filter.
 	 *
-	 * @param string $query Query.
+	 * @param string                  $query Query.
+	 * @param list<TAutomation_Group> $groups Groups available to this operation.
 	 *
 	 * @return string
 	 */
-	private function add_automation_group_filter( $query ) {
-		$groups = nelio_content_get_automation_groups();
+	private function add_automation_group_filter( $query, $groups ) {
 		$groups = array_filter(
 			$groups,
 			function ( $g ) {
@@ -429,17 +530,20 @@ class Nelio_Content_Auto_Sharer {
 							/** @var string    $tax   */
 							/** @var list<int> $terms */
 
+							if ( empty( $terms ) ) {
+								return '';
+							}
 							$terms = array_map(
 								function ( $term ) use ( $tax, &$term_map ) {
 									/** @var int $term */
 
-									return $term_map[ $tax ][ $term ] ?? 0;
+									return absint( $term_map[ $tax ][ $term ] ?? 0 );
 								},
 								$terms
 							);
 							$terms = array_values( array_filter( $terms ) );
 							if ( empty( $terms ) ) {
-								return '';
+								return 'FALSE';
 							}
 							$table = $tax_tables[ $tax ];
 							return sprintf( "{$table}.term_taxonomy_id IN (%s)", implode( ',', $terms ) );
@@ -467,11 +571,11 @@ class Nelio_Content_Auto_Sharer {
 					$where[] = sprintf( '\'%s\' <= p.post_date_gmt', esc_sql( $date ) );
 				}
 
-				return empty( $where ) ? '' : '(' . implode( ' AND ', $where ) . ')';
+				return empty( $where ) ? 'TRUE' : '(' . implode( ' AND ', $where ) . ')';
 			},
 			$groups
 		);
-		$where  = implode( ' OR ', array_filter( $wheres ) );
+		$where  = implode( ' OR ', $wheres );
 		return str_replace( '{{wheres}}', "AND ({$where}) {{wheres}}", $query );
 	}
 
@@ -504,6 +608,9 @@ class Nelio_Content_Auto_Sharer {
 			array()
 		);
 
+		if ( empty( $taxonomies ) ) {
+			return array();
+		}
 		$wheres = array();
 		foreach ( $taxonomies as $tax => $terms ) {
 			$wheres[] = sprintf(
@@ -560,8 +667,10 @@ class Nelio_Content_Auto_Sharer {
 
 				$terms = $j['terms'];
 				$table = $j['table'];
-				$join  = sprintf(
-					'LEFT JOIN wp_term_relationships %1$s ON (p.ID = %1$s.object_id AND %1$s.term_taxonomy_id IN (%2$s))',
+				/** @var wpdb $wpdb */
+				global $wpdb;
+				$join = sprintf(
+					"LEFT JOIN {$wpdb->term_relationships} %1\$s ON (p.ID = %1\$s.object_id AND %1\$s.term_taxonomy_id IN (%2\$s))",
 					$table,
 					implode( ',', $terms )
 				);

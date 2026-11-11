@@ -65,7 +65,7 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_reference' ),
-					'permission_callback' => 'nelio_content_can_current_user_use_plugin',
+					'permission_callback' => array( $this, 'can_update_reference' ),
 					'args'                => array(
 						'id'      => array(
 							'required'          => true,
@@ -139,42 +139,63 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Updates the reference.
 	 *
-	 * @param WP_REST_Request<TEditorial_Reference> $request Full data about the request.
+	 * @param WP_REST_Request<array<string,mixed>> $request Full data about the request.
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_reference( $request ) {
 
-		$reference_id = absint( $request['id'] );
-
+		$reference_id = $this->reference_id( $request );
+		$parents      = Nelio_Content_Reference_Permissions::editable_parents( $reference_id, true );
+		if ( is_wp_error( $parents ) ) {
+			return $parents;
+		}
 		$reference = nelio_content_get_reference( $reference_id );
 		if ( ! $reference ) {
-			return new WP_Error(
-				'reference-not-found',
-				_x( 'Reference not found', 'text', 'nelio-content' )
-			);
+			return Nelio_Content_Reference_Permissions::denied();
 		}
-
-		$title = $request->get_param( 'title' );
-		$title = ! empty( $title ) ? $title : '';
-		$reference->set_title( $title );
-
-		$author = $request->get_param( 'author' );
-		$author = ! empty( $author ) ? $author : '';
-		$reference->set_author_name( $author );
-
-		$email = $request->get_param( 'email' );
-		$email = ! empty( $email ) ? $email : '';
-		$reference->set_author_email( $email );
-
-		$twitter = $request->get_param( 'twitter' );
-		$twitter = ! empty( $twitter ) ? $twitter : '';
-		$reference->set_author_twitter( $twitter );
-
-		$date = $request->get_param( 'date' );
-		$date = ! empty( $date ) ? $date : '';
-		$reference->set_publication_date( $date );
-
+		$setters = array(
+			'title'   => 'set_title',
+			'author'  => 'set_author_name',
+			'email'   => 'set_author_email',
+			'twitter' => 'set_author_twitter',
+			'date'    => 'set_publication_date',
+		);
+		foreach ( $setters as $field => $setter ) {
+			if ( Nelio_Content_Reference_Permissions::editable_parents( $reference_id, true ) !== $parents ) {
+				return $this->unconfirmed_update();
+			}
+			$value = $request->get_param( $field );
+			$reference->$setter( ! empty( $value ) && is_string( $value ) ? $value : '' );
+		}
+		if ( Nelio_Content_Reference_Permissions::editable_parents( $reference_id, true ) !== $parents ) {
+			return $this->unconfirmed_update();
+		}
 		return new WP_REST_Response( $reference->json_encode(), 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request<array<string,mixed>> $request Request.
+	 * @return bool
+	 * @phpstan-impure
+	 */
+	public function can_update_reference( $request ) {
+		return ! is_wp_error( Nelio_Content_Reference_Permissions::editable_parents( $this->reference_id( $request ), true ) );
+	}
+
+	/**
+	 * The URL controls the reference identity, regardless of JSON parameters.
+	 *
+	 * @param WP_REST_Request<array<string,mixed>> $request Request.
+	 * @return int
+	 */
+	private function reference_id( $request ) {
+		$params = $request->get_url_params();
+		return absint( $params['id'] ?? $request['id'] );
+	}
+
+	/** @return WP_Error */
+	private function unconfirmed_update() {
+		return new WP_Error( 'nelio_content_reference_update_unconfirmed', _x( 'The shared-reference update could not be confirmed. Some requested fields may have been saved. Inspect the reference and review access before retrying; no automatic retry was performed.', 'user', 'nelio-content' ) );
 	}
 }

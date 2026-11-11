@@ -416,26 +416,7 @@ class Nelio_Content_Analytics_Helper {
 	 */
 	public function get_paginated_posts( $params, $raw = false ) {
 
-		// Load some settings.
-		$settings           = Nelio_Content_Settings::instance();
-		$enabled_post_types = nelio_content_get_post_types( 'analytics' );
-
-		$defaults = array(
-			'post_status' => 'publish',
-			'post_type'   => $enabled_post_types,
-		);
-
-		$args = wp_parse_args( $params, $defaults );
-
-		if ( isset( $args['meta_key'] ) &&
-			'_nc_pageviews_total' === $args['meta_key'] ) {
-			$ga_data = $settings->get( 'google_analytics_data' );
-			$ga_view = $ga_data['id'];
-			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			$args['meta_key'] = $this->pageviews_total_key( $ga_view );
-		}
-
-		$query = new WP_Query( $args );
+		$query = $this->query_cached_posts( $params );
 
 		$posts       = array();
 		$post_helper = Nelio_Content_Post_Helper::instance();
@@ -463,6 +444,59 @@ class Nelio_Content_Analytics_Helper {
 				'pages' => $query->max_num_pages,
 			),
 		);
+	}
+
+	/**
+	 * Shares the raw analytics query with callers that do not need rendered post content.
+	 *
+	 * @param array<mixed> $params WordPress query parameters.
+	 * @return WP_Query
+	 * @phpstan-impure
+	 */
+	public function query_cached_posts( $params ) {
+		$enabled           = nelio_content_get_post_types( 'analytics' );
+		$requested         = $params['post_type'] ?? $enabled;
+		$requested         = is_string( $requested ) ? array( $requested ) : $requested;
+		$types             = is_array( $requested ) ? array_values( array_intersect( array_filter( $requested, 'is_string' ), $enabled ) ) : $enabled;
+		$args              = wp_parse_args( $params, array( 'post_status' => 'publish' ) );
+		$args['post_type'] = $types;
+		if ( empty( $types ) ) {
+			$args['post__in'] = array( 0 );
+		}
+		if ( '_nc_pageviews_total' === ( $args['meta_key'] ?? null ) ) {
+			$key = $this->get_cached_ranking_key( 'pageviews' );
+			if ( is_wp_error( $key ) ) {
+				$args['post__in'] = array( 0 );
+				unset( $args['meta_key'] );
+			} else {
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Shares the existing indexed-by-metadata analytics ranking.
+				$args['meta_key'] = $key;
+			}
+		}
+		/** @var wpdb $wpdb */
+		global $wpdb;
+		$wpdb->last_error = '';
+		return new WP_Query( $args );
+	}
+
+	/**
+	 * Resolves only supported aggregate counters, scoped to the active GA property.
+	 *
+	 * @param string $metric Metric.
+	 * @return string|WP_Error
+	 */
+	public function get_cached_ranking_key( $metric ) {
+		if ( 'engagement' === $metric ) {
+			return $this->engagement_key( 'total' );
+		}
+		if ( 'pageviews' !== $metric ) {
+			return new WP_Error( 'nelio_content_invalid_metric', _x( 'Choose engagement or pageviews.', 'user', 'nelio-content' ) );
+		}
+		$data = Nelio_Content_Settings::instance()->get( 'google_analytics_data' );
+		if ( empty( $data['id'] ) ) {
+			return new WP_Error( 'nelio_content_analytics_unavailable', _x( 'Configure a Google Analytics property before ranking posts by pageviews.', 'user', 'nelio-content' ) );
+		}
+		return $this->pageviews_total_key( $data['id'] );
 	}
 
 	/**
