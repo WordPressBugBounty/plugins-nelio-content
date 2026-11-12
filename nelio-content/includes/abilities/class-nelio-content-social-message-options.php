@@ -18,31 +18,31 @@ class Nelio_Content_Social_Message_Options {
 				'key'   => array(
 					'type'        => 'string',
 					'maxLength'   => 1000,
-					'description' => _x( 'Header or form field name, supporting post placeholders.', 'text', 'nelio-content' ),
+					'description' => 'Header or form field name, supporting post placeholders.',
 				),
 				'value' => array(
 					'type'        => 'string',
 					'maxLength'   => 10000,
-					'description' => _x( 'Header or form field value, supporting post placeholders. Values are never returned in ability responses.', 'text', 'nelio-content' ),
+					'description' => 'Header or form field value, supporting post placeholders. Values are never returned in ability responses.',
 				),
 			),
 			array( 'key', 'value' ),
-			_x( 'One webhook header or form field.', 'text', 'nelio-content' )
+			'One webhook header or form field.'
 		);
 		$tiktok = array(
 			'privacyLevel' => array(
 				'type'        => 'string',
 				'enum'        => array( 'PUBLIC_TO_EVERYONE', 'MUTUAL_FOLLOW_FRIENDS', 'FOLLOWER_OF_CREATOR', 'SELF_ONLY' ),
-				'description' => _x( 'Explicit TikTok audience chosen for this publication. Provider account restrictions still apply.', 'text', 'nelio-content' ),
+				'description' => 'Explicit TikTok audience chosen for this publication. Provider account restrictions still apply.',
 			),
 		);
 		foreach ( array(
-			'disableDuet'     => _x( 'Disable duets for this TikTok publication.', 'text', 'nelio-content' ),
-			'disableStitch'   => _x( 'Disable stitching for this TikTok publication.', 'text', 'nelio-content' ),
-			'disableComment'  => _x( 'Disable comments for this TikTok publication.', 'text', 'nelio-content' ),
-			'discloseContent' => _x( 'Declare whether this TikTok publication promotes a brand, product or service.', 'text', 'nelio-content' ),
-			'isBrandContent'  => _x( 'The TikTok content promotes a third-party brand. Requires disclosure and cannot use SELF_ONLY.', 'text', 'nelio-content' ),
-			'isBrandOrganic'  => _x( 'The TikTok content promotes your own brand. Requires content disclosure.', 'text', 'nelio-content' ),
+			'disableDuet'     => 'Disable duets for this TikTok publication.',
+			'disableStitch'   => 'Disable stitching for this TikTok publication.',
+			'disableComment'  => 'Disable comments for this TikTok publication.',
+			'discloseContent' => 'Declare whether this TikTok publication promotes a brand, product or service.',
+			'isBrandContent'  => 'The TikTok content promotes a third-party brand. Requires disclosure and cannot use SELF_ONLY.',
+			'isBrandOrganic'  => 'The TikTok content promotes your own brand. Requires content disclosure.',
 		) as $key => $description ) {
 			$tiktok[ $key ] = array(
 				'type'        => 'boolean',
@@ -54,19 +54,19 @@ class Nelio_Content_Social_Message_Options {
 				'profile_id'       => array(
 					'type'        => 'string',
 					'format'      => 'uuid',
-					'description' => _x( 'ID of one selected profile to which these options apply. Supply at most one options object per profile.', 'text', 'nelio-content' ),
+					'description' => 'ID of one selected profile to which these options apply. Supply at most one options object per profile.',
 				),
 				'target_name'      => array(
 					'type'        => 'string',
 					'minLength'   => 1,
 					'maxLength'   => 500,
-					'description' => _x( 'Exact target name returned by list-social-profile-targets. Required for Pinterest boards. Updates preserve the existing target and cannot move a message to another target.', 'text', 'nelio-content' ),
+					'description' => 'Exact target name returned by list-social-profile-targets. Required for Pinterest boards. Updates preserve the existing target and cannot move a message to another target.',
 				),
-				'tiktok_settings'  => self::object_schema( $tiktok, array_keys( $tiktok ), _x( 'Explicit TikTok audience, interaction and commercial disclosure settings. Required when creating a TikTok message; updates preserve existing settings when omitted.', 'text', 'nelio-content' ) ),
+				'tiktok_settings'  => self::object_schema( $tiktok, array_keys( $tiktok ), 'Explicit TikTok audience, interaction and commercial disclosure settings. Required when creating a TikTok message; updates preserve existing settings when omitted.' ),
 				'plurk_qualifier'  => array(
 					'type'        => 'string',
 					'enum'        => array( 'plays', 'buys', 'sells', 'loves', 'likes', 'shares', 'hates', 'wants', 'wishes', 'needs', 'has', 'will', 'hopes', 'asks', 'wonders', 'feels', 'thinks', 'draws', 'is', 'says', 'eats', 'writes', 'whispers' ),
-					'description' => _x( 'Optional Plurk qualifier. Omit to use the provider default, or preserve it when updating.', 'text', 'nelio-content' ),
+					'description' => 'Optional Plurk qualifier. Omit to use the provider default, or preserve it when updating.',
 				),
 				'tags'             => array(
 					'type'        => 'array',
@@ -76,9 +76,9 @@ class Nelio_Content_Social_Message_Options {
 						'type'        => 'string',
 						'minLength'   => 1,
 						'maxLength'   => 100,
-						'description' => _x( 'One Medium tag for the republished article.', 'text', 'nelio-content' ),
+						'description' => 'One Medium tag for the republished article.',
 					),
-					'description' => _x( 'Up to five Medium tags. Blogger uses the related post tags automatically.', 'text', 'nelio-content' ),
+					'description' => 'Up to five Medium tags. Blogger uses the related post tags automatically.',
 				),
 				'webhook_settings' => self::object_schema(
 					array(
@@ -86,38 +86,38 @@ class Nelio_Content_Social_Message_Options {
 							'type'        => 'string',
 							'format'      => 'uri',
 							'maxLength'   => 4096,
-							'description' => _x( 'Fully qualified HTTP or HTTPS destination URL for the scheduled webhook request. Only used for a webhook profile.', 'text', 'nelio-content' ),
+							'description' => 'Fully qualified HTTP or HTTPS destination URL for the scheduled webhook request. Only used for a webhook profile.',
 						),
 						'method'      => array(
 							'type'        => 'string',
 							'enum'        => array( 'POST', 'GET', 'HEAD', 'PATCH', 'PUT', 'DELETE' ),
-							'description' => _x( 'HTTP method executed by Nelio Cloud at the scheduled time.', 'text', 'nelio-content' ),
+							'description' => 'HTTP method executed by Nelio Cloud at the scheduled time.',
 						),
 						'headers'     => array(
 							'type'        => 'array',
 							'maxItems'    => 50,
 							'items'       => $pair,
-							'description' => _x( 'Webhook request headers supporting post placeholders. Credentials are accepted as input but never exposed in output.', 'text', 'nelio-content' ),
+							'description' => 'Webhook request headers supporting post placeholders. Credentials are accepted as input but never exposed in output.',
 						),
 						'bodyType'    => array(
 							'type'        => 'string',
 							'enum'        => array( 'none', 'json', 'form' ),
-							'description' => _x( 'Webhook body encoding. JSON requires a valid JSON string; form requires a list of key/value fields; none omits the body.', 'text', 'nelio-content' ),
+							'description' => 'Webhook body encoding. JSON requires a valid JSON string; form requires a list of key/value fields; none omits the body.',
 						),
 						'bodyContent' => array(
 							'type'        => array( 'string', 'array' ),
 							'maxLength'   => 100000,
 							'maxItems'    => 100,
 							'items'       => $pair,
-							'description' => _x( 'JSON string or form fields matching bodyType, supporting post placeholders. Expanded JSON must remain valid JSON.', 'text', 'nelio-content' ),
+							'description' => 'JSON string or form fields matching bodyType, supporting post placeholders. Expanded JSON must remain valid JSON.',
 						),
 					),
 					array( 'url', 'method', 'headers', 'bodyType' ),
-					_x( 'Optional per-message webhook configuration. Headers and bodies support post placeholders with a related post; URL and method must be literal. Omit to use the profile settings or preserve the message settings on update.', 'text', 'nelio-content' )
+					'Optional per-message webhook configuration. Headers and bodies support post placeholders with a related post; URL and method must be literal. Omit to use the profile settings or preserve the message settings on update.'
 				),
 			),
 			array( 'profile_id' ),
-			_x( 'Publishing options for one selected social profile. Only supply options applicable to that profile network.', 'text', 'nelio-content' )
+			'Publishing options for one selected social profile. Only supply options applicable to that profile network.'
 		);
 	}
 
@@ -131,7 +131,7 @@ class Nelio_Content_Social_Message_Options {
 	 */
 	public static function prepare( $profile, $options, $post ) {
 		if ( is_wp_error( rest_validate_value_from_schema( $options, self::schema() ) ) ) {
-			return new WP_Error( 'nelio_content_invalid_network_options', _x( 'The publishing options do not match the selected network option schema.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_network_options', 'The publishing options do not match the selected network option schema.' );
 		}
 		$network = $profile['network'];
 		foreach ( array(
@@ -141,7 +141,7 @@ class Nelio_Content_Social_Message_Options {
 			'webhook_settings' => 'webhook',
 		) as $option => $owner ) {
 			if ( isset( $options[ $option ] ) && $owner !== $network ) {
-				return new WP_Error( 'nelio_content_invalid_network_options', _x( 'Only provide publishing options applicable to the selected profile network.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_invalid_network_options', 'Only provide publishing options applicable to the selected profile network.' );
 			}
 		}
 		$slot = array();
@@ -153,12 +153,12 @@ class Nelio_Content_Social_Message_Options {
 			$selected = $options['target_name'] ?? '';
 			$targets  = array_column( $targets, null, 'name' );
 			if ( '' === $selected || ! isset( $targets[ $selected ] ) ) {
-				return new WP_Error( 'nelio_content_invalid_target', _x( 'Select an existing Pinterest board with target_name from list-social-profile-targets.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_invalid_target', 'Select an existing Pinterest board with target_name from list-social-profile-targets.' );
 			}
 			$slot['targetName']        = $selected;
 			$slot['targetDisplayName'] = $targets[ $selected ]['displayName'];
 		} elseif ( isset( $options['target_name'] ) && 'default' !== $options['target_name'] ) {
-			return new WP_Error( 'nelio_content_invalid_target', _x( 'This network uses the connected profile as its target. Do not supply a different target_name.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_target', 'This network uses the connected profile as its target. Do not supply a different target_name.' );
 		}
 		if ( 'tiktok' === $network ) {
 			$settings = $options['tiktok_settings'] ?? null;
@@ -177,7 +177,7 @@ class Nelio_Content_Social_Message_Options {
 		}
 		if ( in_array( $network, array( 'medium', 'blogger' ), true ) ) {
 			if ( ! $post ) {
-				return new WP_Error( 'nelio_content_post_required', _x( 'Medium and Blogger require an editable published or scheduled related WordPress post.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_post_required', 'Medium and Blogger require an editable published or scheduled related WordPress post.' );
 			}
 			$slot['title']   = $post['title'];
 			$slot['content'] = $post['content'];
@@ -198,7 +198,7 @@ class Nelio_Content_Social_Message_Options {
 			$settings = $options['webhook_settings'] ?? $profile['webhookSettings'] ?? null;
 			$error    = self::validate( 'webhook_settings', $settings );
 			if ( $error || ! is_array( $settings ) ) {
-				return $error ?? new WP_Error( 'nelio_content_invalid_network_options', _x( 'Provide valid webhook settings.', 'user', 'nelio-content' ) );
+				return $error ?? new WP_Error( 'nelio_content_invalid_network_options', 'Provide valid webhook settings.' );
 			}
 			$computed = self::compute_webhook_settings( $settings, $post );
 			if ( is_wp_error( $computed ) ) {
@@ -224,19 +224,19 @@ class Nelio_Content_Social_Message_Options {
 	public static function validate( $name, $value ) {
 		$schema = self::schema()['properties'][ $name ] ?? null;
 		if ( ! $schema || is_wp_error( rest_validate_value_from_schema( $value, $schema ) ) ) {
-			return new WP_Error( 'nelio_content_invalid_network_options', _x( 'The publishing options do not match the selected network option schema.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_network_options', 'The publishing options do not match the selected network option schema.' );
 		}
 		if ( 'tiktok_settings' === $name && is_array( $value ) ) {
 			if ( ( true === $value['discloseContent'] && empty( $value['isBrandContent'] ) && empty( $value['isBrandOrganic'] ) ) ||
 				( empty( $value['discloseContent'] ) && ( ! empty( $value['isBrandContent'] ) || ! empty( $value['isBrandOrganic'] ) ) ) ||
 				( ! empty( $value['isBrandContent'] ) && 'SELF_ONLY' === $value['privacyLevel'] ) ) {
-				return new WP_Error( 'nelio_content_invalid_network_options', _x( 'TikTok commercial disclosure must identify the promoted brand and use a compatible audience.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_invalid_network_options', 'TikTok commercial disclosure must identify the promoted brand and use a compatible audience.' );
 			}
 		}
 		if ( 'webhook_settings' === $name && is_array( $value ) ) {
 			$url = $value['url'] ?? '';
 			if ( ! is_string( $url ) || ! in_array( wp_parse_url( $url, PHP_URL_SCHEME ), array( 'http', 'https' ), true ) || ! wp_parse_url( $url, PHP_URL_HOST ) ) {
-				return new WP_Error( 'nelio_content_invalid_network_options', _x( 'Provide a fully qualified HTTP or HTTPS webhook URL.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_invalid_network_options', 'Provide a fully qualified HTTP or HTTPS webhook URL.' );
 			}
 			$body       = $value['bodyContent'] ?? null;
 			$valid_body = true;
@@ -251,7 +251,7 @@ class Nelio_Content_Social_Message_Options {
 				$valid_body = is_array( $body );
 			}
 			if ( ! $valid_body ) {
-				return new WP_Error( 'nelio_content_invalid_network_options', _x( 'The webhook body must match its selected encoding and contain valid JSON or form fields.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_invalid_network_options', 'The webhook body must match its selected encoding and contain valid JSON or form fields.' );
 			}
 		}
 		return null;
@@ -280,12 +280,12 @@ class Nelio_Content_Social_Message_Options {
 				continue;
 			}
 			if ( ! is_array( $value ) ) {
-				return new WP_Error( 'nelio_content_invalid_network_options', _x( 'Provide valid webhook header or form fields.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_invalid_network_options', 'Provide valid webhook header or form fields.' );
 			}
 			$computed[ $property ] = array();
 			foreach ( $value as $pair ) {
 				if ( ! is_array( $pair ) || ! is_string( $pair['key'] ?? null ) || ! is_string( $pair['value'] ?? null ) ) {
-					return new WP_Error( 'nelio_content_invalid_network_options', _x( 'Provide valid webhook header or form fields.', 'user', 'nelio-content' ) );
+					return new WP_Error( 'nelio_content_invalid_network_options', 'Provide valid webhook header or form fields.' );
 				}
 				if ( '' === $pair['key'] ) {
 					continue;

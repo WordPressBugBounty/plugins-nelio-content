@@ -1363,7 +1363,7 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 		$utc   = $date->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 		$post  = get_post( $post_id );
 		if ( ! $post ) {
-			return new WP_Error( 'nelio_content_invalid_post', _x( 'The post is unavailable.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_post', _x( 'The post is unavailable.', 'text', 'nelio-content' ) );
 		}
 		if ( $local === $post->post_date && $utc === $post->post_date_gmt ) {
 			return $post;

@@ -7,7 +7,7 @@ class Nelio_Content_Create_Series_Ability extends Nelio_Content_Series_Mutation_
 	/** @return void */
 	public function register() {
 		$properties = $this->term_properties();
-		$this->register_mutation( 'create-series', _x( 'Create series', 'command', 'nelio-content' ), _x( 'Create one series with a plain name and optional description/slug. Requires the taxonomy’s actual manage-terms capability. Existing names or slugs are conflicts, not a request to reuse or alter an existing term.', 'text', 'nelio-content' ), $properties, array( 'name' ) );
+		$this->register_mutation( 'create-series', 'Create series', 'Create one series with a plain name and optional description/slug. Requires the taxonomy’s actual manage-terms capability. Existing names or slugs are conflicts, not a request to reuse or alter an existing term.', $properties, array( 'name' ) );
 	}
 	/** @return string */
 	protected function get_premium_ability_name() {

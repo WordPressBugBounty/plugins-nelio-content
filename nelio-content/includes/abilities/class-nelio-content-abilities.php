@@ -36,43 +36,43 @@ class Nelio_Content_Abilities {
 		$categories = array(
 			'calendar'       => array(
 				'label'       => _x( 'Editorial Calendar', 'text', 'nelio-content' ),
-				'description' => _x( 'Retrieve WordPress posts and social messages scheduled in the editorial calendar, change post publication dates, and create draft copies with the required editing, creation and publishing permissions.', 'text', 'nelio-content' ),
+				'description' => 'Retrieve WordPress posts and social messages scheduled in the editorial calendar, change post publication dates, and create draft copies with the required editing, creation and publishing permissions.',
 			),
 			'profiles'       => array(
 				'label'       => _x( 'Social Profiles', 'text', 'nelio-content' ),
-				'description' => _x( 'Discover connected social profiles, their labels, and connection status to select publishing accounts and identify profiles needing attention.', 'text', 'nelio-content' ),
+				'description' => 'Discover connected social profiles, their labels, and connection status to select publishing accounts and identify profiles needing attention.',
 			),
 			'messages'       => array(
 				'label'       => _x( 'Social Messages', 'text', 'nelio-content' ),
-				'description' => _x( 'Inspect social messages, scheduled timelines, and publishing failures, schedule and update messages, delete unpublished messages, retry failed publications, inspect automation settings and templates, and generate timelines when the required features and permissions are available.', 'text', 'nelio-content' ),
+				'description' => 'Inspect social messages, scheduled timelines, and publishing failures, schedule and update messages, delete unpublished messages, retry failed publications, inspect automation settings and templates, and generate timelines when the required features and permissions are available.',
 			),
 			'tasks'          => array(
 				'label'       => _x( 'Editorial Tasks', 'text', 'nelio-content' ),
-				'description' => _x( 'Retrieve editorial task assignments, due dates, and completion status to coordinate content preparation and review.', 'text', 'nelio-content' ),
+				'description' => 'Retrieve editorial task assignments, due dates, and completion status to coordinate content preparation and review.',
 			),
 			'comments'       => array(
 				'label'       => _x( 'Editorial Comments', 'text', 'nelio-content' ),
-				'description' => _x( 'Read internal post discussions and add editorial comments to coordinate content preparation, with post editing permissions and normal author and follower notifications.', 'text', 'nelio-content' ),
+				'description' => 'Read internal post discussions and add editorial comments to coordinate content preparation, with post editing permissions and normal author and follower notifications.',
 			),
 			'references'     => array(
 				'label'       => _x( 'Editorial References', 'text', 'nelio-content' ),
-				'description' => _x( 'Inspect saved links used as editorial sources and inspiration, their relationships to editable posts and their bibliographic information, suggest individual links discard suggestions and edit shared bibliography without changing post content, with access checks for internal content.', 'text', 'nelio-content' ),
+				'description' => 'Inspect saved links used as editorial sources and inspiration, their relationships to editable posts and their bibliographic information, suggest individual links discard suggestions and edit shared bibliography without changing post content, with access checks for internal content.',
 			),
 			'future-actions' => array(
 				'label'       => _x( 'Future Actions', 'text', 'nelio-content' ),
-				'description' => _x( 'Inspect saved post changes planned for the future, their authorized configuration and scheduling state without executing or rescheduling them or inferring successful execution.', 'text', 'nelio-content' ),
+				'description' => 'Inspect saved post changes planned for the future, their authorized configuration and scheduling state without executing or rescheduling them or inferring successful execution.',
 			),
 			'series'         => array(
 				'label'       => _x( 'Content Series', 'text', 'nelio-content' ),
-				'description' => _x( 'Discover and manage content series, read saved descriptions and archive links, add or remove editable posts and reorder complete authorized collections using the configured taxonomy, without exposing inaccessible members or totals.', 'text', 'nelio-content' ),
+				'description' => 'Discover and manage content series, read saved descriptions and archive links, add or remove editable posts and reorder complete authorized collections using the configured taxonomy, without exposing inaccessible members or totals.',
 			),
 			'site'           => array(
 				'label'       => _x( 'Site Status', 'text', 'nelio-content' ),
-				'description' => _x( 'Inspect local installation readiness, current-user permissions and feature requirements to explain operational blockers without exposing credentials or contacting providers.', 'text', 'nelio-content' ),
+				'description' => 'Inspect local installation readiness, current-user permissions and feature requirements to explain operational blockers without exposing credentials or contacting providers.',
 			),
 			'analytics'      => array(
 				'label'       => _x( 'Analytics', 'text', 'nelio-content' ),
-				'description' => _x( 'Retrieve available post engagement and pageview metrics to assess content performance and inform editorial planning.', 'text', 'nelio-content' ),
+				'description' => 'Retrieve available post engagement and pageview metrics to assess content performance and inform editorial planning.',
 			),
 		);
 		foreach ( $categories as $slug => $category ) {
@@ -222,7 +222,7 @@ class Nelio_Content_Abilities {
 			'nelio-content/v1',
 			'mcp',
 			_x( 'Nelio Content', 'text', 'nelio-content' ),
-			_x( 'Access editorial calendars, social profiles, messages and analytics. Update and delete unpublished messages or explicitly retry failed publications. Schedule new social messages, inspect automations, generate timelines and review editorial tasks when Premium is available.', 'text', 'nelio-content' ),
+			'Access editorial calendars, social profiles, messages and analytics. Update and delete unpublished messages or explicitly retry failed publications. Schedule new social messages, inspect automations, generate timelines and review editorial tasks when Premium is available.',
 			'1.0.0',
 			array( \WP\MCP\Transport\HttpTransport::class ),
 			null,

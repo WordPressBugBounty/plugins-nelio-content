@@ -96,7 +96,7 @@ return array(
 				'name' => 'duplicate_post_types',
 				'help' => _x(
 					'Easily create a copy of any existing post with just one click.',
-					'user',
+					'text',
 					'nelio-content'
 				),
 			)
@@ -113,7 +113,7 @@ return array(
 				'name' => 'rewrite_post_types',
 				'help' => _x(
 					'Rewrite or update a published post without taking it offline, using a copy of its content. And when you’re done, schedule or publish these updates and your new content will be merged into the original post.',
-					'user',
+					'text',
 					'nelio-content'
 				),
 			)
@@ -130,7 +130,7 @@ return array(
 				'name' => 'series_post_types',
 				'help' => _x(
 					'Group your posts into collections or series. This is perfect for magazines, newspapers, short-story authors, educators, comic creators, or anyone who produces multiple posts on a similar subject.',
-					'user',
+					'text',
 					'nelio-content'
 				),
 			)

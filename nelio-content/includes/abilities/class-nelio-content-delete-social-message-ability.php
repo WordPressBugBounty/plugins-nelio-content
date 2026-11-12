@@ -19,25 +19,25 @@ class Nelio_Content_Delete_Social_Message_Ability extends Nelio_Content_Social_M
 		$properties['scope'] = array(
 			'type'        => 'string',
 			'enum'        => array( 'single' ),
-			'description' => _x( 'Use single to delete exactly the identified non-recurring message. Deleting a recurrence series or following occurrences is unsupported.', 'text', 'nelio-content' ),
+			'description' => 'Use single to delete exactly the identified non-recurring message. Deleting a recurrence series or following occurrences is unsupported.',
 		);
 		wp_register_ability(
 			'nelio-content/delete-social-message',
 			array(
 				'label'               => _x( 'Delete a social message', 'command', 'nelio-content' ),
-				'description'         => _x( 'Delete one unpublished, non-recurring social message from Nelio Content. Available in Free and Premium with social editing, profile and related-post permissions. Published, sent and Free preview messages are rejected. This does not delete an already published post from a social network. No following-occurrence or series deletion. After an ambiguous failure inspect the calendar before retrying.', 'text', 'nelio-content' ),
+				'description'         => 'Delete one unpublished, non-recurring social message from Nelio Content. Available in Free and Premium with social editing, profile and related-post permissions. Published, sent and Free preview messages are rejected. This does not delete an already published post from a social network. No following-occurrence or series deletion. After an ambiguous failure inspect the calendar before retrying.',
 				'category'            => 'nelio-content-messages',
-				'input_schema'        => $this->object_schema( $properties, array( 'message_id', 'start_date', 'end_date', 'scope' ), _x( 'Locate one existing message on a bounded calendar page and explicitly select single-message deletion.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $properties, array( 'message_id', 'start_date', 'end_date', 'scope' ), 'Locate one existing message on one page of calendar results and explicitly select single-message deletion.' ),
 				'output_schema'       => $this->object_schema(
 					array(
-						'message_id' => $this->uuid_schema( _x( 'ID of the message whose deletion Nelio Cloud acknowledged.', 'text', 'nelio-content' ) ),
+						'message_id' => $this->uuid_schema( 'ID of the message whose deletion Nelio Cloud acknowledged.' ),
 						'deleted'    => array(
 							'type'        => 'boolean',
-							'description' => _x( 'True when deletion of the specified non-recurring message was confirmed.', 'text', 'nelio-content' ),
+							'description' => 'True when deletion of the specified non-recurring message was confirmed.',
 						),
 					),
 					array( 'message_id', 'deleted' ),
-					_x( 'Acknowledgement of one deletion in Nelio Content. No social network publication is deleted.', 'text', 'nelio-content' )
+					'Acknowledgement of one deletion in Nelio Content. No social network publication is deleted.'
 				),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
@@ -58,14 +58,14 @@ class Nelio_Content_Delete_Social_Message_Ability extends Nelio_Content_Social_M
 			return $message;
 		}
 		if ( 'single' !== ( $input['scope'] ?? '' ) ) {
-			return new WP_Error( 'nelio_content_invalid_scope', _x( 'Select single-message deletion explicitly.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_scope', 'Select single-message deletion explicitly.' );
 		}
 		$result = request_cloud( '/social/' . rawurlencode( $input['message_id'] ), 'DELETE' );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
 		if ( array() !== $result ) {
-			return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Cloud returned unexpected affected messages. Inspect the calendar before retrying deletion.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_cloud_unavailable', 'Cloud returned unexpected affected messages. Inspect the calendar before retrying deletion.' );
 		}
 		return array(
 			'message_id' => $input['message_id'],

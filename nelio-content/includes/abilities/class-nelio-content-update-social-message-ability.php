@@ -24,15 +24,15 @@ class Nelio_Content_Update_Social_Message_Ability extends Nelio_Content_Social_M
 		$properties['media_id']        = array(
 			'type'        => 'integer',
 			'minimum'     => 0,
-			'description' => _x( 'Omit to preserve the existing single WordPress attachment, use a positive attachment ID to replace it, or use 0 to remove it. Networks such as Instagram, Pinterest and TikTok still require supported media. External or multiple attachments cannot be preserved by this ability.', 'text', 'nelio-content' ),
+			'description' => 'Omit to preserve the existing single WordPress attachment, use a positive attachment ID to replace it, or use 0 to remove it. Networks such as Instagram, Pinterest and TikTok still require supported media. External or multiple attachments cannot be preserved by this ability.',
 		);
 		wp_register_ability(
 			'nelio-content/update-social-message',
 			array(
 				'label'               => _x( 'Update a social message', 'command', 'nelio-content' ),
-				'description'         => _x( 'Replace the text and publication time of one unpublished manual message on any supported Nelio Content network. Available in Free and Premium with social editing, profile and related-post permissions. The profile and related post remain fixed. Supports exact dates, network-specific options and one WordPress image or video; omitted media is preserved. Text and webhook headers/bodies support all Nelio Content post placeholders using the existing related post. Expanded text is checked against the network limit. Recurrences, automatic messages and multiple attachments are unsupported. Pinterest keeps its existing board; TikTok and webhook options are preserved when omitted. Medium and Blogger reuse the related post content. Messages linked to an unpublished post can remain or become drafts with planned dates; they are scheduled automatically when post publication reaches Nelio Cloud. This expected state alone does not require an update. This changes the existing message, never creates another. After an ambiguous failure inspect the calendar before retrying.', 'text', 'nelio-content' ),
+				'description'         => 'Replace the text and publication time of one unpublished manual message on any supported Nelio Content network. Available in Free and Premium with social editing, profile and related-post permissions. The profile and related post remain fixed. Supports exact dates, network-specific options and one WordPress image or video; omitted media is preserved. Text and webhook headers/bodies support all Nelio Content post placeholders using the existing related post. Expanded text is checked against the network limit. Recurrences, automatic messages and multiple attachments are unsupported. Pinterest keeps its existing board; TikTok and webhook options are preserved when omitted. Medium and Blogger reuse the related post content. Messages linked to an unpublished post can remain or become drafts with planned dates; they are scheduled automatically when post publication reaches Nelio Cloud. This expected state alone does not require an update. This changes the existing message, never creates another. After an ambiguous failure inspect the calendar before retrying.',
 				'category'            => 'nelio-content-messages',
-				'input_schema'        => $this->object_schema( $properties, array( 'message_id', 'start_date', 'end_date', 'content', 'scheduled_at' ), _x( 'Identify the current message by its calendar range and page, then provide replacement text with optional post placeholders and a future publication time. The date range locates the existing message, not its new publication time.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $properties, array( 'message_id', 'start_date', 'end_date', 'content', 'scheduled_at' ), 'Identify the current message by its calendar range and page, then provide replacement text with optional post placeholders and a future publication time. The date range locates the existing message, not its new publication time.' ),
 				'output_schema'       => $this->message_schema(),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
@@ -54,11 +54,11 @@ class Nelio_Content_Update_Social_Message_Ability extends Nelio_Content_Social_M
 		}
 		if ( 'manual' !== ( $message['source'] ?? '' ) || 'exact' !== ( $message['dateType'] ?? '' ) || 'exact' !== ( $message['timeType'] ?? '' ) ||
 			! in_array( $message['type'] ?? '', array( 'text', 'image', 'video', 'webhook' ), true ) || ! empty( $message['auto'] ) ) {
-			return new WP_Error( 'nelio_content_unsupported_message', _x( 'Only manual, exact-date text, image, video or webhook messages can be updated. Use the social message editor for other messages.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_unsupported_message', 'Only manual, exact-date text, image, video or webhook messages can be updated. Use the social message editor for other messages.' );
 		}
 		$profile_id = $message['profileId'];
 		if ( ! is_string( $profile_id ) ) {
-			return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Unexpected Cloud message profile.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_cloud_unavailable', 'Unexpected Cloud message profile.' );
 		}
 		$options = ! empty( $input['profile_options'] ) ? $input['profile_options'] : array( array( 'profile_id' => $profile_id ) );
 		foreach ( $options as &$option ) {
@@ -67,7 +67,7 @@ class Nelio_Content_Update_Social_Message_Ability extends Nelio_Content_Social_M
 			}
 			$target = $message['targetName'] ?? 'default';
 			if ( ! is_string( $target ) || ( isset( $option['target_name'] ) && $option['target_name'] !== $target ) ) {
-				return new WP_Error( 'nelio_content_invalid_target', _x( 'Updating a message cannot change its publishing target.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_invalid_target', 'Updating a message cannot change its publishing target.' );
 			}
 			$option['target_name'] = $target;
 			foreach ( array(
@@ -105,7 +105,7 @@ class Nelio_Content_Update_Social_Message_Ability extends Nelio_Content_Social_M
 				}
 				$id = $message[ $type . 'Id' ] ?? null;
 				if ( ! is_string( $message[ $type ] ) || ! is_int( $id ) || $id < 1 || null !== $media_id ) {
-					return new WP_Error( 'nelio_content_unsupported_media', _x( 'The existing media cannot be preserved. Provide media_id to explicitly replace or remove it.', 'user', 'nelio-content' ) );
+					return new WP_Error( 'nelio_content_unsupported_media', 'The existing media cannot be preserved. Provide media_id to explicitly replace or remove it.' );
 				}
 				$media_id = $id;
 				if ( is_string( $message[ $type . 'AltText' ] ?? null ) ) {
@@ -123,7 +123,7 @@ class Nelio_Content_Update_Social_Message_Ability extends Nelio_Content_Social_M
 		$slot = $body['slots'][0] ?? null;
 		// prepare_scheduled_social_message builds the same slots used by creation.
 		if ( null === $slot ) {
-			return new WP_Error( 'nelio_content_invalid_input', _x( 'Unable to prepare the message update.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_input', 'Unable to prepare the message update.' );
 		}
 		unset( $body['slots'] );
 		$body   = array_merge( $body, $slot, $preserved_alt, array( 'id' => $input['message_id'] ) );

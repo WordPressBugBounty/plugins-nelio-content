@@ -42,7 +42,7 @@ if ( ! empty( $desc ) ) {
 			$this->print_html( $desc );
 			if ( ! empty( $more ) ) {
 				?>
-				<a href="<?php echo esc_url( $more ); ?>"><?php echo esc_html_x( 'Read more…', 'user', 'nelio-content' ); ?></a>
+				<a href="<?php echo esc_url( $more ); ?>"><?php echo esc_html_x( 'Read more…', 'command', 'nelio-content' ); ?></a>
 				<?php
 			}
 			?>

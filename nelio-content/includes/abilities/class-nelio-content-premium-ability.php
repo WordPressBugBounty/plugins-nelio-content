@@ -56,7 +56,7 @@ abstract class Nelio_Content_Premium_Ability extends Nelio_Content_Ability {
 	public function execute( $input ) {
 		$allowed = $this->permissions( $input );
 		if ( true !== $allowed ) {
-			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot execute this ability.', 'user', 'nelio-content' ) );
+			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', 'You cannot execute this ability.' );
 		}
 		$error = $this->get_premium_requirement_error();
 		if ( $error ) {
@@ -138,8 +138,7 @@ abstract class Nelio_Content_Premium_Ability extends Nelio_Content_Ability {
 			$url = $this->get_upgrade_url();
 			return new WP_Error(
 				'nelio_content_premium_required',
-				/* translators: %s: URL to subscribe to Nelio Content Premium. */
-				sprintf( _x( 'This ability requires Nelio Content Premium. Subscribe at %s.', 'user', 'nelio-content' ), $url ),
+				sprintf( 'This ability requires Nelio Content Premium. Subscribe at %s.', $url ),
 				array(
 					'status'      => 403,
 					'reason'      => 'subscription_required',
@@ -150,7 +149,7 @@ abstract class Nelio_Content_Premium_Ability extends Nelio_Content_Ability {
 		if ( function_exists( 'nelio_content_premium_is_version_valid' ) && ! nelio_content_premium_is_version_valid() ) {
 			return new WP_Error(
 				'nelio_content_premium_update_required',
-				_x( 'Update Nelio Content and Nelio Content Premium to matching versions to use this ability. Ask your site administrator if you cannot update plugins.', 'user', 'nelio-content' ),
+				'Update Nelio Content and Nelio Content Premium to matching versions to use this ability. Ask your site administrator if you cannot update plugins.',
 				array(
 					'status' => 403,
 					'reason' => 'incompatible_versions',
@@ -171,7 +170,7 @@ abstract class Nelio_Content_Premium_Ability extends Nelio_Content_Ability {
 	private function get_activation_error() {
 		return new WP_Error(
 			'nelio_content_premium_activation_required',
-			_x( 'Your subscription is active. Install and activate the matching Nelio Content Premium plugin to use this ability. Ask your site administrator if you cannot manage plugins.', 'user', 'nelio-content' ),
+			'Your subscription is active. Install and activate the matching Nelio Content Premium plugin to use this ability. Ask your site administrator if you cannot manage plugins.',
 			array(
 				'status'     => 403,
 				'reason'     => 'activate_premium',

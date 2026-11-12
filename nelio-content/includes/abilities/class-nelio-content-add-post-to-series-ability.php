@@ -14,9 +14,9 @@ class Nelio_Content_Add_Post_To_Series_Ability extends Nelio_Content_Series_Muta
 			'type'        => 'integer',
 			'minimum'     => 1,
 			'maximum'     => 1000000,
-			'description' => _x( 'Optional positive part number up to 1000000. Omit to preserve the saved part, including when membership already exists.', 'text', 'nelio-content' ),
+			'description' => 'Optional positive part number up to 1000000. Omit to preserve the saved part, including when membership already exists.',
 		);
-		$this->register_mutation( 'add-post-to-series', _x( 'Add post to series', 'command', 'nelio-content' ), _x( 'Add one readable/editable enabled post to this series with taxonomy assignment permission, preserving every other series. Optional part_number replaces this series’s saved part; omission preserves it. Repeating an existing membership with the same requested part is a no-op.', 'text', 'nelio-content' ), $properties, array( 'series_id', 'post_id' ) );
+		$this->register_mutation( 'add-post-to-series', 'Add post to series', 'Add one readable/editable enabled post to this series with taxonomy assignment permission, preserving every other series. Optional part_number replaces this series’s saved part; omission preserves it. Repeating an existing membership with the same requested part does not make changes.', $properties, array( 'series_id', 'post_id' ) );
 	}
 	/** @return string */
 	protected function get_premium_ability_name() {

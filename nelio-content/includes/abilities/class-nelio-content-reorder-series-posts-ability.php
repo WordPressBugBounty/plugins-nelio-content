@@ -15,7 +15,7 @@ class Nelio_Content_Reorder_Series_Posts_Ability extends Nelio_Content_Series_Mu
 				'type'    => 'integer',
 				'minimum' => 1,
 			),
-			'description' => _x( 'Complete series member IDs in the desired order. Parts become 1..N. Empty only for an empty series.', 'text', 'nelio-content' ),
+			'description' => 'Complete series member IDs in the desired order. Parts become 1..N. Empty only for an empty series.',
 		);
 		$properties['expected_parts'] = array(
 			'type'        => 'array',
@@ -25,16 +25,16 @@ class Nelio_Content_Reorder_Series_Posts_Ability extends Nelio_Content_Series_Mu
 					'post_id'     => array(
 						'type'        => 'integer',
 						'minimum'     => 1,
-						'description' => _x( 'One current series member ID.', 'text', 'nelio-content' ),
+						'description' => 'One current series member ID.',
 					),
 					'part_number' => $this->part_schema(),
 				),
 				array( 'post_id', 'part_number' ),
-				_x( 'Current saved part observed for this member, or null when unset. Exactly one entry per member.', 'text', 'nelio-content' )
+				'Saved part number returned by the last read for this member, or null when unset. Exactly one entry per member.'
 			),
-			'description' => _x( 'Expected complete saved parts from current series-post reads. Stale numbers or membership reject the reorder before writes.', 'text', 'nelio-content' ),
+			'description' => 'Expected complete saved parts from current series-post reads. If the saved part numbers or membership have changed since they were read, reordering is rejected before anything is saved.',
 		);
-		$this->register_mutation( 'reorder-series-posts', _x( 'Reorder series posts', 'command', 'nelio-content' ), _x( 'Set parts 1..N for an explicit complete series collection, at most 100 posts, with term-edit, taxonomy assignment and read/edit permission for every member. Supply expected_parts from current series-post reads to detect stale saved numbers, and post_ids in the desired order. IDs must be unique and match the full membership. Missing, hidden, stale or oversized collections fail before writes. An empty order is allowed only for an empty series. Equal resulting parts are a no-op. Duplicate or malformed per-post part metadata is rejected.', 'text', 'nelio-content' ), $properties, array( 'series_id', 'post_ids', 'expected_parts' ) );
+		$this->register_mutation( 'reorder-series-posts', 'Reorder series posts', 'Assign consecutive part numbers starting at 1 to every post in the series, at most 100 posts, with term-edit, taxonomy assignment and read/edit permission for every member. Supply expected_parts from current series-post reads to detect part numbers that changed since they were read, and post_ids in the desired order. IDs must be unique and match the full membership. If the list is incomplete, includes hidden posts, no longer matches the saved series or exceeds the size limit, the request fails before saving changes. An empty order is allowed only for an empty series. If the resulting part numbers are already saved, nothing is changed. Duplicate or malformed per-post part metadata is rejected.', $properties, array( 'series_id', 'post_ids', 'expected_parts' ) );
 	}
 	/** @return string */
 	protected function get_premium_ability_name() {

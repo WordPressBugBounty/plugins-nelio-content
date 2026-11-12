@@ -572,7 +572,7 @@ class Nelio_Content_Notifications {
 		$message .= "--------------------\r\n\r\n";
 
 		/* translators: %s: Post type. */
-		$message .= sprintf( _x( '== %s Details ==', 'title', 'nelio-content' ), $post_type ) . "\r\n";
+		$message .= sprintf( _x( '== %s Details ==', 'text', 'nelio-content' ), $post_type ) . "\r\n";
 		/* translators: %s: Post title. */
 		$message .= sprintf( _x( 'Title: %s', 'text', 'nelio-content' ), $post_title ) . "\r\n";
 
@@ -636,7 +636,7 @@ class Nelio_Content_Notifications {
 		$message .= "--------------------\r\n\r\n";
 
 		/* translators: %s: Post type. */
-		$message .= sprintf( _x( '== %s Details ==', 'title', 'nelio-content' ), $post_type ) . "\r\n";
+		$message .= sprintf( _x( '== %s Details ==', 'text', 'nelio-content' ), $post_type ) . "\r\n";
 		/* translators: %s: Post title. */
 		$message .= sprintf( _x( 'Title: %s', 'text', 'nelio-content' ), $post_title ) . "\r\n";
 
@@ -943,19 +943,19 @@ class Nelio_Content_Notifications {
 			$view_label = is_string( $view_label ) ? $view_label : _x( 'View', 'command', 'nelio-content' );
 
 			$footer .= "\r\n";
-			$footer .= _x( '== Actions ==', 'title', 'nelio-content' ) . "\r\n";
+			$footer .= _x( '== Actions ==', 'text', 'nelio-content' ) . "\r\n";
 			$footer .= sprintf( '%1$s: %2$s', $edit_label, $edit_link ) . "\r\n";
 			$footer .= sprintf( '%1$s: %2$s', $view_label, $view_link ) . "\r\n";
 
 			$footer .= "\r\n--------------------\r\n";
 			/* translators: %s: Post title. */
-			$footer .= sprintf( _x( 'You are receiving this email because you are subscribed to “%s”.', 'user', 'nelio-content' ), $post_title );
+			$footer .= sprintf( _x( 'You are receiving this email because you are subscribed to “%s”.', 'text', 'nelio-content' ), $post_title );
 
 		} else {
 
 			$footer .= "\r\n--------------------\r\n";
 			/* translators: %s: Blog URL. */
-			$footer .= sprintf( _x( 'You are receiving this email because you are registered to %s.', 'user', 'nelio-content' ), $blog_url );
+			$footer .= sprintf( _x( 'You are receiving this email because you are registered to %s.', 'text', 'nelio-content' ), $blog_url );
 
 		}
 

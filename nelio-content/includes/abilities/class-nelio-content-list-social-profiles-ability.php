@@ -26,10 +26,10 @@ class Nelio_Content_List_Social_Profiles_Ability extends Nelio_Content_Ability {
 			'nelio-content/list-social-profiles',
 			array(
 				'label'               => _x( 'List social profiles', 'command', 'nelio-content' ),
-				'description'         => _x( 'List accessible connected profiles, their existing labels and available saved publication/reshare frequencies shared across automation groups. All requested labels must match. Status is valid or renew; no credentials or connection changes are returned.', 'text', 'nelio-content' ),
+				'description'         => 'List accessible connected profiles, their existing labels and available saved publication/reshare frequencies shared across automation groups. All requested labels must match. Status is valid or renew; no credentials or connection changes are returned.',
 				'category'            => 'nelio-content-profiles',
 				'input_schema'        => $input_schema,
-				'output_schema'       => $this->page_schema( $this->profile_schema(), _x( 'A page of accessible profiles with existing labels and safe account details. No credentials are returned.', 'text', 'nelio-content' ) ),
+				'output_schema'       => $this->page_schema( $this->profile_schema(), 'A page of accessible profiles with existing labels and safe account details. No credentials are returned.' ),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
 				'meta'                => $this->get_ability_metadata(),
@@ -56,7 +56,7 @@ class Nelio_Content_List_Social_Profiles_Ability extends Nelio_Content_Ability {
 	public function execute( $input ) {
 		$allowed = $this->permissions( $input );
 		if ( true !== $allowed ) {
-			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot execute this ability.', 'user', 'nelio-content' ) );
+			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', 'You cannot execute this ability.' );
 		}
 
 		return query_social_profiles( $input, $this->profile_schema() );

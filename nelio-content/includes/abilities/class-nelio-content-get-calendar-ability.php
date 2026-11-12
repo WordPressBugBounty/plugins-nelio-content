@@ -26,72 +26,72 @@ class Nelio_Content_Get_Calendar_Ability extends Nelio_Content_Ability {
 		$input_properties['item_type'] = array(
 			'type'        => 'string',
 			'enum'        => array( 'posts', 'social' ),
-			'description' => _x( 'Select one independently paginated calendar stream; defaults to posts.', 'text', 'nelio-content' ),
+			'description' => 'Select one independently paginated calendar stream; defaults to posts.',
 		);
 		$input_properties['statuses']  = $this->array_schema(
 			array(
 				'type'        => 'string',
-				'description' => _x( 'One status from the selected calendar stream.', 'text', 'nelio-content' ),
+				'description' => 'One status from the selected calendar stream.',
 				'enum'        => array_values( array_unique( array_merge( get_post_stati(), array( 'schedule', 'error' ) ) ) ),
 			),
-			_x( 'Include any of these statuses in the selected stream. Use WordPress post statuses for posts and draft, schedule, publish or error for social messages.', 'text', 'nelio-content' )
+			'Include any of these statuses in the selected stream. Use WordPress post statuses for posts and draft, schedule, publish or error for social messages.'
 		);
 		$input_properties['authors']   = $this->array_schema(
 			array(
 				'type'        => 'integer',
-				'description' => _x( 'WordPress user ID of an author to include.', 'text', 'nelio-content' ),
+				'description' => 'WordPress user ID of an author to include.',
 				'minimum'     => 1,
 			),
-			_x( 'Include items associated with any of these WordPress author IDs. For social messages, this refers to the related post author.', 'text', 'nelio-content' )
+			'Include items associated with any of these WordPress author IDs. For social messages, this refers to the related post author.'
 		);
 		$item_schema                   = $this->object_schema(
 			array(
 				'id'           => array(
 					'type'        => array( 'integer', 'string' ),
-					'description' => _x( 'WordPress post ID for a post item, or social message UUID for a social item. Interpret together with item_type.', 'text', 'nelio-content' ),
+					'description' => 'WordPress post ID for a post item, or social message UUID for a social item. Interpret together with item_type.',
 				),
 				'item_type'    => array(
 					'type'        => 'string',
 					'enum'        => array( 'post', 'social' ),
-					'description' => _x( 'Item kind: post for WordPress posts or social for per-profile social messages.', 'text', 'nelio-content' ),
+					'description' => 'Item kind: post for WordPress posts or social for social messages for individual profiles.',
 				),
 				'title'        => array(
 					'type'        => 'string',
-					'description' => _x( 'WordPress post title or the original social message text.', 'text', 'nelio-content' ),
+					'description' => 'WordPress post title or the original social message text.',
 				),
 				'status'       => array(
 					'type'        => 'string',
-					'description' => _x( 'Item status: a WordPress post status for post items or draft, schedule, publish or error for social items.', 'text', 'nelio-content' ),
+					'description' => 'Item status: a WordPress post status for post items or draft, schedule, publish or error for social items.',
 				),
 				'scheduled_at' => array(
 					'type'        => 'string',
-					'description' => _x( 'Post publication timestamp with timezone offset, or the Cloud social publication timestamp. Empty when no social schedule is available.', 'text', 'nelio-content' ),
+					'description' => 'Post publication timestamp with timezone offset, or the Cloud social publication timestamp. Empty when no social schedule is available.',
 				),
 				'post_id'      => array(
 					'type'        => 'integer',
-					'description' => _x( 'Related WordPress post ID. For post items this equals id; for unrelated social messages it is 0.', 'text', 'nelio-content' ),
+					'description' => 'Related WordPress post ID. For post items this equals id; for unrelated social messages it is 0.',
 				),
 				'author_id'    => array(
 					'type'        => 'integer',
-					'description' => _x( 'WordPress author ID for a post item. Omitted from social calendar items.', 'text', 'nelio-content' ),
+					'description' => 'WordPress author ID for a post item. Omitted from social calendar items.',
 				),
 				'profile_id'   => array(
 					'type'        => 'string',
-					'description' => _x( 'Connected social profile ID for a social item. Omitted from WordPress post items.', 'text', 'nelio-content' ),
+					'description' => 'Connected social profile ID for a social item. Omitted from WordPress post items.',
 				),
 			),
 			array( 'id', 'item_type', 'title', 'status', 'scheduled_at' ),
-			_x( 'One WordPress post or social message in the calendar. Interpret its ID and status according to item_type.', 'text', 'nelio-content' )
+			'One WordPress post or social message in the calendar. Interpret its ID and status according to item_type.'
 		);
 
 		wp_register_ability(
 			'nelio-content/get-calendar',
 			array(
 				'label'               => _x( 'Get editorial calendar', 'command', 'nelio-content' ),
-				'description'         => _x( 'Retrieve a bounded page of posts or social messages for inclusive site-local calendar days. Select item_type for each stream. Tasks are available through the Premium task ability. Dates include offsets; unscheduled posts are excluded.', 'text', 'nelio-content' ),
+				'description'         => 'Retrieve one page of posts or social messages for inclusive site-local calendar days. Select item_type for each stream. Tasks are available through the Premium task ability. Dates include offsets; unscheduled posts are excluded.',
 				'category'            => 'nelio-content-calendar',
-				'input_schema'        => $this->object_schema( $input_properties, array( 'start_date', 'end_date' ), _x( 'Inclusive site-local date range, calendar stream and optional filters. Each stream has independent pagination; unscheduled posts are excluded.', 'text', 'nelio-content' ) ),
-				'output_schema'       => $this->page_schema( $item_schema, _x( 'A bounded page of accessible posts or social messages with their IDs and publication dates. Each item_type has separate pagination; this is not a combined total.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $input_properties, array( 'start_date', 'end_date' ), 'Inclusive site-local date range, calendar stream and optional filters. Posts and social messages are requested in separate pages; unscheduled posts are excluded.' ),
+				'output_schema'       => $this->page_schema( $item_schema, 'One page of posts or social messages the current user can access with their IDs and publication dates. Each item_type is requested separately; the response does not give a combined total.' ),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
 				'meta'                => $this->get_ability_metadata(),
@@ -118,7 +118,7 @@ class Nelio_Content_Get_Calendar_Ability extends Nelio_Content_Ability {
 	public function execute( $input ) {
 		$allowed = $this->permissions( $input );
 		if ( true !== $allowed ) {
-			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot execute this ability.', 'user', 'nelio-content' ) );
+			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', 'You cannot execute this ability.' );
 		}
 
 		$valid = validate_date_range( $input );
@@ -211,7 +211,7 @@ class Nelio_Content_Get_Calendar_Ability extends Nelio_Content_Ability {
 			)
 		);
 		if ( false === $encoded ) {
-			return new WP_Error( 'nelio_content_invalid_cursor', _x( 'Unable to encode the pagination cursor.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_cursor', 'Unable to create the cursor value for the next page.' );
 		}
 		return array(
 			'items'       => $items,

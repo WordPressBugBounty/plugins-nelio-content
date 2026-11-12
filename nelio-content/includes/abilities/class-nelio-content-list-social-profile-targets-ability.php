@@ -20,32 +20,32 @@ class Nelio_Content_List_Social_Profile_Targets_Ability extends Nelio_Content_Ab
 			array(
 				'name'        => array(
 					'type'        => 'string',
-					'description' => _x( 'Exact publishing target name to use as profile_options.target_name, such as a Pinterest board identifier.', 'text', 'nelio-content' ),
+					'description' => 'Exact publishing target name to use as profile_options.target_name, such as a Pinterest board identifier.',
 				),
 				'displayName' => array(
 					'type'        => 'string',
-					'description' => _x( 'Human-readable board or destination name reported by Nelio Cloud.', 'text', 'nelio-content' ),
+					'description' => 'Human-readable board or destination name reported by Nelio Cloud.',
 				),
 			),
 			array( 'name', 'displayName' ),
-			_x( 'One publishing destination within an accessible social profile.', 'text', 'nelio-content' )
+			'One publishing destination within an accessible social profile.'
 		);
 		wp_register_ability(
 			'nelio-content/list-social-profile-targets',
 			array(
 				'label'               => _x( 'List social profile targets', 'command', 'nelio-content' ),
-				'description'         => _x( 'List accessible destinations for a connected profile, such as Pinterest boards, before creating a message. Requires access to the profile. Returns destination names only, without credentials or connection changes.', 'text', 'nelio-content' ),
+				'description'         => 'List accessible destinations for a connected profile, such as Pinterest boards, before creating a message. Requires access to the profile. Returns destination names only, without credentials or connection changes.',
 				'category'            => 'nelio-content-profiles',
 				'input_schema'        => $this->object_schema(
 					array(
-						'profile_id' => $this->uuid_schema( _x( 'Accessible connected social profile whose destinations should be listed.', 'text', 'nelio-content' ) ),
+						'profile_id' => $this->uuid_schema( 'Accessible connected social profile whose destinations should be listed.' ),
 						'cursor'     => $query['cursor'],
 						'per_page'   => $query['per_page'],
 					),
 					array( 'profile_id' ),
-					_x( 'One accessible profile and optional bounded pagination over its publishing destinations.', 'text', 'nelio-content' )
+					'One accessible profile and optional page size and continuation values over its publishing destinations.'
 				),
-				'output_schema'       => $this->page_schema( $target, _x( 'A page of profile destination names suitable for use in per-profile publishing options.', 'text', 'nelio-content' ) ),
+				'output_schema'       => $this->page_schema( $target, 'A page of profile destination names suitable for use in per-profile publishing options.' ),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
 				'meta'                => $this->get_ability_metadata(),
@@ -71,7 +71,7 @@ class Nelio_Content_List_Social_Profile_Targets_Ability extends Nelio_Content_Ab
 	 */
 	public function execute( $input ) {
 		if ( ! $this->permissions( $input ) ) {
-			return new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot access social profile targets.', 'user', 'nelio-content' ), array( 'status' => 403 ) );
+			return new WP_Error( 'nelio_content_permission_denied', 'You cannot access social profile targets.', array( 'status' => 403 ) );
 		}
 		$targets = get_social_profile_targets( $input['profile_id'] ?? '' );
 		return is_wp_error( $targets ) ? $targets : paginate_items( $targets, $input );

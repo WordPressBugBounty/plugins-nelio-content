@@ -138,7 +138,7 @@ class Nelio_Content_Auto_Sharer {
 		foreach ( $this->array_split( $posts, $days_to_schedule ) as $posts ) {
 			$next_day = strtotime( $last_scheduled_day . ' +1 day' );
 			if ( false === $next_day ) {
-				return new WP_Error( 'nelio_content_invalid_date', _x( 'Unable to determine the next reshare day.', 'user', 'nelio-content' ), array( 'queued_days' => $queued ) );
+				return new WP_Error( 'nelio_content_invalid_date', _x( 'Unable to determine the next reshare day.', 'text', 'nelio-content' ), array( 'queued_days' => $queued ) );
 			}
 			$day    = gmdate( 'Y-m-d', $next_day );
 			$result = $this->schedule_day( $day, $posts );
@@ -147,7 +147,7 @@ class Nelio_Content_Auto_Sharer {
 					$result->get_error_code(),
 					$queued
 						/* translators: 1: Failed day scheduling guidance, 2: Previously acknowledged UTC days. */
-						? sprintf( _x( '%1$s Previously acknowledged days: %2$s.', 'user', 'nelio-content' ), $result->get_error_message(), implode( ', ', $queued ) )
+						? sprintf( _x( '%1$s Previously acknowledged days: %2$s.', 'text', 'nelio-content' ), $result->get_error_message(), implode( ', ', $queued ) )
 						: $result->get_error_message(),
 					array(
 						'queued_days' => $queued,
@@ -178,7 +178,7 @@ class Nelio_Content_Auto_Sharer {
 	public function schedule_day( $day, $posts ) {
 		$posts = array_map( fn( $p ) => array_merge( $p, array( 'content' => '' ) ), $posts );
 		if ( empty( $posts ) ) {
-			return new WP_Error( 'nelio_content_invalid_input', _x( 'No posts are available for this reshare day.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_input', _x( 'No posts are available for this reshare day.', 'text', 'nelio-content' ) );
 		}
 		$body = wp_json_encode(
 			array(
@@ -187,7 +187,7 @@ class Nelio_Content_Auto_Sharer {
 			)
 		);
 		if ( false === $body ) {
-			return new WP_Error( 'nelio_content_invalid_input', _x( 'Unable to encode reshare scheduling input.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_input', _x( 'Unable to encode reshare scheduling input.', 'text', 'nelio-content' ) );
 		}
 		$data     = array(
 			'method'              => 'POST',
@@ -267,14 +267,14 @@ class Nelio_Content_Auto_Sharer {
 		global $wpdb;
 		$pagination = $wpdb->prepare( 'LIMIT %d, %d', max( 0, $offset ), max( 1, min( 101, $limit ) ) );
 		if ( null === $pagination ) {
-			return new WP_Error( 'nelio_content_query_failed', _x( 'Unable to prepare the republication query.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_query_failed', _x( 'Unable to prepare the republication query.', 'text', 'nelio-content' ) );
 		}
 		$query = str_replace( 'LIMIT 0, {{post_count}}', $pagination, $query );
 		// Eligibility uses the same escaped SQL fragments as cron; no raw request text is interpolated.
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$ids = $wpdb->get_col( $query );
 		if ( $wpdb->last_error ) {
-			return new WP_Error( 'nelio_content_query_failed', _x( 'Unable to retrieve posts eligible for republication.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_query_failed', _x( 'Unable to retrieve posts eligible for republication.', 'text', 'nelio-content' ) );
 		}
 		return array_map( 'absint', $ids );
 	}

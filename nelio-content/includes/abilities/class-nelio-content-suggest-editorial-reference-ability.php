@@ -11,57 +11,57 @@ class Nelio_Content_Suggest_Editorial_Reference_Ability extends Nelio_Content_Ed
 			'post_id' => array(
 				'type'        => 'integer',
 				'minimum'     => 1,
-				'description' => _x( 'Readable and editable WordPress post with editorial references enabled. Only its suggestion for this URL is changed.', 'text', 'nelio-content' ),
+				'description' => 'Readable and editable WordPress post with editorial references enabled. Only its suggestion for this URL is changed.',
 			),
 			'url'     => array(
 				'type'        => 'string',
 				'format'      => 'uri',
 				'minLength'   => 1,
 				'maxLength'   => 2048,
-				'description' => _x( 'HTTP(S) URL to suggest, at most 2048 bytes after trimming surrounding whitespace. Embedded username/password credentials, HTML, unescaped whitespace and other protocols are unsupported. Internal content must be readable and viewable.', 'text', 'nelio-content' ),
+				'description' => 'HTTP(S) URL to suggest, at most 2048 bytes after trimming surrounding whitespace. Embedded username/password credentials, HTML, unescaped whitespace and other protocols are unsupported. Internal content must be readable and viewable.',
 			),
 		);
 		wp_register_ability(
 			'nelio-content/suggest-editorial-reference',
 			array(
 				'label'               => _x( 'Suggest editorial reference', 'command', 'nelio-content' ),
-				'description'         => _x( 'Suggest one HTTP(S) URL for an editable post, in Free or Premium. Reuses a saved external reference for that exact URL or resolves readable, viewable internal content; otherwise creates a pending external reference. Creation requires permission to create references. Adds only this suggestion, preserving other references and any included relationship. Re-suggesting a discarded reference removes its discarded relationship. Records the current user and time when suggestion metadata is absent, preserving valid existing attribution. An already suggested, non-discarded reference with valid attribution is returned unchanged. No page download, link check, metadata enrichment or post-content edit occurs; internal content and shared bibliographic fields are not modified. Writes are not transactional and concurrent requests may create duplicate reference records. After an unconfirmed result, inspect the post’s references before retrying; no automatic retry is performed.', 'text', 'nelio-content' ),
+				'description'         => 'Suggest one HTTP(S) URL for an editable post, in Free or Premium. Reuses a saved external reference for that exact URL or resolves readable, viewable internal content; otherwise creates a pending external reference. Creation requires permission to create references. Adds only this suggestion, preserving other references and any included relationship. Re-suggesting a discarded reference removes its discarded relationship. Records the current user and time when suggestion metadata is absent, preserving valid existing attribution. An already suggested, non-discarded reference with valid attribution is returned unchanged. No page download, link check, metadata enrichment or post-content edit occurs; internal content and shared bibliographic fields are not modified. The reference is saved in separate steps, so some changes may remain if a later step fails. Requests made at the same time may create duplicate reference records. After an unconfirmed result, inspect the post’s references before retrying; no automatic retry is performed.',
 				'category'            => 'nelio-content-references',
-				'input_schema'        => $this->object_schema( $properties, array( 'post_id', 'url' ), _x( 'One editable post and one reference URL. Attribution and reference identity are resolved by the site, not supplied by the caller.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $properties, array( 'post_id', 'url' ), 'One editable post and one reference URL. Attribution and reference identity are resolved by the site, not supplied by the caller.' ),
 				'output_schema'       => $this->object_schema(
 					array(
 						'post_id'      => array(
 							'type'        => 'integer',
 							'minimum'     => 1,
-							'description' => _x( 'Post whose suggestion was verified.', 'text', 'nelio-content' ),
+							'description' => 'Post whose suggestion was verified.',
 						),
 						'reference_id' => array(
 							'type'        => 'integer',
 							'minimum'     => 1,
-							'description' => _x( 'Resolved external reference ID or internal WordPress content ID. Reuse it when inspecting this post’s references.', 'text', 'nelio-content' ),
+							'description' => 'Resolved external reference ID or internal WordPress content ID. Reuse it when inspecting this post’s references.',
 						),
 						'url'          => array(
 							'type'        => 'string',
 							'format'      => 'uri',
 							'maxLength'   => 2048,
-							'description' => _x( 'Requested URL after trimming surrounding whitespace. This does not prove the URL is reachable.', 'text', 'nelio-content' ),
+							'description' => 'Requested URL after trimming surrounding whitespace. This does not prove the URL is reachable.',
 						),
 						'is_external'  => array(
 							'type'        => 'boolean',
-							'description' => _x( 'Whether this uses an external reference record rather than internal WordPress content.', 'text', 'nelio-content' ),
+							'description' => 'Whether this uses an external reference record rather than internal WordPress content.',
 						),
 						'suggested'    => array(
 							'type'        => 'boolean',
 							'enum'        => array( true ),
-							'description' => _x( 'True only after verifying the suggestion, absence of a discarded relationship and valid saved attribution.', 'text', 'nelio-content' ),
+							'description' => 'True only after verifying the suggestion, absence of a discarded relationship and valid saved attribution.',
 						),
 						'changed'      => array(
 							'type'        => 'boolean',
-							'description' => _x( 'True when a suggestion, discard state or absent attribution needed updating. False means the existing valid suggestion required no write. This is not a transactional change log.', 'text', 'nelio-content' ),
+							'description' => 'True when a suggestion, discard state or absent attribution needed updating. False means the existing valid suggestion required no write. This is a summary of verified changes, not a complete record of every save step.',
 						),
 					),
 					array( 'post_id', 'reference_id', 'url', 'is_external', 'suggested', 'changed' ),
-					_x( 'Verified suggestion identity and result, without author contact details, raw metadata or associations with other posts.', 'text', 'nelio-content' )
+					'Verified suggestion identity and result, without author contact details, raw metadata or associations with other posts.'
 				),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
@@ -81,7 +81,7 @@ class Nelio_Content_Suggest_Editorial_Reference_Ability extends Nelio_Content_Ed
 		$url   = trim( $input['url'] ?? '' );
 		$parts = wp_parse_url( $url );
 		if ( '' === $url || strlen( $url ) > 2048 || esc_url_raw( $url, array( 'http', 'https' ) ) !== $url || preg_match( '/\s/u', $url ) || ! is_array( $parts ) || empty( $parts['host'] ) || ! in_array( $parts['scheme'] ?? '', array( 'http', 'https' ), true ) || isset( $parts['user'] ) || isset( $parts['pass'] ) ) {
-			return new WP_Error( 'nelio_content_invalid_reference_url', _x( 'Provide an HTTP(S) URL of at most 2048 bytes without embedded credentials or unescaped whitespace.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_reference_url', 'Provide an HTTP(S) URL of at most 2048 bytes without embedded credentials or unescaped whitespace.' );
 		}
 		$reference = nelio_content_get_reference_post_by_url( $url );
 		if ( is_wp_error( $reference ) ) {
@@ -150,7 +150,7 @@ class Nelio_Content_Suggest_Editorial_Reference_Ability extends Nelio_Content_Ed
 
 	/** @return WP_Error */
 	private function denied() {
-		return new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot suggest this reference for the selected post.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_permission_denied', 'You cannot suggest this reference for the selected post.' );
 	}
 
 	/**
@@ -162,8 +162,7 @@ class Nelio_Content_Suggest_Editorial_Reference_Ability extends Nelio_Content_Ed
 		if ( $id > 0 && $this->permissions( $input ) && $this->can_read_reference( $id ) ) {
 			return new WP_Error(
 				'nelio_content_reference_suggestion_unconfirmed',
-				/* translators: %d: Reference ID to inspect. */
-				sprintf( _x( 'The suggestion for reference %d could not be confirmed. Inspect this post’s references before retrying.', 'user', 'nelio-content' ), $id ),
+				sprintf( 'The suggestion for reference %d could not be confirmed. Inspect this post’s references before retrying.', $id ),
 				array(
 					'post_id'      => $input['post_id'] ?? 0,
 					'reference_id' => $id,
@@ -171,6 +170,6 @@ class Nelio_Content_Suggest_Editorial_Reference_Ability extends Nelio_Content_Ed
 				)
 			);
 		}
-		return new WP_Error( 'nelio_content_reference_suggestion_unconfirmed', _x( 'The suggestion could not be confirmed. Inspect this post’s references, or ask an editor to do so, before retrying.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_reference_suggestion_unconfirmed', 'The suggestion could not be confirmed. Inspect this post’s references, or ask an editor to do so, before retrying.' );
 	}
 }

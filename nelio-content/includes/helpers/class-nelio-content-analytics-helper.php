@@ -1084,7 +1084,7 @@ class Nelio_Content_Analytics_Helper {
 
 		$json_string = wp_remote_post( "https://analyticsdata.googleapis.com/v1beta/properties/{$ga4_prop}:runReport", $args );
 		if ( is_wp_error( $json_string ) ) {
-			return new WP_Error( 'nelio-content-ga-error', _x( 'Error while retrieving data from Google Analytics.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio-content-ga-error', _x( 'Error while retrieving data from Google Analytics.', 'text', 'nelio-content' ) );
 		}
 
 		$code = wp_remote_retrieve_response_code( $json_string );
@@ -1178,7 +1178,7 @@ class Nelio_Content_Analytics_Helper {
 
 		$json_string = wp_remote_post( "https://analyticsdata.googleapis.com/v1beta/properties/{$ga4_prop}:runReport", $args );
 		if ( is_wp_error( $json_string ) ) {
-			return new WP_Error( 'nelio-content-ga-error', _x( 'Error while retrieving social-origin data from Google Analytics.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio-content-ga-error', _x( 'Error while retrieving social-origin data from Google Analytics.', 'text', 'nelio-content' ) );
 		}
 
 		$code = wp_remote_retrieve_response_code( $json_string );
@@ -1188,7 +1188,7 @@ class Nelio_Content_Analytics_Helper {
 
 		$json = json_decode( $json_string['body'], true );
 		if ( ! is_array( $json ) || isset( $json['error'] ) ) {
-			return new WP_Error( 'nelio-content-ga-error', _x( 'Error while retrieving social-origin data from Google Analytics.', 'user', 'nelio-content' ) . wp_json_encode( $json ) );
+			return new WP_Error( 'nelio-content-ga-error', _x( 'Error while retrieving social-origin data from Google Analytics.', 'text', 'nelio-content' ) . wp_json_encode( $json ) );
 		}
 
 		$rows = isset( $json['rows'] ) && is_array( $json['rows'] ) ? $json['rows'] : array();

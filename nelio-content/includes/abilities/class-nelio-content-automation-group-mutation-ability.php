@@ -11,7 +11,7 @@ abstract class Nelio_Content_Automation_Group_Mutation_Ability extends Nelio_Con
 				'taxonomy' => array(
 					'type'        => 'string',
 					'minLength'   => 1,
-					'description' => _x( 'Attached, assignable taxonomy.', 'text', 'nelio-content' ),
+					'description' => 'Attached, assignable taxonomy.',
 				),
 				'term_ids' => array(
 					'type'        => 'array',
@@ -21,63 +21,63 @@ abstract class Nelio_Content_Automation_Group_Mutation_Ability extends Nelio_Con
 						'type'    => 'integer',
 						'minimum' => 1,
 					),
-					'description' => _x( 'Existing assignable terms; empty means no restriction for this taxonomy.', 'text', 'nelio-content' ),
+					'description' => 'Existing assignable terms; empty means no restriction for this taxonomy.',
 				),
 			),
 			array( 'taxonomy', 'term_ids' ),
-			_x( 'One complete taxonomy selector; duplicate taxonomies are rejected.', 'text', 'nelio-content' )
+			'One complete taxonomy selector; duplicate taxonomies are rejected.'
 		);
 		$template  = $this->object_schema(
 			array(
-				'template_id'  => $this->uuid_schema( _x( 'Optional ID of an existing template in this exact group, source and promotion kind. Omit for a new controlled identity.', 'text', 'nelio-content' ) ),
+				'template_id'  => $this->uuid_schema( 'Optional ID of an existing template in this exact group, source and promotion kind. Omit for a new controlled identity.' ),
 				'text'         => array(
 					'type'        => 'string',
 					'minLength'   => 1,
 					'maxLength'   => 10000,
-					'description' => _x( 'Literal template text, including supported placeholders. Text is saved without rendering or enforcing a rendered message length.', 'text', 'nelio-content' ),
+					'description' => 'Literal template text, including supported placeholders. Text is saved without rendering or enforcing a rendered message length.',
 				),
 				'post_type'    => array(
 					'type'        => 'string',
 					'maxLength'   => 100,
-					'description' => _x( 'Optional enabled editable type for a universal-group template. Regular-group templates inherit their group type.', 'text', 'nelio-content' ),
+					'description' => 'Optional enabled editable type for a universal-group template. Regular-group templates inherit their group type.',
 				),
 				'author_id'    => array(
 					'type'        => 'integer',
 					'minimum'     => 1,
-					'description' => _x( 'Optional existing author selector. Must be compatible with the group and editable content type.', 'text', 'nelio-content' ),
+					'description' => 'Optional existing author selector. Must be compatible with the group and editable content type.',
 				),
 				'taxonomies'   => array(
 					'type'        => 'array',
 					'maxItems'    => 100,
 					'items'       => $term,
-					'description' => _x( 'Optional single-term selectors; each taxonomy must have exactly one term, compatible with the group.', 'text', 'nelio-content' ),
+					'description' => 'Optional single-term selectors; each taxonomy must have exactly one term, compatible with the group.',
 				),
 				'target_name'  => array(
 					'type'        => 'string',
 					'maxLength'   => 500,
-					'description' => _x( 'Optional saved publication destination, such as a Pinterest board. Its current availability is evaluated when generating messages.', 'text', 'nelio-content' ),
+					'description' => 'Optional saved publication destination, such as a Pinterest board. Its current availability is evaluated when generating messages.',
 				),
 				'attachment'   => array(
 					'type'        => 'string',
 					'enum'        => array( 'none', 'image', 'video' ),
-					'description' => _x( 'Optional media preference supported by the network. Actual media is chosen when generating messages.', 'text', 'nelio-content' ),
+					'description' => 'Optional media preference supported by the network. Actual media is chosen when generating messages.',
 				),
 				'availability' => $this->availability_schema(),
 			),
 			array( 'text' ),
-			_x( 'One replacement template. Identity, creator, network, source profile and group are assigned by the service; credentials and arbitrary settings are unsupported.', 'text', 'nelio-content' )
+			'One replacement template. Identity, creator, network, source profile and group are assigned by the service; credentials and arbitrary settings are unsupported.'
 		);
 		$templates = array(
 			'type'        => 'array',
 			'maxItems'    => 100,
 			'items'       => $template,
-			'description' => _x( 'Complete replacement of this source’s templates for this promotion kind. Empty explicitly removes them; omitted preserves them.', 'text', 'nelio-content' ),
+			'description' => 'Complete replacement of this source’s templates for this promotion kind. Empty explicitly removes them; omitted preserves them.',
 		);
-		$profile   = array( 'profile_id' => $this->uuid_schema( _x( 'Connected accessible profile whose settings are being patched. Omitted profiles are preserved.', 'text', 'nelio-content' ) ) );
+		$profile   = array( 'profile_id' => $this->uuid_schema( 'Connected accessible profile whose settings are being patched. Omitted profiles are preserved.' ) );
 		foreach ( array( 'enabled', 'publication_enabled', 'reshare_enabled' ) as $key ) {
 			$profile[ $key ] = array(
 				'type'        => 'boolean',
-				'description' => _x( 'Requested saved switch. Publication/reshare switches are normalized to false without usable profile or network templates.', 'text', 'nelio-content' ),
+				'description' => 'Requested saved switch. Publication/reshare switches are normalized to false without usable profile or network templates.',
 			);
 		}
 		$profile['publication_templates'] = $templates;
@@ -87,19 +87,19 @@ abstract class Nelio_Content_Automation_Group_Mutation_Ability extends Nelio_Con
 				'type'        => 'string',
 				'minLength'   => 1,
 				'maxLength'   => 200,
-				'description' => _x( 'Plain name for a regular group; unavailable for universal.', 'text', 'nelio-content' ),
+				'description' => 'Plain name for a regular group; unavailable for universal.',
 			),
 			'weight'           => array(
 				'type'        => 'number',
 				'minimum'     => 0,
 				'maximum'     => 100,
-				'description' => _x( 'Relative group weight, default 100 on creation. Zero disables; positive weights do not imply exclusive precedence.', 'text', 'nelio-content' ),
+				'description' => 'Relative group weight, default 100 on creation. Zero disables the group. A higher weight does not exclude other matching groups.',
 			),
 			'post_type'        => array(
 				'type'        => 'string',
 				'minLength'   => 1,
 				'maxLength'   => 100,
-				'description' => _x( 'Enabled editable type for a regular group. Changing it normalizes its selectors and templates as in the editor. Unavailable for universal.', 'text', 'nelio-content' ),
+				'description' => 'Enabled editable type for a regular group. Changing it normalizes its selectors and templates as in the editor. Unavailable for universal.',
 			),
 			'authors'          => array(
 				'type'        => 'array',
@@ -109,20 +109,20 @@ abstract class Nelio_Content_Automation_Group_Mutation_Ability extends Nelio_Con
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'description' => _x( 'Complete saved author selector. Empty selects all authors; authors must exist and have editing access to the selected type. Types without author support clear author selectors.', 'text', 'nelio-content' ),
+				'description' => 'Complete saved author selector. Empty selects all authors; authors must exist and have editing access to the selected type. Types without author support clear author selectors.',
 			),
 			'taxonomies'       => array(
 				'type'        => 'array',
 				'maxItems'    => 100,
 				'items'       => $term,
-				'description' => _x( 'Complete replacement of regular-group taxonomy selectors. Empty clears them; omitted preserves applicable selectors.', 'text', 'nelio-content' ),
+				'description' => 'Complete replacement of regular-group taxonomy selectors. Empty clears them; omitted preserves applicable selectors.',
 			),
 			'publication_rule' => $this->publication_rule_schema(),
 			'profiles'         => array(
 				'type'        => 'array',
 				'maxItems'    => 100,
-				'items'       => $this->object_schema( $profile, array( 'profile_id' ), _x( 'Partial settings for one profile. At least one switch or template list is required.', 'text', 'nelio-content' ) ),
-				'description' => _x( 'Individual profile patches. Frequencies are not changed by this operation.', 'text', 'nelio-content' ),
+				'items'       => $this->object_schema( $profile, array( 'profile_id' ), 'Partial settings for one profile. At least one switch or template list is required.' ),
+				'description' => 'Individual profile patches. Frequencies are not changed by this operation.',
 			),
 			'networks'         => array(
 				'type'        => 'array',
@@ -132,15 +132,15 @@ abstract class Nelio_Content_Automation_Group_Mutation_Ability extends Nelio_Con
 						'network'               => array(
 							'type'        => 'string',
 							'minLength'   => 1,
-							'description' => _x( 'Connected network supporting network templates. Its templates may affect every associated profile.', 'text', 'nelio-content' ),
+							'description' => 'Connected network supporting network templates. Its templates may affect every associated profile.',
 						),
 						'publication_templates' => $templates,
 						'reshare_templates'     => $templates,
 					),
 					array( 'network' ),
-					_x( 'Partial network-template settings. At least one template list is required; omitted modes/networks are preserved.', 'text', 'nelio-content' )
+					'Partial network-template settings. At least one template list is required; omitted modes/networks are preserved.'
 				),
-				'description' => _x( 'Network template patches without profile frequency updates.', 'text', 'nelio-content' ),
+				'description' => 'Network template patches without profile frequency updates.',
 			),
 		);
 	}
@@ -161,30 +161,30 @@ abstract class Nelio_Content_Automation_Group_Mutation_Ability extends Nelio_Con
 		$properties['confirm_collection_write'] = array(
 			'type'        => 'boolean',
 			'enum'        => array( true ),
-			'description' => _x( 'Confirm that saving this individual change rewrites the Cloud-visible group collection. Concurrent browser/other-site writes cannot be atomically prevented. Inspect after uncertain results; never retry creation automatically.', 'text', 'nelio-content' ),
+			'description' => 'Confirm that saving this individual change rewrites the group collection returned by Cloud. Another browser or site may save changes at the same time; this operation cannot prevent that. Inspect after uncertain results; never retry creation automatically.',
 		);
 		wp_register_ability(
 			'nelio-content/' . $name,
 			array(
 				'label'               => $label,
-				'description'         => $description . ' ' . _x( 'Requires Premium, plugin management, full social editing and access to every connected profile and saved profile reference, including network-template effects. Supply a revision from a fresh group read and explicitly confirm the collection-wide save. Unrelated returned groups and omitted settings are preserved. A stale revision is rejected before submission; a local lock and rechecks do not provide atomic Cloud concurrency. Errors after submission may leave a saved or partial change. Inspect configuration before deciding what to do next. This does not generate messages or update profile frequencies.', 'text', 'nelio-content' ),
+				'description'         => $description . ' Requires Premium, plugin management, full social editing and access to every connected profile and saved profile reference, including network-template effects. Supply a revision from a fresh group read and explicitly confirm the save of the entire group collection. Unrelated returned groups and omitted settings are preserved. If the supplied revision no longer matches the collection, the request is rejected before saving. A local lock prevents overlapping changes through these tools. Rechecks may detect other changes, but cannot prevent another client from changing Cloud settings at the same time. Errors after submission may leave a saved or partial change. Inspect configuration before deciding what to do next. This does not generate messages or update profile frequencies.',
 				'category'            => 'nelio-content-messages',
-				'input_schema'        => $this->object_schema( $properties, array_merge( $required, array( 'expected_revision', 'confirm_collection_write' ) ), _x( 'One explicit group mutation with a required observed collection revision and save confirmation. No raw collection replacement is accepted.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $properties, array_merge( $required, array( 'expected_revision', 'confirm_collection_write' ) ), 'One group change, with the revision returned by a recent read of the collection and explicit confirmation to save it. Replacing the entire collection directly is not supported.' ),
 				'output_schema'       => $this->object_schema(
 					array(
 						'group_id' => $this->group_id_schema(),
 						'changed'  => array(
 							'type'        => 'boolean',
-							'description' => _x( 'Whether the verified request changed saved configuration. Equal normalized updates are no-ops.', 'text', 'nelio-content' ),
+							'description' => 'Whether the verified request changed saved configuration. If the settings already match after applying the normal setting rules, no changes are saved.',
 						),
 						'deleted'  => array(
 							'type'        => 'boolean',
-							'description' => _x( 'Whether the identified regular group is absent after verified deletion. No posts or messages were deleted.', 'text', 'nelio-content' ),
+							'description' => 'Whether the identified regular group is absent after verified deletion. No posts or messages were deleted.',
 						),
 						'revision' => $this->revision_schema(),
 					),
 					array( 'group_id', 'changed', 'deleted', 'revision' ),
-					_x( 'Verified operation identity and observed collection revision, without raw settings or templates.', 'text', 'nelio-content' )
+					'Identifiers for the confirmed change and the collection revision returned after it, without full settings or templates.'
 				),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),

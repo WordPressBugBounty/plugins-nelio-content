@@ -41,7 +41,7 @@ defined( 'ABSPATH' ) || exit;
 		?>
 		<span class="description"><a href="<?php echo esc_url( $more ); ?>">
 		<?php
-			echo esc_html_x( 'Read more…', 'user', 'nelio-content' );
+			echo esc_html_x( 'Read more…', 'command', 'nelio-content' );
 		?>
 		</a></span>
 		<?php
@@ -59,7 +59,7 @@ defined( 'ABSPATH' ) || exit;
 			more = more
 				? wp.element.createElement( wp.components.ExternalLink, {
 						href: more,
-						children: [ <?php echo wp_json_encode( _x( 'Read more…', 'user', 'nelio-content' ) ); ?> ],
+						children: [ <?php echo wp_json_encode( _x( 'Read more…', 'command', 'nelio-content' ) ); ?> ],
 					} )
 				: wp.element.createElement( wp.element.Fragment, {} );
 

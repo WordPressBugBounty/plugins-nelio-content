@@ -13,7 +13,7 @@ abstract class Nelio_Content_Series_Ability extends Nelio_Content_Premium_Abilit
 		return array(
 			'type'        => 'integer',
 			'minimum'     => 1,
-			'description' => _x( 'Existing series term ID in the site’s configured series taxonomy.', 'text', 'nelio-content' ),
+			'description' => 'Existing series term ID in the site’s configured series taxonomy.',
 		);
 	}
 }

@@ -27,10 +27,10 @@ class Nelio_Content_Get_Social_Publishing_Errors_Ability extends Nelio_Content_A
 			'nelio-content/get-social-publishing-errors',
 			array(
 				'label'               => _x( 'Get social publishing errors', 'command', 'nelio-content' ),
-				'description'         => _x( 'List failed per-profile messages in a date range. Raw provider error text is excluded because it can contain credentials. Failure timestamps and retry eligibility are not available from this contract.', 'text', 'nelio-content' ),
+				'description'         => 'List failed messages for individual profiles in a date range. Raw provider error text is excluded because it can contain credentials. Failure timestamps and retry eligibility are not available from this contract.',
 				'category'            => 'nelio-content-messages',
-				'input_schema'        => $this->object_schema( array_diff_key( $input_properties, array( 'status' => true ) ), $required_fields, _x( 'Date range and optional filters for one page of failed social message instances.', 'text', 'nelio-content' ) ),
-				'output_schema'       => $this->page_schema( $this->message_schema(), _x( 'A bounded page of messages with status error. Unfiltered provider error details, failure timestamps and retry eligibility are not returned.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( array_diff_key( $input_properties, array( 'status' => true ) ), $required_fields, 'Date range and optional filters for one page of failed social message instances.' ),
+				'output_schema'       => $this->page_schema( $this->message_schema(), 'One page of messages with status error. Unfiltered provider error details, failure timestamps and retry eligibility are not returned.' ),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
 				'meta'                => $this->get_ability_metadata(),
@@ -57,7 +57,7 @@ class Nelio_Content_Get_Social_Publishing_Errors_Ability extends Nelio_Content_A
 	public function execute( $input ) {
 		$allowed = $this->permissions( $input );
 		if ( true !== $allowed ) {
-			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot execute this ability.', 'user', 'nelio-content' ) );
+			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', 'You cannot execute this ability.' );
 		}
 
 		$input['status'] = 'error';

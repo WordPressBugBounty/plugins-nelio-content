@@ -22,18 +22,18 @@ class Nelio_Content_Get_Post_Social_Status_Ability extends Nelio_Content_Ability
 			'nelio-content/get-post-social-status',
 			array(
 				'label'               => _x( 'Get post social status', 'command', 'nelio-content' ),
-				'description'         => _x( 'Summarize one readable post’s social promotion in Free or Premium without changing messages. Counts only non-muted records for current profiles accessible to this user. Draft, scheduled, published and failed states are counted, with Free previews in separate counters. Drafts with planned dates linked to an unpublished post are expected and become scheduled automatically when post publication reaches Nelio Cloud. They are counted as drafts, not future scheduled messages; this alone does not mean promotion is missing or require regeneration. Previews never count as effective future scheduling. Includes profile/network breakdowns and the next future scheduled date in UTC. Scope excludes removed profiles and inaccessible profiles; it is not a complete historical or site-wide view. Future recurrence instances are not predicted. Scheduled records do not guarantee successful publication. Limits are 1000 source messages, 100 accessible profiles and 2 MiB per response; failures, oversized replies and unverifiable collections produce an error rather than partial totals.', 'text', 'nelio-content' ),
+				'description'         => 'Summarize one readable post’s social promotion in Free or Premium without changing messages. Counts only message records not marked as muted for current profiles accessible to this user. Draft, scheduled, published and failed states are counted, with Free previews in separate counters. Drafts with planned dates linked to an unpublished post are expected and become scheduled automatically when post publication reaches Nelio Cloud. They are counted as drafts, not future scheduled messages; this alone does not mean promotion is missing or require regeneration. Previews never count as effective future scheduling. Includes profile/network breakdowns and the next future scheduled date in UTC. Removed profiles and profiles the current user cannot access are excluded; it is not a complete history or a view of the whole site. Future recurrence instances are not predicted. Scheduled records do not guarantee successful publication. Limits are 1000 source messages, 100 accessible profiles and 2 MiB per response; failures, replies exceeding those limits and data that cannot be verified produce an error rather than partial totals.',
 				'category'            => 'nelio-content-messages',
 				'input_schema'        => $this->object_schema(
 					array(
 						'post_id' => array(
 							'type'        => 'integer',
 							'minimum'     => 1,
-							'description' => _x( 'Existing readable WordPress post whose currently visible social messages should be summarized. No publication-date range is needed, so undated drafts can be included.', 'text', 'nelio-content' ),
+							'description' => 'Existing readable WordPress post whose currently visible social messages should be summarized. No publication-date range is needed, so undated drafts can be included.',
 						),
 					),
 					array( 'post_id' ),
-					_x( 'Identify one readable post. All counts are restricted to profiles accessible to the current user.', 'text', 'nelio-content' )
+					'Identify one readable post. All counts are restricted to profiles accessible to the current user.'
 				),
 				'output_schema'       => $this->output_schema(),
 				'execute_callback'    => array( $this, 'execute' ),
@@ -58,7 +58,7 @@ class Nelio_Content_Get_Post_Social_Status_Ability extends Nelio_Content_Ability
 	 */
 	public function execute( $input ) {
 		if ( ! $this->permissions( $input ) ) {
-			return new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot inspect social promotion for this post.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_permission_denied', 'You cannot inspect social promotion for this post.' );
 		}
 		$response = request_cloud( '/post/' . $input['post_id'] . '/items', 'GET', null, array( 'social' ) );
 		if ( is_wp_error( $response ) ) {
@@ -73,7 +73,7 @@ class Nelio_Content_Get_Post_Social_Status_Ability extends Nelio_Content_Ability
 			return $profiles;
 		}
 		if ( ! $this->permissions( $input ) ) {
-			return new WP_Error( 'nelio_content_permission_denied', _x( 'Post access is no longer available.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_permission_denied', 'Post access is no longer available.' );
 		}
 		if ( count( $profiles ) > self::MAX_PROFILES ) {
 			return $this->unavailable();
@@ -233,21 +233,21 @@ class Nelio_Content_Get_Post_Social_Status_Ability extends Nelio_Content_Ability
 
 	/** @return WP_Error */
 	private function unavailable() {
-		return new WP_Error( 'nelio_content_social_summary_unavailable', _x( 'A complete social summary could not be verified within the supported limits. No partial counts were returned.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_social_summary_unavailable', 'A complete social summary could not be verified within the supported limits. No partial counts were returned.' );
 	}
 
 	/** @return array<string,mixed> */
 	private function output_schema() {
 		$properties = array();
 		foreach ( array(
-			'total'          => _x( 'Total records in this bucket. Published means reported as published, not a newly verified provider publication.', 'text', 'nelio-content' ),
-			'draft'          => _x( 'Records with draft status, including undated drafts and messages with planned dates awaiting publication of a related post. The latter become scheduled automatically after post publication reaches Nelio Cloud.', 'text', 'nelio-content' ),
-			'schedule'       => _x( 'Records with schedule status, which may have past dates. This is not a publication guarantee.', 'text', 'nelio-content' ),
-			'publish'        => _x( 'Records reported with publish status within the visible current collection, not an exhaustive historical total.', 'text', 'nelio-content' ),
-			'error'          => _x( 'Records with error status. Raw provider failure details are excluded.', 'text', 'nelio-content' ),
-			'manual'         => _x( 'Records explicitly identified as manual without an automatic-generation marker.', 'text', 'nelio-content' ),
-			'automatic'      => _x( 'Records identified by a known automatic-generation marker or automatic source.', 'text', 'nelio-content' ),
-			'unknown_origin' => _x( 'Records whose origin cannot be reliably classified as manual or automatic.', 'text', 'nelio-content' ),
+			'total'          => 'Total records in this bucket. Published means reported as published, not a newly verified provider publication.',
+			'draft'          => 'Records with draft status, including undated drafts and messages with planned dates awaiting publication of a related post. The latter become scheduled automatically after post publication reaches Nelio Cloud.',
+			'schedule'       => 'Records with schedule status, which may have past dates. This is not a publication guarantee.',
+			'publish'        => 'Records reported with publish status within the visible current collection, not an exhaustive historical total.',
+			'error'          => 'Records with error status. Raw provider failure details are excluded.',
+			'manual'         => 'Records explicitly identified as manual without an automatic-generation marker.',
+			'automatic'      => 'Records identified by a known automatic-generation marker or automatic source.',
+			'unknown_origin' => 'Records whose origin cannot be reliably classified as manual or automatic.',
 		) as $name => $description ) {
 			$properties[ $name ] = array(
 				'type'        => 'integer',
@@ -256,92 +256,92 @@ class Nelio_Content_Get_Post_Social_Status_Ability extends Nelio_Content_Ability
 				'description' => $description,
 			);
 		}
-		$counts               = $this->object_schema( $properties, array_keys( $properties ), _x( 'Record counts by state and origin. State counters sum to total; origin counters separately sum to total.', 'text', 'nelio-content' ) );
+		$counts               = $this->object_schema( $properties, array_keys( $properties ), 'Record counts by state and origin. State counters sum to total; origin counters separately sum to total.' );
 		$summary              = array(
-			'counts'                 => array_replace( $counts, array( 'description' => _x( 'Visible non-preview, non-muted message records. Counts do not include Free previews.', 'text', 'nelio-content' ) ) ),
-			'previews'               => array_replace( $counts, array( 'description' => _x( 'Free preview records counted separately. These do not establish effective future promotion.', 'text', 'nelio-content' ) ) ),
+			'counts'                 => array_replace( $counts, array( 'description' => 'Visible messages that are not previews and are not marked as muted. Counts do not include Free previews.' ) ),
+			'previews'               => array_replace( $counts, array( 'description' => 'Free preview records counted separately. These do not establish effective future promotion.' ) ),
 			'future_scheduled_count' => array(
 				'type'        => 'integer',
 				'minimum'     => 0,
 				'maximum'     => self::MAX_MESSAGES,
-				'description' => _x( 'Non-preview schedule records with valid dates later than observed_at. This counts stored schedule records, not drafts awaiting post publication, future recurrence expansion or provider acceptance.', 'text', 'nelio-content' ),
+				'description' => 'Non-preview schedule records with valid dates later than observed_at. This counts stored schedule records, not drafts awaiting post publication, future recurrence expansion or provider acceptance.',
 			),
 			'next_scheduled_at'      => array(
 				'type'        => 'string',
-				'description' => _x( 'Earliest future non-preview scheduled date in UTC, or empty when none is present within this scope.', 'text', 'nelio-content' ),
+				'description' => 'Earliest future non-preview scheduled date in UTC, or empty when none is present among the records covered by this response.',
 			),
 		);
 		$profile              = $this->object_schema(
 			array_merge(
 				array(
-					'profile_id'   => $this->uuid_schema( _x( 'Current social profile accessible to the current user.', 'text', 'nelio-content' ) ),
+					'profile_id'   => $this->uuid_schema( 'Current social profile accessible to the current user.' ),
 					'display_name' => array(
 						'type'        => 'string',
 						'maxLength'   => 200,
-						'description' => _x( 'Plain display name of this accessible profile, shortened to at most 200 Unicode characters. Use profile_id as the stable identity.', 'text', 'nelio-content' ),
+						'description' => 'Plain display name of this accessible profile, shortened to at most 200 Unicode characters. Use profile_id as the stable identity.',
 					),
 					'network'      => array(
 						'type'        => 'string',
-						'description' => _x( 'Network belonging to this accessible profile. A current profile does not prove current provider authentication.', 'text', 'nelio-content' ),
+						'description' => 'Network belonging to this accessible profile. A current profile does not prove current provider authentication.',
 					),
 				),
 				$summary
 			),
 			array_merge( array( 'profile_id', 'display_name', 'network' ), array_keys( $summary ) ),
-			_x( 'Counts for one accessible current profile, including zero counts where no matching message records exist.', 'text', 'nelio-content' )
+			'Counts for one accessible current profile, including zero counts where no matching message records exist.'
 		);
 		$network              = $this->object_schema(
 			array_merge(
 				array(
 					'network' => array(
 						'type'        => 'string',
-						'description' => _x( 'Network represented by the accessible current profiles in this group.', 'text', 'nelio-content' ),
+						'description' => 'Network represented by the accessible current profiles in this group.',
 					),
 				),
 				$summary
 			),
 			array_merge( array( 'network' ), array_keys( $summary ) ),
-			_x( 'Counts aggregated only across accessible current profiles of this network.', 'text', 'nelio-content' )
+			'Combined counts for this network, including only current profiles the user can access.'
 		);
-		$profiles             = $this->array_schema( $profile, _x( 'All accessible current profiles considered, with no inaccessible profile identities or counts.', 'text', 'nelio-content' ) );
+		$profiles             = $this->array_schema( $profile, 'All accessible current profiles considered, with no inaccessible profile identities or counts.' );
 		$profiles['maxItems'] = self::MAX_PROFILES;
-		$networks             = $this->array_schema( $network, _x( 'Network breakdown of the same scoped records, with previews separated.', 'text', 'nelio-content' ) );
+		$networks             = $this->array_schema( $network, 'Counts by network for the same records, with previews separated.' );
 		$networks['maxItems'] = self::MAX_PROFILES;
 		$root                 = array(
 			'post_id'                       => array(
 				'type'        => 'integer',
 				'minimum'     => 1,
-				'description' => _x( 'Readable WordPress post summarized.', 'text', 'nelio-content' ),
+				'description' => 'Readable WordPress post summarized.',
 			),
 			'scope'                         => array(
 				'type'        => 'string',
 				'enum'        => array( 'accessible_current_profiles_non_muted' ),
-				'description' => _x( 'Coverage is limited to non-muted records belonging to current profiles accessible to this user. Removed and inaccessible profiles are outside scope.', 'text', 'nelio-content' ),
+				'description' => 'The response covers only messages not marked as muted from current profiles the user can access. Removed profiles and profiles the user cannot access are excluded.',
 			),
 			'complete'                      => array(
 				'type'        => 'boolean',
 				'enum'        => array( true ),
-				'description' => _x( 'True only for the fully validated bounded collection within the stated scope. It does not mean complete site-wide promotion or historical coverage. Partial summaries are not returned.', 'text', 'nelio-content' ),
+				'description' => 'True only when all records covered by this response were checked within the supported size limits. It does not mean complete site-wide promotion or historical coverage. Partial summaries are not returned.',
 			),
 			'profiles_considered'           => array(
 				'type'        => 'integer',
 				'minimum'     => 0,
 				'maximum'     => self::MAX_PROFILES,
-				'description' => _x( 'Number of accessible current profiles considered. Zero means this user has no current profiles in scope, not that no profiles exist on the site.', 'text', 'nelio-content' ),
+				'description' => 'Number of accessible current profiles considered. Zero means this user has no current profiles covered by this response, not that no profiles exist on the site.',
 			),
 			'observed_at'                   => array(
 				'type'        => 'string',
 				'format'      => 'date-time',
-				'description' => _x( 'UTC time used to distinguish future schedules. Post and profile reads are not an atomic snapshot.', 'text', 'nelio-content' ),
+				'description' => 'UTC time used to distinguish future schedules. Post and profile details are read separately and may reflect different moments in time.',
 			),
 			'has_future_scheduled_messages' => array(
 				'type'        => 'boolean',
-				'description' => _x( 'Whether at least one visible non-preview record has schedule status and a future date. False can be expected for an unpublished post whose messages are drafts awaiting automatic scheduling at publication; it does not alone mean promotion is missing. Results are limited to this scope, and true does not guarantee publication.', 'text', 'nelio-content' ),
+				'description' => 'Whether at least one visible non-preview record has schedule status and a future date. False can be expected for an unpublished post whose messages are drafts awaiting automatic scheduling at publication; it does not alone mean promotion is missing. Results cover only the records described here, and true does not guarantee publication.',
 			),
 			'by_profile'                    => $profiles,
 			'by_network'                    => $networks,
 		);
 		$root                 = array_merge( $root, $summary );
-		return $this->object_schema( $root, array_keys( $root ), _x( 'Complete bounded summary of currently visible social promotion for one post. Previews are separate, and no site-wide or exhaustive historical conclusion is implied.', 'text', 'nelio-content' ) );
+		return $this->object_schema( $root, array_keys( $root ), 'Complete summary within the supported size limits of currently visible social promotion for one post. Previews are separate, and it does not establish a complete history or results for the whole site.' );
 	}
 }

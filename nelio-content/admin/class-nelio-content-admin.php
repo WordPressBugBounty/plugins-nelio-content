@@ -383,7 +383,7 @@ class Nelio_Content_Admin {
 	public function open_billing_session() {
 
 		if ( ! nelio_content_can_current_user_manage_account() ) {
-			$this->die_on_billing_session_error( _x( 'You’re not allowed to manage this subscription.', 'user', 'nelio-content' ) );
+			$this->die_on_billing_session_error( _x( 'You’re not allowed to manage this subscription.', 'text', 'nelio-content' ) );
 		}
 
 		$nonce = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) );

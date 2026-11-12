@@ -19,7 +19,7 @@ class Nelio_Content_Social_Message_Text {
 	public static function compute( $text, $post, $limit, $keep_permalink = false ) {
 		if ( ! $post ) {
 			if ( preg_match( '/\{(?:permalink|title|author|excerpt|categories|tags|(?:taxonomy|field|custom):[^}]*)\}/u', $text ) ) {
-				return new WP_Error( 'nelio_content_post_required', _x( 'Placeholders require an editable published or scheduled related post.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_post_required', 'Placeholders require an editable published or scheduled related post.' );
 			}
 			return self::clean( $text );
 		}

@@ -13,15 +13,15 @@ abstract class Nelio_Content_Future_Action_Ability extends Nelio_Content_Premium
 		return array(
 			'type'        => 'integer',
 			'minimum'     => 1,
-			'description' => _x( 'Existing future-action record ID obtained from action discovery, not a WordPress content ID.', 'text', 'nelio-content' ),
+			'description' => 'Existing future-action record ID obtained from action discovery, not a WordPress content ID.',
 		);
 	}
 	/** @return array{type:string,description:string,properties:array<string,array<string,mixed>>,required:list<string>,additionalProperties:bool} */
 	protected function action_schema() {
 		$properties = array();
 		foreach ( array(
-			'id'      => _x( 'Saved future-action record ID.', 'text', 'nelio-content' ),
-			'post_id' => _x( 'Verified readable and editable target post matching both saved relationships.', 'text', 'nelio-content' ),
+			'id'      => 'Saved future-action record ID.',
+			'post_id' => 'Verified readable and editable target post matching both saved relationships.',
 		) as $key => $description ) {
 			$properties[ $key ] = array(
 				'type'        => 'integer',
@@ -30,16 +30,16 @@ abstract class Nelio_Content_Future_Action_Ability extends Nelio_Content_Premium
 			);
 		}
 		foreach ( array(
-			'type'            => _x( 'Saved action kind: status-change, delete, terms-change, fields-change, stick or unstick.', 'text', 'nelio-content' ),
-			'recorded_status' => _x( 'Saved record status: draft or nc_executed. nc_executed means execution was recorded before attempting the change; it does not prove success.', 'text', 'nelio-content' ),
-			'date_type'       => _x( 'Saved date rule: exact, positive-days or predefined-offset. The rule is not recalculated.', 'text', 'nelio-content' ),
-			'date_value'      => _x( 'Saved calendar date or nonnegative day offset, interpreted according to date_type.', 'text', 'nelio-content' ),
-			'time_type'       => _x( 'Saved time rule: exact, positive-hours or predefined-offset.', 'text', 'nelio-content' ),
-			'time_value'      => _x( 'Saved HH:mm clock time or nonnegative hour offset, interpreted according to time_type.', 'text', 'nelio-content' ),
-			'timezone'        => _x( 'Saved scheduling timezone, or the current site timezone when no explicit zone was stored.', 'text', 'nelio-content' ),
-			'saved_schedule'  => _x( 'Saved target timestamp with its explicit offset, or empty when unscheduled. It is not recomputed or checked for execution success.', 'text', 'nelio-content' ),
-			'stored_date'     => _x( 'Record’s saved WordPress date in the site timezone, or empty when unset. Date-range discovery uses this date, which may differ from saved_schedule and WP-Cron.', 'text', 'nelio-content' ),
-			'cron_date'       => _x( 'Next matching WP-Cron event timestamp in UTC, or empty when no event is found. Presence does not guarantee execution.', 'text', 'nelio-content' ),
+			'type'            => 'Saved action kind: status-change, delete, terms-change, fields-change, stick or unstick.',
+			'recorded_status' => 'Saved record status: draft or nc_executed. nc_executed means execution was recorded before attempting the change; it does not prove success.',
+			'date_type'       => 'Saved date rule: exact, positive-days or predefined-offset. The rule is not recalculated.',
+			'date_value'      => 'Saved calendar date or a day offset of zero or more, interpreted according to date_type.',
+			'time_type'       => 'Saved time rule: exact, positive-hours or predefined-offset.',
+			'time_value'      => 'Saved HH:mm clock time or an hour offset of zero or more, interpreted according to time_type.',
+			'timezone'        => 'Saved scheduling timezone, or the current site timezone when no explicit zone was stored.',
+			'saved_schedule'  => 'Saved target timestamp with its explicit offset, or empty when unscheduled. It is not recomputed or checked for execution success.',
+			'stored_date'     => 'Record’s saved WordPress date in the site timezone, or empty when unset. Date-range discovery uses this date, which may differ from saved_schedule and WP-Cron.',
+			'cron_date'       => 'Next matching WP-Cron event timestamp in UTC, or empty when no event is found. Presence does not guarantee execution.',
 		) as $key => $description ) {
 			$properties[ $key ] = array(
 				'type'        => 'string',
@@ -50,17 +50,17 @@ abstract class Nelio_Content_Future_Action_Ability extends Nelio_Content_Premium
 		$properties['recorded_status']['enum'] = array( 'draft', 'nc_executed' );
 		$properties['cron_scheduled']          = array(
 			'type'        => 'boolean',
-			'description' => _x( 'Whether WP-Cron currently reports an event for this action. This is independent of its saved date and recorded status.', 'text', 'nelio-content' ),
+			'description' => 'Whether WP-Cron currently reports an event for this action. This is independent of its saved date and recorded status.',
 		);
 		$properties['configuration']           = $this->object_schema(
 			array(
 				'operation'  => array(
 					'type'        => 'string',
-					'description' => _x( 'Saved operation for terms/fields changes; empty for other action kinds.', 'text', 'nelio-content' ),
+					'description' => 'Saved operation for terms/fields changes; empty for other action kinds.',
 				),
 				'new_status' => array(
 					'type'        => 'string',
-					'description' => _x( 'Saved target WordPress status for status-change, otherwise empty.', 'text', 'nelio-content' ),
+					'description' => 'Saved target WordPress status for status-change, otherwise empty.',
 				),
 				'taxonomies' => array(
 					'type'        => 'array',
@@ -69,7 +69,7 @@ abstract class Nelio_Content_Future_Action_Ability extends Nelio_Content_Premium
 						array(
 							'taxonomy' => array(
 								'type'        => 'string',
-								'description' => _x( 'Configured target taxonomy attached to the post type and assignable by the current user.', 'text', 'nelio-content' ),
+								'description' => 'Configured target taxonomy attached to the post type and assignable by the current user.',
 							),
 							'term_ids' => array(
 								'type'        => 'array',
@@ -78,22 +78,22 @@ abstract class Nelio_Content_Future_Action_Ability extends Nelio_Content_Premium
 									'type'    => 'integer',
 									'minimum' => 1,
 								),
-								'description' => _x( 'Saved positive term IDs. Saved term labels, slugs and arbitrary data are omitted.', 'text', 'nelio-content' ),
+								'description' => 'Saved positive term IDs. Saved term labels, slugs and arbitrary data are omitted.',
 							),
 						),
 						array( 'taxonomy', 'term_ids' ),
-						_x( 'Authorized taxonomy-change target.', 'text', 'nelio-content' )
+						'Authorized taxonomy-change target.'
 					),
-					'description' => _x( 'Only authorized taxonomy targets. Empty for other action kinds or redacted targets.', 'text', 'nelio-content' ),
+					'description' => 'Only authorized taxonomy targets. Empty for other action types or targets the current user cannot access.',
 				),
 				'redacted'   => array(
 					'type'        => 'boolean',
-					'description' => _x( 'True when configuration is withheld. All custom-field keys and values are always redacted; inaccessible taxonomy targets are also omitted.', 'text', 'nelio-content' ),
+					'description' => 'True when some settings are hidden. Custom-field names and values are never included; taxonomy targets the current user cannot access are also left out.',
 				),
 			),
 			array( 'operation', 'new_status', 'taxonomies', 'redacted' ),
-			_x( 'Allowlisted saved configuration. No custom-field keys/values, raw payload, credentials or term labels are returned.', 'text', 'nelio-content' )
+			'Saved settings limited to fields this tool is allowed to return. Custom-field names and values, the full saved action data, credentials and term labels are not included.'
 		);
-		return $this->object_schema( $properties, array_keys( $properties ), _x( 'Validated saved action and current scheduling observations. No execution result is inferred and no action is repaired or rescheduled.', 'text', 'nelio-content' ) );
+		return $this->object_schema( $properties, array_keys( $properties ), 'Saved action details and its current scheduling state, after validation. These details do not establish whether the action ran successfully. This operation does not repair or reschedule the action.' );
 	}
 }

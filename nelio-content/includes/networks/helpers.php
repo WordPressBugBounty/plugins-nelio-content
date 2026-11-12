@@ -20,12 +20,12 @@ function get_network_requirements() {
 	// This is bundled application data, not a user-supplied path or response.
 	$contents = file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 	if ( false === $contents ) {
-		return new WP_Error( 'nelio_content_feature_unavailable', _x( 'Network requirements are unavailable.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_feature_unavailable', _x( 'Network requirements are unavailable.', 'text', 'nelio-content' ) );
 	}
 	/** @var array<string,TNetwork_Requirements>|null $decoded Bundled definitions checked by the cross-language tests. */
 	$decoded = json_decode( $contents, true );
 	if ( ! is_array( $decoded ) ) {
-		return new WP_Error( 'nelio_content_feature_unavailable', _x( 'Network requirements are unavailable.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_feature_unavailable', _x( 'Network requirements are unavailable.', 'text', 'nelio-content' ) );
 	}
 	return $decoded;
 }
@@ -62,18 +62,18 @@ function is_text_validation_available() {
  */
 function get_weighted_text_length( $text ) {
 	if ( ! is_text_validation_available() ) {
-		return new WP_Error( 'nelio_content_feature_unavailable', _x( 'Server-side message validation requires the PHP intl and mbstring extensions.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_feature_unavailable', _x( 'Server-side message validation requires the PHP intl and mbstring extensions.', 'text', 'nelio-content' ) );
 	}
 	// Match getMessageLength in packages/networks/text.ts, including Unicode whitespace.
 	// ECMAScript whitespace excludes U+0085 and includes U+FEFF, unlike PCRE \s.
 	$space = '\x{0009}-\x{000D}\x{0020}\x{00A0}\x{1680}\x{2000}-\x{200A}\x{2028}\x{2029}\x{202F}\x{205F}\x{3000}\x{FEFF}';
 	$text  = preg_replace( '/([' . $space . '])https?:\/\/[^' . $space . ']+/u', '$1aaaabaaaabaaaabaaaabaaaab', ' ' . $text . ' ' );
 	if ( null === $text ) {
-		return new WP_Error( 'nelio_content_invalid_content', _x( 'Message content must be valid UTF-8 text.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_content', _x( 'Message content must be valid UTF-8 text.', 'text', 'nelio-content' ) );
 	}
 	$text = preg_replace( '/^[' . $space . ']+|[' . $space . ']+$/u', '', $text );
 	if ( null === $text ) {
-		return new WP_Error( 'nelio_content_invalid_content', _x( 'Message content must be valid UTF-8 text.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_content', _x( 'Message content must be valid UTF-8 text.', 'text', 'nelio-content' ) );
 	}
 	// The PHP parser normalizes CRLF; the JavaScript parser counts both code points.
 	$line_feed_adjustment = substr_count( $text, "\r\n" );

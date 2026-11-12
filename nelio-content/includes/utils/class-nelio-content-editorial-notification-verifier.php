@@ -274,11 +274,11 @@ class Nelio_Content_Editorial_Notification_Verifier {
 
 	/** @return WP_Error */
 	public static function denied() {
-		return new WP_Error( 'nelio_content_notification_forbidden', _x( 'You cannot notify this editorial item with the supplied data and current permissions.', 'user', 'nelio-content' ), array( 'status' => 403 ) );
+		return new WP_Error( 'nelio_content_notification_forbidden', _x( 'You cannot notify this editorial item with the supplied data and current permissions.', 'text', 'nelio-content' ), array( 'status' => 403 ) );
 	}
 
 	/** @return WP_Error */
 	private static function unverified() {
-		return new WP_Error( 'nelio_content_notification_unverified', _x( 'The saved editorial item could not be verified. No notification was sent.', 'user', 'nelio-content' ), array( 'status' => 503 ) );
+		return new WP_Error( 'nelio_content_notification_unverified', _x( 'The saved editorial item could not be verified. No notification was sent.', 'text', 'nelio-content' ), array( 'status' => 503 ) );
 	}
 }

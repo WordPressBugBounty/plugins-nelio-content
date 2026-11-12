@@ -22,10 +22,10 @@ class Nelio_Content_Get_Automation_Settings_Ability extends Nelio_Content_Automa
 			'nelio-content/get-automation-settings',
 			array(
 				'label'               => _x( 'Get automation settings', 'command', 'nelio-content' ),
-				'description'         => _x( 'Requires Nelio Content Premium. Inspect publication and reshare automation settings for one accessible profile, optionally restricted to groups matching an editable post. Returns enabled settings and group weights; these do not guarantee that messages will be generated. Credentials and settings for other profiles are excluded.', 'text', 'nelio-content' ),
+				'description'         => 'Requires Nelio Content Premium. Inspect publication and reshare automation settings for one accessible profile, optionally restricted to groups matching an editable post. Returns enabled settings and group weights; these do not guarantee that messages will be generated. Credentials and settings for other profiles are excluded.',
 				'category'            => 'nelio-content-messages',
 				'input_schema'        => $this->automation_query_schema(),
-				'output_schema'       => $this->page_schema( $this->automation_settings_schema(), _x( 'One bounded page of profile-scoped automation records. Keep the same filters when following next_cursor. Configuration does not guarantee message generation.', 'text', 'nelio-content' ) ),
+				'output_schema'       => $this->page_schema( $this->automation_settings_schema(), 'One page of automation settings for a single profile. Keep the same filters when following next_cursor. Configuration does not guarantee message generation.' ),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
 				'meta'                => $this->get_premium_ability_metadata(),

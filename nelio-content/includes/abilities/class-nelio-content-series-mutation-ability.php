@@ -11,19 +11,19 @@ abstract class Nelio_Content_Series_Mutation_Ability extends Nelio_Content_Serie
 				'type'        => 'string',
 				'minLength'   => 1,
 				'maxLength'   => 200,
-				'description' => _x( 'Plain series name, trimmed, at most 200 Unicode characters. Required on creation; omit on update to preserve it.', 'text', 'nelio-content' ),
+				'description' => 'Plain series name, trimmed, at most 200 Unicode characters. Required on creation; omit on update to preserve it.',
 			),
 			'description' => array(
 				'type'        => 'string',
 				'maxLength'   => 10000,
-				'description' => _x( 'Plain series description, at most 10000 Unicode characters. Omit to preserve on update or default to empty on creation; an empty string clears it.', 'text', 'nelio-content' ),
+				'description' => 'Plain series description, at most 10000 Unicode characters. Omit to preserve on update or default to empty on creation; an empty string clears it.',
 			),
 			'slug'        => array(
 				'type'        => 'string',
 				'minLength'   => 1,
 				'maxLength'   => 200,
 				'pattern'     => '^[a-z0-9]+(?:-[a-z0-9]+)*$',
-				'description' => _x( 'Optional lowercase ASCII slug, using letters, numbers and single separating hyphens. Creation derives a slug from the name when omitted; update preserves it. Conflicts fail rather than silently suffixing or reusing another series.', 'text', 'nelio-content' ),
+				'description' => 'Optional lowercase ASCII slug, using letters, numbers and single separating hyphens. Creation derives a slug from the name when omitted; update preserves it. Conflicts fail rather than silently suffixing or reusing another series.',
 			),
 		);
 	}
@@ -32,7 +32,7 @@ abstract class Nelio_Content_Series_Mutation_Ability extends Nelio_Content_Serie
 		return array(
 			'type'        => array( 'integer', 'null' ),
 			'minimum'     => 1,
-			'description' => _x( 'Saved positive part number, or null when unset or invalid. No position among hidden posts is inferred.', 'text', 'nelio-content' ),
+			'description' => 'Saved positive part number, or null when unset or invalid. The response does not estimate the position among posts the user cannot access.',
 		);
 	}
 	/**
@@ -48,27 +48,27 @@ abstract class Nelio_Content_Series_Mutation_Ability extends Nelio_Content_Serie
 			'nelio-content/' . $name,
 			array(
 				'label'               => $label,
-				'description'         => $description . ' ' . _x( 'Requires Nelio Content Premium and the configured series taxonomy. Writes require the standard WordPress database connection, autocommit and transactional core tables; existing transactions and unsupported storage fail before writes. Saves are checked under database locks and confirmed before commit. Failures roll back database changes when possible; commit/connection uncertainty must be inspected before retrying. No automatic retry occurs. Plugin hooks and external side effects are outside the database transaction.', 'text', 'nelio-content' ),
+				'description'         => $description . ' Requires Nelio Content Premium and the configured series taxonomy. Saving requires the standard WordPress database connection, automatic commits enabled (autocommit) and core tables that support saving or undoing a group of changes together. If a database transaction is already open or the storage cannot support this, the request fails before saving. Records are locked while changes are checked, and the saved results are verified before committing the database transaction. If a step fails, database changes are undone when possible. If the connection fails or it is unclear whether changes were committed, inspect the saved state before retrying. No automatic retry occurs. Changes made by plugin hooks or external services cannot be undone by that database transaction.',
 				'category'            => 'nelio-content-series',
-				'input_schema'        => $this->object_schema( $properties, $required, _x( 'Explicit series change; omitted optional attributes preserve their saved values unless creation defaults are specified.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $properties, $required, 'Explicit series change; omitted optional attributes preserve their saved values unless creation defaults are specified.' ),
 				'output_schema'       => $this->object_schema(
 					array(
 						'series_id'   => $this->series_id_schema(),
 						'name'        => array(
 							'type'        => 'string',
-							'description' => _x( 'Verified saved series name.', 'text', 'nelio-content' ),
+							'description' => 'Verified saved series name.',
 						),
 						'slug'        => array(
 							'type'        => 'string',
-							'description' => _x( 'Verified saved series slug.', 'text', 'nelio-content' ),
+							'description' => 'Verified saved series slug.',
 						),
 						'description' => array(
 							'type'        => 'string',
-							'description' => _x( 'Saved series description as plain text, without rendering.', 'text', 'nelio-content' ),
+							'description' => 'Saved series description as plain text, without rendering.',
 						),
 						'changed'     => array(
 							'type'        => 'boolean',
-							'description' => _x( 'Whether this confirmed operation changed saved series fields, membership or part numbers. False means a verified no-op.', 'text', 'nelio-content' ),
+							'description' => 'Whether this confirmed operation changed saved series fields, membership or part numbers. False means the saved values were checked and no changes were needed.',
 						),
 						'posts'       => array(
 							'type'        => 'array',
@@ -78,18 +78,18 @@ abstract class Nelio_Content_Series_Mutation_Ability extends Nelio_Content_Serie
 									'post_id'     => array(
 										'type'        => 'integer',
 										'minimum'     => 1,
-										'description' => _x( 'Authorized post explicitly affected by this operation.', 'text', 'nelio-content' ),
+										'description' => 'Authorized post explicitly affected by this operation.',
 									),
 									'part_number' => $this->part_schema(),
 								),
 								array( 'post_id', 'part_number' ),
-								_x( 'Verified post and resulting saved part; removal returns null.', 'text', 'nelio-content' )
+								'Verified post and resulting saved part; removal returns null.'
 							),
-							'description' => _x( 'Affected authorized posts only. Empty for term creation or editing; no other-post identities or membership totals are returned.', 'text', 'nelio-content' ),
+							'description' => 'Affected authorized posts only. Empty for term creation or editing; no other-post identities or membership totals are returned.',
 						),
 					),
 					array( 'series_id', 'name', 'slug', 'description', 'changed', 'posts' ),
-					_x( 'Verified local series mutation. Inspect the series before retrying any unconfirmed operation.', 'text', 'nelio-content' )
+					'Confirmed changes to the series saved on this site. Inspect the series before retrying any unconfirmed operation.'
 				),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),

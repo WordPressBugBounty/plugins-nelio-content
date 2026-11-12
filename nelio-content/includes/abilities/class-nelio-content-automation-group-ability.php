@@ -22,7 +22,7 @@ abstract class Nelio_Content_Automation_Group_Ability extends Nelio_Content_Auto
 			'type'        => 'string',
 			'minLength'   => 1,
 			'maxLength'   => 100,
-			'description' => _x( 'Saved automation group UUID, or universal for the universal group. Obtain it from list-automation-groups.', 'text', 'nelio-content' ),
+			'description' => 'Saved automation group UUID, or universal for the universal group. Obtain it from list-automation-groups.',
 		);
 	}
 
@@ -31,7 +31,7 @@ abstract class Nelio_Content_Automation_Group_Ability extends Nelio_Content_Auto
 		return array(
 			'type'        => 'string',
 			'pattern'     => '^[a-f0-9]{64}$',
-			'description' => _x( 'Opaque revision of the Cloud-visible group collection. Pass it as expected_revision when writing. It detects observed stale configuration but does not provide an atomic remote lock.', 'text', 'nelio-content' ),
+			'description' => 'Value identifying the group collection last read from Cloud. Pass it unchanged as expected_revision when saving changes. It helps detect changes made since that read, but cannot prevent another client from changing Cloud settings at the same time.',
 		);
 	}
 
@@ -45,25 +45,25 @@ abstract class Nelio_Content_Automation_Group_Ability extends Nelio_Content_Auto
 			'revision'          => $this->revision_schema(),
 			'name'              => array(
 				'type'        => 'string',
-				'description' => _x( 'Saved group name in plain text; empty for the universal group.', 'text', 'nelio-content' ),
+				'description' => 'Saved group name in plain text; empty for the universal group.',
 			),
 			'universal'         => array(
 				'type'        => 'boolean',
-				'description' => _x( 'Whether this group applies across enabled content types without author or taxonomy selectors.', 'text', 'nelio-content' ),
+				'description' => 'Whether this group applies across enabled content types without author or taxonomy selectors.',
 			),
 			'weight'            => array(
 				'type'        => 'number',
 				'minimum'     => 0,
 				'maximum'     => 100,
-				'description' => _x( 'Saved relative weight. Zero disables the group. Positive weights are not exclusive precedence: multiple applicable groups can contribute messages.', 'text', 'nelio-content' ),
+				'description' => 'Saved relative weight. Zero disables the group. A higher weight does not exclude other matching groups; several groups can contribute messages.',
 			),
 			'enabled'           => array(
 				'type'        => 'boolean',
-				'description' => _x( 'Whether the group has positive weight. Profile switches, usable templates, content eligibility and plan limits still apply.', 'text', 'nelio-content' ),
+				'description' => 'Whether the group has positive weight. Profile switches, usable templates, content eligibility and plan limits still apply.',
 			),
 			'post_type'         => array(
 				'type'        => 'string',
-				'description' => _x( 'Enabled editable content type selected by a regular group; empty for the universal group.', 'text', 'nelio-content' ),
+				'description' => 'Enabled editable content type selected by a regular group; empty for the universal group.',
 			),
 			'author_ids'        => array(
 				'type'        => 'array',
@@ -71,7 +71,7 @@ abstract class Nelio_Content_Automation_Group_Ability extends Nelio_Content_Auto
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'description' => _x( 'Saved author selectors, without contact information. Empty means any author. A saved ID does not imply that the author still exists.', 'text', 'nelio-content' ),
+				'description' => 'Saved author selectors, without contact information. Empty means any author. A saved ID does not imply that the author still exists.',
 			),
 			'taxonomies'        => array(
 				'type'        => 'array',
@@ -79,7 +79,7 @@ abstract class Nelio_Content_Automation_Group_Ability extends Nelio_Content_Auto
 					array(
 						'taxonomy' => array(
 							'type'        => 'string',
-							'description' => _x( 'Taxonomy attached to the selected content type and assignable by the current user.', 'text', 'nelio-content' ),
+							'description' => 'Taxonomy attached to the selected content type and assignable by the current user.',
 						),
 						'term_ids' => array(
 							'type'        => 'array',
@@ -87,23 +87,23 @@ abstract class Nelio_Content_Automation_Group_Ability extends Nelio_Content_Auto
 								'type'    => 'integer',
 								'minimum' => 1,
 							),
-							'description' => _x( 'Saved terms in this taxonomy. A post must match at least one selected term in each nonempty taxonomy selector.', 'text', 'nelio-content' ),
+							'description' => 'Saved terms in this taxonomy. A post must match at least one selected term in each taxonomy filter that has selected terms.',
 						),
 					),
 					array( 'taxonomy', 'term_ids' ),
-					_x( 'One authorized saved taxonomy criterion. Empty selections do not restrict content.', 'text', 'nelio-content' )
+					'One authorized saved taxonomy criterion. Empty selections do not restrict content.'
 				),
-				'description' => _x( 'Authorized taxonomy selectors. Different taxonomies are combined with AND; terms within each taxonomy use OR.', 'text', 'nelio-content' ),
+				'description' => 'Authorized taxonomy selectors. Different taxonomies are combined with AND; terms within each taxonomy use OR.',
 			),
 			'criteria_redacted' => array(
 				'type'        => 'boolean',
-				'description' => _x( 'Whether unavailable or unauthorized taxonomy criteria were omitted. An incomplete projection cannot establish which posts match.', 'text', 'nelio-content' ),
+				'description' => 'Whether unavailable or unauthorized taxonomy criteria were omitted. If some criteria are missing from the response, it cannot establish which posts match.',
 			),
 			'publication_rule'  => $this->publication_rule_schema(),
 			'plan_group_limit'  => array(
 				'type'        => 'integer',
 				'minimum'     => 1,
-				'description' => _x( 'Locally recorded subscription limit for the total group collection, including universal. This read does not truncate saved groups to the limit or guarantee Cloud eligibility.', 'text', 'nelio-content' ),
+				'description' => 'Locally recorded subscription limit for the total group collection, including universal. This read does not truncate saved groups to the limit or guarantee Cloud eligibility.',
 			),
 		);
 		if ( $detail ) {
@@ -111,15 +111,15 @@ abstract class Nelio_Content_Automation_Group_Ability extends Nelio_Content_Auto
 				'type'        => 'array',
 				'items'       => $this->automation_settings_schema(),
 				'maxItems'    => 1000,
-				'description' => _x( 'Saved switches for connected profiles accessible to the current user, including disabled switches. Other profiles and their counts are excluded.', 'text', 'nelio-content' ),
+				'description' => 'Saved switches for connected profiles accessible to the current user, including disabled switches. Other profiles and their counts are excluded.',
 			);
 			$properties['templates'] = array(
 				'type'        => 'array',
 				'items'       => $this->social_template_schema(),
 				'maxItems'    => 1000,
-				'description' => _x( 'Configured templates compatible with the group selectors, projected separately for each accessible profile, including disabled groups and switches. Network templates carry the accessible profile to which they apply. Additional template selectors may still restrict use; use get-social-templates with a post for post-specific selection. No placeholders are rendered.', 'text', 'nelio-content' ),
+				'description' => 'Configured templates compatible with the group selectors, returned separately for each profile the current user can access, including disabled groups and switches. Each network template identifies the accessible profile to which it applies. Additional template selectors may still restrict use; use get-social-templates with a post for post-specific selection. No placeholders are rendered.',
 			);
 		}
-		return $this->object_schema( $properties, array_keys( $properties ), _x( 'Saved automation group configuration. Selectors, weight and templates do not guarantee message generation; content, network and subscription eligibility are evaluated when generating.', 'text', 'nelio-content' ) );
+		return $this->object_schema( $properties, array_keys( $properties ), 'Saved automation group configuration. Selectors, weight and templates do not guarantee message generation; content, network and subscription eligibility are evaluated when generating.' );
 	}
 }

@@ -258,7 +258,7 @@ function get_last_posts() {
 function render_post( \WP_Post $p ) {
 	$title  = trim( $p->post_title );
 	$title  = empty( $title ) ? esc_html_x( 'Unnamed post', 'text', 'nelio-content' ) : $title;
-	$format = esc_html_x( 'M d, h:ia', 'PHP datetime format', 'nelio-content' );
+	$format = esc_html_x( 'M d, h:ia', 'text (PHP datetime format)', 'nelio-content' );
 	$date   = get_the_modified_date( $format, $p->ID );
 	$date   = is_string( $date ) ? $date : '';
 

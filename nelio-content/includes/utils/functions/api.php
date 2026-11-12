@@ -176,7 +176,7 @@ function nelio_content_generate_api_auth_token( $mode = 'regular' ) {
 
 			if ( wp_doing_ajax() ) {
 				header( 'HTTP/1.1 500 Internal Server Error' );
-				wp_send_json( _x( 'There was an error while accessing Nelio Content’s API.', 'error', 'nelio-content' ) );
+				wp_send_json( _x( 'There was an error while accessing Nelio Content’s API.', 'text', 'nelio-content' ) );
 			} else {
 				return '';
 			}
@@ -202,7 +202,7 @@ function nelio_content_get_error_message( $code, $default_value = false ) {
 	switch ( $code ) {
 
 		case 'LicenseNotFound':
-			return _x( 'Invalid license code.', 'error', 'nelio-content' );
+			return _x( 'Invalid license code.', 'text', 'nelio-content' );
 
 		default:
 			return $default_value;
@@ -239,7 +239,7 @@ function nelio_content_extract_response_body( $response ) {
 		$error_type    = is_string( $body['errorType'] ) && ! empty( $body['errorType'] ) ? $body['errorType'] : 'unknown-error';
 		$error_message = is_string( $body['errorMessage'] ) && ! empty( $body['errorMessage'] ) ? $body['errorMessage'] : false;
 		$error_message = nelio_content_get_error_message( $error_type, $error_message );
-		$error_message = ! empty( $error_message ) ? $error_message : _x( 'There was an error while accessing Nelio Content’s API.', 'error', 'nelio-content' );
+		$error_message = ! empty( $error_message ) ? $error_message : _x( 'There was an error while accessing Nelio Content’s API.', 'text', 'nelio-content' );
 		return new WP_Error( $error_type, $error_message );
 	}
 
@@ -265,7 +265,7 @@ function nelio_content_extract_response_body( $response ) {
 			'server-error',
 			sprintf(
 			/* translators: %s: The placeholder is a string explaining the error returned by the API. */
-				_x( 'There was an error while accessing Nelio Content’s API: %s.', 'error', 'nelio-content' ),
+				_x( 'There was an error while accessing Nelio Content’s API: %s.', 'text', 'nelio-content' ),
 				$summary
 			),
 			array(

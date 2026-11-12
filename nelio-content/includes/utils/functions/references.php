@@ -52,7 +52,7 @@ function nelio_content_get_reference_by_url( $url ) {
 function nelio_content_get_reference_post_by_url( $url ) {
 	global $wpdb;
 	if ( ! $wpdb instanceof wpdb ) {
-		return new WP_Error( 'nelio_content_references_unavailable', _x( 'Existing references could not be retrieved.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_references_unavailable', _x( 'Existing references could not be retrieved.', 'text', 'nelio-content' ) );
 	}
 	$previous = $wpdb->suppress_errors();
 	try {
@@ -71,7 +71,7 @@ function nelio_content_get_reference_post_by_url( $url ) {
 		);
 		$lookup_error = $wpdb->last_error;
 		if ( '' !== $lookup_error ) {
-			return new WP_Error( 'nelio_content_references_unavailable', _x( 'Existing references could not be retrieved.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_references_unavailable', _x( 'Existing references could not be retrieved.', 'text', 'nelio-content' ) );
 		}
 		if ( isset( $query->posts[0] ) && $query->posts[0] instanceof WP_Post ) {
 			return $query->posts[0];
@@ -91,14 +91,14 @@ function nelio_content_get_reference_post_by_url( $url ) {
 function nelio_content_get_internal_reference_post_by_url( $url ) {
 	global $wpdb;
 	if ( ! $wpdb instanceof wpdb ) {
-		return new WP_Error( 'nelio_content_references_unavailable', _x( 'Internal reference content could not be retrieved.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_references_unavailable', _x( 'Internal reference content could not be retrieved.', 'text', 'nelio-content' ) );
 	}
 	$previous = $wpdb->suppress_errors();
 	try {
 		$id   = nelio_content_url_to_postid( $url );
 		$post = $id ? get_post( $id ) : null;
 		if ( '' !== $wpdb->last_error ) {
-			return new WP_Error( 'nelio_content_references_unavailable', _x( 'Internal reference content could not be retrieved.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_references_unavailable', _x( 'Internal reference content could not be retrieved.', 'text', 'nelio-content' ) );
 		}
 		return $post ? $post : false;
 	} finally {

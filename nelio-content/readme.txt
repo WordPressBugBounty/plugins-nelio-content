@@ -5,7 +5,7 @@ Tags: editorial calendar, social media, social media scheduler, auto post, conte
 Requires PHP: 7.4
 Requires at least: 6.7
 Tested up to: 7.1
-Stable tag: 5.0.0
+Stable tag: 5.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -338,6 +338,9 @@ If you have more questions, visit our [Knowledge Base](https://neliosoftware.com
 
 
 == Changelog ==
+
+= 5.0.1 (November 12, 2026) =
+* Fix a performance regression introduced in 5.0.0 that could cause very slow page loads for logged-in users and PHP execution timeouts. Limit internal capability filters to their own permissions to prevent cascading access checks while preserving authorization checks.
 
 = 5.0.0 (November 11, 2026) =
 * Add WordPress Abilities API support, local feature diagnostics and a dedicated MCP server for authenticated AI assistants.
@@ -771,5 +774,5 @@ If you have more questions, visit our [Knowledge Base](https://neliosoftware.com
 
 == Upgrade Notice ==
 
-= 5.0.0 (November 11, 2026) =
-Adds AI assistant integration through WordPress Abilities API and MCP. Requires WordPress 6.9+ for abilities and MCP Adapter 0.7.1+ for MCP connections.
+= 5.0.1 (November 12, 2026) =
+Fixes a 5.0.0 performance regression that could cause very slow page loads for logged-in users and PHP execution timeouts. Update both Nelio Content and Nelio Content Premium to 5.0.1 if you use Premium.

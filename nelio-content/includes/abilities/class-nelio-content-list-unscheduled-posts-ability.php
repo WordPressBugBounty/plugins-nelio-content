@@ -26,22 +26,22 @@ class Nelio_Content_List_Unscheduled_Posts_Ability extends Nelio_Content_Ability
 		$properties['query']     = array(
 			'type'        => 'string',
 			'maxLength'   => 200,
-			'description' => _x( 'Optional title fragment, WordPress post ID or local post URL. Exact matches must also have no publication date. Leading and trailing whitespace is ignored.', 'text', 'nelio-content' ),
+			'description' => 'Optional title fragment, WordPress post ID or local post URL. Exact matches must also have no publication date. Leading and trailing whitespace is ignored.',
 		);
 		$properties['post_type'] = array(
 			'type'        => 'string',
 			'minLength'   => 1,
 			'maxLength'   => 64,
-			'description' => _x( 'Optional WordPress post type enabled in the editorial calendar. Omit to include all enabled calendar post types.', 'text', 'nelio-content' ),
+			'description' => 'Optional WordPress post type enabled in the editorial calendar. Omit to include all enabled calendar post types.',
 		);
 		wp_register_ability(
 			'nelio-content/list-unscheduled-posts',
 			array(
 				'label'               => _x( 'List unscheduled posts', 'command', 'nelio-content' ),
-				'description'         => _x( 'Find readable WordPress posts without a publication date among the post types enabled in the editorial calendar. Available in Free and Premium. Unscheduled is determined by the absence of a publication date, not by draft status alone. Optionally search titles or supply an exact post ID or local URL. Exact matches must also be unscheduled. Results are bounded and ordered by saved post date, newest first, with exact matches first. Follow next_cursor even after an empty page while has_more is true. Does not change posts or generate social messages.', 'text', 'nelio-content' ),
+				'description'         => 'Find readable WordPress posts without a publication date among the post types enabled in the editorial calendar. Available in Free and Premium. Unscheduled is determined by the absence of a publication date, not by draft status alone. Optionally search titles or supply an exact post ID or local URL. Exact matches must also be unscheduled. Results are returned one page at a time, ordered by saved post date, newest first, with exact matches first. Follow next_cursor even after an empty page while has_more is true. Does not change posts or generate social messages.',
 				'category'            => 'nelio-content-calendar',
-				'input_schema'        => $this->object_schema( $properties, array(), _x( 'Optional search and calendar post type filters with bounded pagination for posts without publication dates.', 'text', 'nelio-content' ) ),
-				'output_schema'       => $this->page_schema( $this->post_summary_schema(), _x( 'One page of readable unscheduled posts. publication_date is empty for every item. Continue with unchanged filters when next_cursor is present.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $properties, array(), 'Optional search and calendar post type filters with results returned one page at a time with page size limits for posts without publication dates.' ),
+				'output_schema'       => $this->page_schema( $this->post_summary_schema(), 'One page of readable unscheduled posts. publication_date is empty for every item. Continue with unchanged filters when next_cursor is present.' ),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
 				'meta'                => $this->get_ability_metadata(),
@@ -67,19 +67,19 @@ class Nelio_Content_List_Unscheduled_Posts_Ability extends Nelio_Content_Ability
 	 */
 	public function execute( $input ) {
 		if ( ! $this->permissions( $input ) ) {
-			return new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot list unscheduled posts.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_permission_denied', 'You cannot list unscheduled posts.' );
 		}
 		$cursor = decode_cursor( $input );
 		if ( is_wp_error( $cursor ) ) {
 			return $cursor;
 		}
 		if ( '' !== $cursor['page'] ) {
-			return new WP_Error( 'nelio_content_invalid_cursor', _x( 'Use a cursor returned by this post query.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_cursor', 'Use the cursor value from the previous response to this post query.' );
 		}
 		$types = nelio_content_get_post_types( 'calendar' );
 		if ( isset( $input['post_type'] ) ) {
 			if ( ! in_array( $input['post_type'], $types, true ) ) {
-				return new WP_Error( 'nelio_content_invalid_post_type', _x( 'The requested post type is not enabled in the editorial calendar.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_invalid_post_type', 'The requested post type is not enabled in the editorial calendar.' );
 			}
 			$types = array( $input['post_type'] );
 		}

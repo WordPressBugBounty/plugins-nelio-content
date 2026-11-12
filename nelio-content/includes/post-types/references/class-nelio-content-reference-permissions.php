@@ -56,6 +56,6 @@ class Nelio_Content_Reference_Permissions {
 
 	/** @return WP_Error */
 	public static function denied() {
-		return new WP_Error( 'nelio_content_reference_forbidden', _x( 'You cannot edit this shared reference with your current permissions.', 'user', 'nelio-content' ), array( 'status' => 403 ) );
+		return new WP_Error( 'nelio_content_reference_forbidden', _x( 'You cannot edit this shared reference with your current permissions.', 'text', 'nelio-content' ), array( 'status' => 403 ) );
 	}
 }

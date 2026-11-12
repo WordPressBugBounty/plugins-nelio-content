@@ -20,10 +20,10 @@ class Nelio_Content_Social_Timeline_Content {
 	 */
 	public function extract( $html ) {
 		if ( ! class_exists( 'DOMDocument' ) ) {
-			return new WP_Error( 'nelio_content_feature_unavailable', _x( 'Timeline generation requires the PHP DOM extension.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_feature_unavailable', _x( 'Timeline generation requires the PHP DOM extension.', 'text', 'nelio-content' ) );
 		}
 		if ( strlen( $html ) > MB_IN_BYTES ) {
-			return new WP_Error( 'nelio_content_invalid_post', _x( 'Rendered post content exceeds the timeline generation limit of 1 MiB.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_post', _x( 'Rendered post content exceeds the timeline generation limit of 1 MiB.', 'text', 'nelio-content' ) );
 		}
 		$dom      = new DOMDocument( '1.0', 'UTF-8' );
 		$previous = libxml_use_internal_errors( true );
@@ -35,7 +35,7 @@ class Nelio_Content_Social_Timeline_Content {
 		}
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 		if ( ! $loaded || ! $body ) {
-			return new WP_Error( 'nelio_content_invalid_post', _x( 'Unable to parse saved post content.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_post', _x( 'Unable to parse saved post content.', 'text', 'nelio-content' ) );
 		}
 		$this->unwrap_nested_blocks( $body );
 		$clean      = array();

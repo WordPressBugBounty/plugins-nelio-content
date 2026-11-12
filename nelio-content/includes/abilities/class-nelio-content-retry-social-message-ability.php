@@ -19,15 +19,15 @@ class Nelio_Content_Retry_Social_Message_Ability extends Nelio_Content_Social_Me
 		$properties['confirm_publication'] = array(
 			'type'        => 'boolean',
 			'enum'        => array( true ),
-			'description' => _x( 'Must be true to request an immediate publication attempt. This does not merely reschedule the message. Obtain the user\'s intent to publish before calling.', 'text', 'nelio-content' ),
+			'description' => 'Must be true to request an immediate publication attempt. This does not merely reschedule the message. Obtain the user\'s intent to publish before calling.',
 		);
 		wp_register_ability(
 			'nelio-content/retry-social-message',
 			array(
 				'label'               => _x( 'Retry publishing a social message', 'command', 'nelio-content' ),
-				'description'         => _x( 'Request immediate publication of one failed, non-recurring message. Available in Free and Premium with social editing, profile and related-post permissions. Requires status error, a connected profile and confirm_publication true. Existing content and network settings are preserved by Cloud. This may publish immediately and is non-idempotent: never automatically retry a timeout or assume that an acknowledgement proves publication.', 'text', 'nelio-content' ),
+				'description'         => 'Request immediate publication of one failed, non-recurring message. Available in Free and Premium with social editing, profile and related-post permissions. Requires status error, a connected profile and confirm_publication true. Existing content and network settings are preserved by Cloud. This may publish immediately. Repeating the request may cause another publication attempt. Never automatically retry after a timeout or assume that accepting the request proves publication.',
 				'category'            => 'nelio-content-messages',
-				'input_schema'        => $this->object_schema( $properties, array( 'message_id', 'start_date', 'end_date', 'confirm_publication' ), _x( 'Locate the failed message on a bounded calendar page and explicitly request an immediate publication attempt.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $properties, array( 'message_id', 'start_date', 'end_date', 'confirm_publication' ), 'Locate the failed message on one page of calendar results and explicitly request an immediate publication attempt.' ),
 				'output_schema'       => $this->message_schema(),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
@@ -48,7 +48,7 @@ class Nelio_Content_Retry_Social_Message_Ability extends Nelio_Content_Social_Me
 			return $message;
 		}
 		if ( 'error' !== ( $message['status'] ?? '' ) || true !== ( $input['confirm_publication'] ?? false ) ) {
-			return new WP_Error( 'nelio_content_invalid_message_state', _x( 'Retry requires a failed message and an explicit immediate-publication request.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_message_state', 'Retry requires a failed message and an explicit immediate-publication request.' );
 		}
 		$result = request_cloud( '/social/' . rawurlencode( $input['message_id'] ) . '/retry', 'PUT' );
 		return is_wp_error( $result ) ? $result : $this->confirmed_message( $result, $message );

@@ -64,7 +64,7 @@ defined( 'ABSPATH' ) || exit;
 		<p class="description">
 			<?php $this->print_html( $desc ); ?>
 			<?php if ( ! empty( $more ) ) { ?>
-			<a href="<?php echo esc_url( $more ); ?>"><?php echo esc_html_x( 'Read more&hellip;', 'user', 'nelio-content' ); ?></a>
+			<a href="<?php echo esc_url( $more ); ?>"><?php echo esc_html_x( 'Read more&hellip;', 'command', 'nelio-content' ); ?></a>
 				<?php
 			}
 			?>

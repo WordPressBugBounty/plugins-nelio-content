@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 function nelio_content_get_automation_groups( $strict = false ) {
 	$site_id = nelio_content_get_site_id();
 	if ( empty( $site_id ) ) {
-		return $strict ? new WP_Error( 'nelio_content_feature_unavailable', _x( 'Nelio Content is not configured.', 'user', 'nelio-content' ) ) : array();
+		return $strict ? new WP_Error( 'nelio_content_feature_unavailable', _x( 'Nelio Content is not configured.', 'text', 'nelio-content' ) ) : array();
 	}
 
 	/** @var list<TAutomation_Group> */
@@ -38,7 +38,7 @@ function nelio_content_get_automation_groups( $strict = false ) {
 	$response = wp_remote_request( $url, $data );
 	$response = nelio_content_extract_response_body( $response );
 	if ( is_wp_error( $response ) || ! is_array( $response ) ) {
-		return $strict ? new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Unable to retrieve social automation groups.', 'user', 'nelio-content' ) ) : array();
+		return $strict ? new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Unable to retrieve social automation groups.', 'text', 'nelio-content' ) ) : array();
 	}
 	if ( empty( $response ) ) {
 		return array();
@@ -119,7 +119,7 @@ function nelio_content_get_automation_groups( $strict = false ) {
 		),
 	);
 	if ( is_wp_error( rest_validate_value_from_schema( $response, $schema, 'groups' ) ) ) {
-		return $strict ? new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Cloud returned invalid social automation groups.', 'user', 'nelio-content' ) ) : array();
+		return $strict ? new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Cloud returned invalid social automation groups.', 'text', 'nelio-content' ) ) : array();
 	}
 
 	$is_universal = function ( $group ) {
@@ -136,7 +136,7 @@ function nelio_content_get_automation_groups( $strict = false ) {
 	$groups    = $response;
 	$universal = array_values( array_filter( $groups, $is_universal ) );
 	if ( empty( $universal ) ) {
-		return $strict ? new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Cloud returned incomplete social automation groups.', 'user', 'nelio-content' ) ) : array();
+		return $strict ? new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Cloud returned incomplete social automation groups.', 'text', 'nelio-content' ) ) : array();
 	}
 	$regular = array_values( array_filter( $groups, $is_regular ) );
 	$groups  = array_merge( $universal, $regular );

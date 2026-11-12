@@ -48,7 +48,7 @@ abstract class Nelio_Content_Generate_Timeline_Ability extends Nelio_Content_Pre
 			'confirm_generation' => array(
 				'type'        => 'boolean',
 				'enum'        => array( true ),
-				'description' => _x( 'Confirm automatic message generation, which can create or replace messages and pause or resume reshare messages across the site to respect publishing limits. Requires plugin management, full social editing and access to every connected profile.', 'text', 'nelio-content' ),
+				'description' => 'Confirm automatic message generation, which can create or replace messages and pause or resume reshare messages across the site to respect publishing limits. Requires plugin management, full social editing and access to every connected profile.',
 			),
 		);
 	}

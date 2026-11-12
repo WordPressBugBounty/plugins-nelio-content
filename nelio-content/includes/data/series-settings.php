@@ -17,7 +17,7 @@ return array(
 		'type'    => 'text',
 		'name'    => 'series_taxonomy_slug',
 		'label'   => esc_html_x( 'Series Taxonomy Slug', 'text', 'nelio-content' ),
-		'desc'    => esc_html_x( 'This feature allows you to use a different taxonomy for this plugin if you don’t want to use the default "Series" taxonomy.', 'user', 'nelio-content' ),
+		'desc'    => esc_html_x( 'This feature allows you to use a different taxonomy for this plugin if you don’t want to use the default "Series" taxonomy.', 'text', 'nelio-content' ),
 		'default' => 'series',
 	),
 

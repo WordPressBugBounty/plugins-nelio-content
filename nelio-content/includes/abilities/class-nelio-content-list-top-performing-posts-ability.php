@@ -21,54 +21,54 @@ class Nelio_Content_List_Top_Performing_Posts_Ability extends Nelio_Content_Abil
 			'type'        => 'string',
 			'enum'        => array( 'engagement', 'pageviews' ),
 			'default'     => 'engagement',
-			'description' => _x( 'Cached aggregate counter used for descending ranking. engagement combines available social counters and approved WordPress comments. pageviews uses the currently configured Google Analytics property and requires that configuration. Defaults to engagement. These are accumulated counters, not activity within a selected period.', 'text', 'nelio-content' ),
+			'description' => 'Saved total used to rank posts from highest to lowest. engagement combines available social interaction counts and approved WordPress comments. pageviews uses the currently configured Google Analytics property and requires that configuration. Defaults to engagement. These are accumulated counts, not activity within a selected period.',
 		);
 		$properties['author_id']                     = array(
 			'type'        => 'integer',
 			'minimum'     => 1,
-			'description' => _x( 'Optional WordPress author ID whose published posts should be considered.', 'text', 'nelio-content' ),
+			'description' => 'Optional WordPress author ID whose published posts should be considered.',
 		);
 		$properties['post_type']                     = array(
 			'type'        => 'string',
 			'minLength'   => 1,
 			'maxLength'   => 64,
-			'description' => _x( 'Optional post type with analytics enabled. Omit to include all analytics-enabled types.', 'text', 'nelio-content' ),
+			'description' => 'Optional post type with analytics enabled. Omit to include all analytics-enabled types.',
 		);
 		$properties['published_after']               = array(
 			'type'        => 'string',
 			'format'      => 'date',
-			'description' => _x( 'Optional first inclusive publication day in the site timezone, YYYY-MM-DD. Filters when posts were published, not when visits or interactions occurred.', 'text', 'nelio-content' ),
+			'description' => 'Optional first inclusive publication day in the site timezone, YYYY-MM-DD. Filters when posts were published, not when visits or interactions occurred.',
 		);
 		$properties['published_before']              = array(
 			'type'        => 'string',
 			'format'      => 'date',
-			'description' => _x( 'Optional last inclusive publication day in the site timezone, YYYY-MM-DD. May span multiple years; it must not precede published_after. Does not restrict the period covered by the counters.', 'text', 'nelio-content' ),
+			'description' => 'Optional last inclusive publication day in the site timezone, YYYY-MM-DD. May span multiple years; it must not precede published_after. Does not restrict the period covered by the counts.',
 		);
 		$item                                        = $this->post_summary_schema();
 		$item['properties']['permalink']             = array(
 			'type'        => 'string',
-			'description' => _x( 'WordPress permalink of this published post.', 'text', 'nelio-content' ),
+			'description' => 'WordPress permalink of this published post.',
 		);
 		$item['properties']['metric_value']          = array(
 			'type'        => 'integer',
 			'minimum'     => 0,
-			'description' => _x( 'Stored nonnegative count used to rank this post for the selected metric. A stored zero differs from a missing counter, which is excluded. Provider coverage and freshness vary.', 'text', 'nelio-content' ),
+			'description' => 'Stored count of zero or more used to rank this post for the selected metric. A stored zero differs from a missing count, which is excluded. Provider coverage and freshness vary.',
 		);
 		$item['properties']['last_analytics_update'] = array(
 			'type'        => 'string',
-			'description' => _x( 'Last recorded general analytics update in UTC, or empty when unavailable. This is not a per-provider freshness guarantee and does not prove that every source was updated.', 'text', 'nelio-content' ),
+			'description' => 'Last recorded general analytics update in UTC, or empty when unavailable. This is not a per-provider freshness guarantee and does not prove that every source was updated.',
 		);
 		$item['required']                            = array_merge( $item['required'], array( 'permalink', 'metric_value', 'last_analytics_update' ) );
-		$output                                      = $this->page_schema( $item, _x( 'One source page of readable published posts ranked by a stored accumulated counter. This is not a ranking of activity within a measurement period. Missing counters are excluded; different posts may have different provider coverage and freshness.', 'text', 'nelio-content' ) );
+		$output                                      = $this->page_schema( $item, 'One page of readable published posts ranked by a stored accumulated count. This is not a ranking of activity within a measurement period. Missing counts are excluded; different posts may have different provider coverage and freshness.' );
 		$output['properties']['metric']              = $properties['metric'];
 		$output['required'][]                        = 'metric';
 		wp_register_ability(
 			'nelio-content/list-top-performing-posts',
 			array(
 				'label'               => _x( 'List top-performing posts', 'command', 'nelio-content' ),
-				'description'         => _x( 'Rank readable published posts by cached accumulated engagement or pageviews. Available in Free and Premium. Uses only post types with analytics enabled and existing counters, without contacting providers or refreshing metrics. Engagement includes available social counters and approved WordPress comments; pageviews require a configured Google Analytics property. Optional date filters select publication dates, not a period of visits or interactions. Missing counters are excluded rather than treated as zero. Results are ordered by counter descending, then publication date and post ID descending. Examine a bounded page and follow next_cursor with unchanged filters and per_page even when a page is empty. Rankings are not snapshots and may change as posts or counters change.', 'text', 'nelio-content' ),
+				'description'         => 'Rank readable published posts by cached accumulated engagement or pageviews. Available in Free and Premium. Uses only post types with analytics enabled and existing counts, without contacting providers or refreshing metrics. Engagement includes available social interaction counts and approved WordPress comments; pageviews require a configured Google Analytics property. Optional date filters select publication dates, not a period of visits or interactions. Missing counts are excluded rather than treated as zero. Results are ordered by count from highest to lowest, then by newest publication date and highest post ID. Read one page and follow next_cursor with unchanged filters and per_page even when a page is empty. Rankings may change between requests as posts or counts change.',
 				'category'            => 'nelio-content-analytics',
-				'input_schema'        => $this->object_schema( $properties, array(), _x( 'Aggregate ranking metric, optional publication-date, author and post-type filters, and bounded pagination. No measurement-period filter is available.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $properties, array(), 'Total metric used for ranking, optional publication-date, author and post-type filters, and results returned one page at a time with page size limits. No measurement-period filter is available.' ),
 				'output_schema'       => $output,
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
@@ -91,14 +91,14 @@ class Nelio_Content_List_Top_Performing_Posts_Ability extends Nelio_Content_Abil
 	 */
 	public function execute( $input ) {
 		if ( ! $this->permissions( $input ) ) {
-			return new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot access post analytics.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_permission_denied', 'You cannot access post analytics.' );
 		}
 		$cursor = decode_cursor( $input );
 		if ( is_wp_error( $cursor ) ) {
 			return $cursor;
 		}
 		if ( '' !== $cursor['page'] ) {
-			return new WP_Error( 'nelio_content_invalid_cursor', _x( 'Use a cursor returned by this analytics ranking.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_cursor', 'Use the cursor value from the previous response to this analytics ranking.' );
 		}
 		$dates = $this->publication_filter( $input );
 		if ( is_wp_error( $dates ) ) {
@@ -107,7 +107,7 @@ class Nelio_Content_List_Top_Performing_Posts_Ability extends Nelio_Content_Abil
 		$types = nelio_content_get_post_types( 'analytics' );
 		if ( isset( $input['post_type'] ) ) {
 			if ( ! in_array( $input['post_type'], $types, true ) ) {
-				return new WP_Error( 'nelio_content_invalid_post_type', _x( 'Analytics are not enabled for this post type.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_invalid_post_type', 'Analytics are not enabled for this post type.' );
 			}
 			$types = array( $input['post_type'] );
 		}
@@ -139,7 +139,7 @@ class Nelio_Content_List_Top_Performing_Posts_Ability extends Nelio_Content_Abil
 		global $wpdb;
 		$query = $helper->query_cached_posts( $args );
 		if ( $wpdb->last_error ) {
-			return new WP_Error( 'nelio_content_analytics_unavailable', _x( 'The cached analytics ranking could not be read.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_analytics_unavailable', 'The cached analytics ranking could not be read.' );
 		}
 		$source = $query->posts ?? array();
 		$items  = array();
@@ -186,12 +186,12 @@ class Nelio_Content_List_Top_Performing_Posts_Ability extends Nelio_Content_Abil
 			}
 			$date = DateTimeImmutable::createFromFormat( '!Y-m-d', $input[ $field ], wp_timezone() );
 			if ( ! $date || $date->format( 'Y-m-d' ) !== $input[ $field ] ) {
-				return new WP_Error( 'nelio_content_invalid_date', _x( 'Use real publication dates in YYYY-MM-DD format.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_invalid_date', 'Use real publication dates in YYYY-MM-DD format.' );
 			}
 			$filter[ $bound ] = $input[ $field ] . ( 'after' === $bound ? ' 00:00:00' : ' 23:59:59' );
 		}
 		if ( isset( $input['published_after'], $input['published_before'] ) && $input['published_after'] > $input['published_before'] ) {
-			return new WP_Error( 'nelio_content_invalid_date_range', _x( 'The final publication date must not precede the first.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_date_range', 'The final publication date must not precede the first.' );
 		}
 		return count( $filter ) > 2 ? $filter : array();
 	}

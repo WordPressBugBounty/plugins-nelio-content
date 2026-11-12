@@ -18,15 +18,15 @@ class Nelio_Content_Generate_Reshare_Timeline_Ability extends Nelio_Content_Gene
 			'nelio-content/generate-reshare-timeline',
 			array(
 				'label'               => _x( 'Generate reshare timeline', 'command', 'nelio-content' ),
-				'description'         => _x( 'Fill remaining days in the current weekly reshare scheduling window with automatic republication of eligible content, using existing automation groups and publishing limits. Requires Nelio Content Premium, plugin management, full social editing and access to every connected profile. Runs across the site; individual posts, profiles and arbitrary date ranges cannot be selected, and previously scheduled days are not reset. The scheduling window uses UTC dates. Messages are generated asynchronously: success confirms that scheduling requests were accepted, not that messages already exist. Does nothing if the window is already scheduled or no eligible posts are found. A failed request may already have been accepted; inspect the calendar before retrying.', 'text', 'nelio-content' ),
+				'description'         => 'Fill remaining days in the current weekly reshare scheduling window with automatic republication of eligible content, using existing automation groups and publishing limits. Requires Nelio Content Premium, plugin management, full social editing and access to every connected profile. Runs across the site; individual posts, profiles and arbitrary date ranges cannot be selected, and previously scheduled days are not reset. The scheduling window uses UTC dates. Messages are generated asynchronously: success confirms that scheduling requests were accepted, not that messages already exist. Does nothing if the window is already scheduled or no eligible posts are found. A failed request may already have been accepted; inspect the calendar before retrying.',
 				'category'            => 'nelio-content-messages',
-				'input_schema'        => $this->object_schema( $this->generation_properties(), array( 'confirm_generation' ), _x( 'Explicit confirmation to generate reshare messages across the site for the remaining weekly scheduling window.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $this->generation_properties(), array( 'confirm_generation' ), 'Explicit confirmation to generate reshare messages across the site for the remaining weekly scheduling window.' ),
 				'output_schema'       => $this->object_schema(
 					array(
 						'status'      => array(
 							'type'        => 'string',
 							'enum'        => array( 'queued', 'no_change' ),
-							'description' => _x( 'queued means Cloud acknowledged day scheduling requests; generation happens asynchronously. no_change means no request was needed.', 'text', 'nelio-content' ),
+							'description' => 'queued means Cloud acknowledged day scheduling requests; generation happens asynchronously. no_change means no request was needed.',
 						),
 						'queued_days' => array(
 							'type'        => 'array',
@@ -34,18 +34,18 @@ class Nelio_Content_Generate_Reshare_Timeline_Ability extends Nelio_Content_Gene
 							'items'       => array(
 								'type'        => 'string',
 								'format'      => 'date',
-								'description' => _x( 'UTC calendar day acknowledged by Cloud.', 'text', 'nelio-content' ),
+								'description' => 'UTC calendar day acknowledged by Cloud.',
 							),
-							'description' => _x( 'Days whose scheduling requests Cloud acknowledged. These are not message IDs or a count of generated messages.', 'text', 'nelio-content' ),
+							'description' => 'Days whose scheduling requests Cloud acknowledged. These are not message IDs or a count of generated messages.',
 						),
 						'reason'      => array(
 							'type'        => 'string',
 							'enum'        => array( '', 'already_scheduled', 'no_candidates' ),
-							'description' => _x( 'Reason for no_change, or an empty string when requests were queued.', 'text', 'nelio-content' ),
+							'description' => 'Reason for no_change, or an empty string when requests were queued.',
 						),
 					),
 					array( 'status', 'queued_days', 'reason' ),
-					_x( 'Accepted requests to generate reshare messages for the listed days. Inspect the calendar later to see messages actually generated.', 'text', 'nelio-content' )
+					'Accepted requests to generate reshare messages for the listed days. Inspect the calendar later to see messages actually generated.'
 				),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),

@@ -20,11 +20,11 @@ class Nelio_Content_Get_Post_Analytics_Ability extends Nelio_Content_Ability {
 	public function register() {
 		$metric_schema = array(
 			'type'                 => 'object',
-			'description'          => _x( 'Cached lifetime metric counts indexed by metric or network name. Coverage varies by provider; zero alone does not establish availability.', 'text', 'nelio-content' ),
+			'description'          => 'Cached lifetime metric counts indexed by metric or network name. Coverage varies by provider; zero alone does not establish availability.',
 			'additionalProperties' => array(
 				'type'        => 'integer',
 				'minimum'     => 0,
-				'description' => _x( 'Non-negative cached count for the metric identified by this key.', 'text', 'nelio-content' ),
+				'description' => 'Non-negative cached count for the metric identified by this key.',
 			),
 		);
 
@@ -32,30 +32,30 @@ class Nelio_Content_Get_Post_Analytics_Ability extends Nelio_Content_Ability {
 			'nelio-content/get-post-analytics',
 			array(
 				'label'               => _x( 'Get post analytics', 'command', 'nelio-content' ),
-				'description'         => _x( 'Read cached lifetime analytics without refreshing providers. Engagement contains available network counters and WordPress comments; pageviews come from the configured Google Analytics property. Zero does not prove provider coverage. No date-range breakdown is available.', 'text', 'nelio-content' ),
+				'description'         => 'Read cached lifetime analytics without refreshing providers. Engagement contains available network counters and WordPress comments; pageviews come from the configured Google Analytics property. Zero does not prove provider coverage. No date-range breakdown is available.',
 				'category'            => 'nelio-content-analytics',
 				'input_schema'        => $this->object_schema(
 					array(
 						'post_id' => array(
 							'type'        => 'integer',
 							'minimum'     => 1,
-							'description' => _x( 'WordPress post ID to inspect. The post must be readable and its post type must have analytics enabled.', 'text', 'nelio-content' ),
+							'description' => 'WordPress post ID to inspect. The post must be readable and its post type must have analytics enabled.',
 						),
 					),
 					array( 'post_id' ),
-					_x( 'Identify a readable WordPress post whose cached lifetime analytics should be retrieved.', 'text', 'nelio-content' )
+					'Identify a readable WordPress post whose cached lifetime analytics should be retrieved.'
 				),
 				'output_schema'       => $this->object_schema(
 					array(
 						'post_id'    => array(
 							'type'        => 'integer',
-							'description' => _x( 'WordPress post ID to which these cached metrics belong.', 'text', 'nelio-content' ),
+							'description' => 'WordPress post ID to which these cached metrics belong.',
 						),
-						'engagement' => array_merge( $metric_schema, array( 'description' => _x( 'Cached engagement counters keyed by network or metric name, including total and WordPress comments. Networks may expose different counters.', 'text', 'nelio-content' ) ) ),
-						'pageviews'  => array_merge( $metric_schema, array( 'description' => _x( 'Cached pageview counts from the configured Google Analytics property, including total and available social network breakdowns.', 'text', 'nelio-content' ) ) ),
+						'engagement' => array_merge( $metric_schema, array( 'description' => 'Cached engagement counters keyed by network or metric name, including total and WordPress comments. Networks may expose different counters.' ) ),
+						'pageviews'  => array_merge( $metric_schema, array( 'description' => 'Cached pageview counts from the configured Google Analytics property, including total and available social network breakdowns.' ) ),
 					),
 					array( 'post_id', 'engagement', 'pageviews' ),
-					_x( 'Cached lifetime engagement and pageview metrics for the post. Providers are not refreshed and no date-range breakdown is available.', 'text', 'nelio-content' )
+					'Cached lifetime engagement and pageview metrics for the post. Providers are not refreshed and no date-range breakdown is available.'
 				),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
@@ -83,15 +83,15 @@ class Nelio_Content_Get_Post_Analytics_Ability extends Nelio_Content_Ability {
 	public function execute( $input ) {
 		$allowed = $this->permissions( $input );
 		if ( true !== $allowed ) {
-			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot execute this ability.', 'user', 'nelio-content' ) );
+			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', 'You cannot execute this ability.' );
 		}
 
 		$post_id = $input['post_id'];
 		if ( ! in_array( get_post_type( $post_id ), nelio_content_get_post_types( 'analytics' ), true ) ) {
-			return new WP_Error( 'nelio_content_feature_unavailable', _x( 'Analytics are disabled for this post type.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_feature_unavailable', 'Analytics are disabled for this post type.' );
 		}
 		if ( ! get_post_meta( $post_id, '_nc_last_update', true ) ) {
-			return new WP_Error( 'nelio_content_analytics_unavailable', _x( 'No cached analytics are available for this post.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_analytics_unavailable', 'No cached analytics are available for this post.' );
 		}
 		$statistics = Nelio_Content_Analytics_Helper::instance()->get_post_stats( $post_id, true );
 		return array(

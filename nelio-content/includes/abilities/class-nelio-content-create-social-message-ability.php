@@ -21,14 +21,14 @@ class Nelio_Content_Create_Social_Message_Ability extends Nelio_Content_Premium_
 		$input_schema = $this->object_schema(
 			$this->scheduled_message_properties(),
 			array( 'content', 'profile_ids', 'scheduled_at', 'publication_mode' ),
-			_x( 'Message text with optional post placeholders, target profiles and an explicit future publication time. Requires an active Premium subscription and social editing permissions.', 'text', 'nelio-content' )
+			'Message text with optional post placeholders, target profiles and an explicit future publication time. Requires an active Premium subscription and social editing permissions.'
 		);
 
 		wp_register_ability(
 			'nelio-content/create-social-message',
 			array(
 				'label'               => _x( 'Schedule social messages', 'command', 'nelio-content' ),
-				'description'         => _x( 'Create one future social message per selected profile on any supported Nelio Content network through Nelio Cloud. Requires Nelio Content Premium. Applies the text, media and publishing requirements of each network. Instagram, Pinterest and TikTok require media_id; Pinterest requires target_name; TikTok requires explicit settings; Medium and Blogger require post_id. Best-effort creation: each valid profile is submitted independently, and invalid profiles do not block the others. Always inspect both items and errors, even when the tool succeeds. Invalid request structure, permissions, dates or attachments abort before writing. Unknown Cloud outcomes may already have created a message; inspect the calendar using the returned message_id before retrying. Buffer and Hootsuite connections are supported; Buffer uses the requested time instead of its managed queue. Message text and webhook headers/bodies support all Nelio Content post placeholders when post_id is supplied. Expanded text is checked against each network limit. No explicit draft creation mode, recurrence, multiple attachments or immediate publication support. Messages linked to an unpublished post can appear as drafts with planned dates; they are scheduled automatically when the post is published and its publication update reaches Nelio Cloud. Do not recreate or reschedule them solely because of this expected draft status. Related posts must be published or scheduled. Non-idempotent: do not blindly retry an ambiguous timeout; inspect the calendar first.', 'text', 'nelio-content' ),
+				'description'         => 'Create one future social message per selected profile on any supported Nelio Content network through Nelio Cloud. Requires Nelio Content Premium. Applies the text, media and publishing requirements of each network. Instagram, Pinterest and TikTok require media_id; Pinterest requires target_name; TikTok requires explicit settings; Medium and Blogger require post_id. Each valid profile is submitted separately. An invalid profile does not prevent creation for the others. Always inspect both items and errors, even when the tool succeeds. Invalid request structure, permissions, dates or attachments abort before writing. Unknown Cloud outcomes may already have created a message; inspect the calendar using the returned message_id before retrying. Buffer and Hootsuite connections are supported; Buffer uses the requested time instead of its managed queue. Message text and webhook headers/bodies support all Nelio Content post placeholders when post_id is supplied. Expanded text is checked against each network limit. No explicit draft creation mode, recurrence, multiple attachments or immediate publication support. Messages linked to an unpublished post can appear as drafts with planned dates; they are scheduled automatically when the post is published and its publication update reaches Nelio Cloud. Do not recreate or reschedule them solely because of this expected draft status. Related posts must be published or scheduled. Repeating the request can create another message. If a request times out and its result is unclear, inspect the calendar before trying again.',
 				'category'            => 'nelio-content-messages',
 				'input_schema'        => $input_schema,
 				'output_schema'       => $this->object_schema(
@@ -37,17 +37,17 @@ class Nelio_Content_Create_Social_Message_Ability extends Nelio_Content_Premium_
 							'type'        => 'array',
 							'items'       => $this->message_schema(),
 							'maxItems'    => 10,
-							'description' => _x( 'Confirmed messages for successful profiles only. Messages linked to an unpublished post can later appear as drafts until publication of the post activates scheduling. This can be empty. Compare with errors to account for every requested profile.', 'text', 'nelio-content' ),
+							'description' => 'Confirmed messages for successful profiles only. Messages linked to an unpublished post can later appear as drafts until publication of the post activates scheduling. This can be empty. Compare with errors to account for every requested profile.',
 						),
 						'errors' => array(
 							'type'        => 'array',
 							'items'       => $this->creation_error_schema(),
 							'maxItems'    => 10,
-							'description' => _x( 'One failure for each profile without confirmed creation. not_created means no creation was submitted; unknown means Cloud may already have created message_id. Never automatically retry unknown outcomes.', 'text', 'nelio-content' ),
+							'description' => 'One failure for each profile without confirmed creation. not_created means no creation was submitted; unknown means Cloud may already have created message_id. Never automatically retry unknown outcomes.',
 						),
 					),
 					array( 'items', 'errors' ),
-					_x( 'Best-effort results with exactly one confirmed item or error per requested profile. Confirmed items survive failures of other profiles. A successful response can contain only errors; it does not imply that all messages were created.', 'text', 'nelio-content' )
+					'Results contain exactly one confirmed item or error for each requested profile. Messages created for one profile are kept even if creation fails for another. A successful response can contain only errors; it does not imply that all messages were created.'
 				),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
@@ -63,33 +63,33 @@ class Nelio_Content_Create_Social_Message_Ability extends Nelio_Content_Premium_
 	 */
 	private function creation_error_schema() {
 		$properties = array(
-			'profile_id' => $this->uuid_schema( _x( 'Requested profile for which creation was not confirmed.', 'text', 'nelio-content' ) ),
+			'profile_id' => $this->uuid_schema( 'Requested profile for which creation was not confirmed.' ),
 			'code'       => array(
 				'type'        => 'string',
-				'description' => _x( 'Stable local validation or Cloud execution error code. Raw provider errors are excluded.', 'text', 'nelio-content' ),
+				'description' => 'Stable local validation or Cloud execution error code. Raw provider errors are excluded.',
 			),
 			'message'    => array(
 				'type'        => 'string',
-				'description' => _x( 'Human-readable reason and recovery guidance for this profile, without provider credentials or raw failure bodies.', 'text', 'nelio-content' ),
+				'description' => 'Human-readable reason and recovery guidance for this profile, without provider credentials or raw failure bodies.',
 			),
 			'outcome'    => array(
 				'type'        => 'string',
 				'enum'        => array( 'not_created', 'unknown' ),
-				'description' => _x( 'not_created means no creation was submitted for this profile. unknown means a request may have created the message; inspect the calendar before retrying.', 'text', 'nelio-content' ),
+				'description' => 'not_created means no creation was submitted for this profile. unknown means a request may have created the message; inspect the calendar before retrying.',
 			),
-			'message_id' => $this->uuid_schema( _x( 'Generated message ID submitted for an unknown outcome. Use it with the profile and publication range to inspect the calendar before considering a retry.', 'text', 'nelio-content' ) ),
+			'message_id' => $this->uuid_schema( 'Generated message ID submitted for an unknown outcome. Use it with the profile and publication range to inspect the calendar before considering a retry.' ),
 			'network'    => array(
 				'type'        => 'string',
-				'description' => _x( 'Network associated with an accessible profile when included in local validation details. Omitted for inaccessible profiles.', 'text', 'nelio-content' ),
+				'description' => 'Network associated with an accessible profile when included in local validation details. Omitted for inaccessible profiles.',
 			),
 			'rule'       => array(
 				'type'        => 'string',
-				'description' => _x( 'Stable media validation rule, such as file_too_large, when a specific constraint failed.', 'text', 'nelio-content' ),
+				'description' => 'Stable media validation rule, such as file_too_large, when a specific constraint failed.',
 			),
 		);
 		foreach ( array(
-			'limit'         => _x( 'Network weighted text limit when the content is too long.', 'text', 'nelio-content' ),
-			'actual_length' => _x( 'Measured weighted text length when the content is too long.', 'text', 'nelio-content' ),
+			'limit'         => 'The network character limit exceeded by this text, using that network’s counting rules.',
+			'actual_length' => 'The measured length of text that exceeds the limit, using the network’s character and link counting rules.',
 		) as $key => $description ) {
 			$properties[ $key ] = array(
 				'type'        => 'integer',
@@ -97,7 +97,7 @@ class Nelio_Content_Create_Social_Message_Ability extends Nelio_Content_Premium_
 				'description' => $description,
 			);
 		}
-		return $this->object_schema( $properties, array( 'profile_id', 'code', 'message', 'outcome' ), _x( 'Failure of one selected profile. Local rejection is distinguished from an unconfirmed Cloud write so retries do not create duplicates.', 'text', 'nelio-content' ) );
+		return $this->object_schema( $properties, array( 'profile_id', 'code', 'message', 'outcome' ), 'Failure of one selected profile. The response distinguishes a request rejected before submission from a Cloud request whose result could not be confirmed, so the agent can avoid creating duplicates when retrying.' );
 	}
 
 	/**

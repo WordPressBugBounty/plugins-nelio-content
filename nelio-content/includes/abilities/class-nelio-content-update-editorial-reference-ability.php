@@ -20,61 +20,61 @@ class Nelio_Content_Update_Editorial_Reference_Ability extends Nelio_Content_Edi
 			'post_id'          => array(
 				'type'        => 'integer',
 				'minimum'     => 1,
-				'description' => _x( 'Readable and editable reference-enabled post already associated with this reference. Editing affects the shared bibliography for every associated post, not only this context.', 'text', 'nelio-content' ),
+				'description' => 'Readable and editable reference-enabled post already associated with this reference. Editing affects the shared bibliography for every associated post, not only this context.',
 			),
 			'reference_id'     => array(
 				'type'        => 'integer',
 				'minimum'     => 1,
-				'description' => _x( 'Existing external reference ID obtained from this post’s references. Internal WordPress content cannot be edited through this operation.', 'text', 'nelio-content' ),
+				'description' => 'Existing external reference ID obtained from this post’s references. Internal WordPress content cannot be edited through this operation.',
 			),
 			'title'            => array(
 				'type'        => 'string',
 				'maxLength'   => 500,
-				'description' => _x( 'Optional plain bibliographic title, at most 500 Unicode characters. Omit to preserve it; an explicit empty string clears it. Surrounding whitespace is trimmed.', 'text', 'nelio-content' ),
+				'description' => 'Optional plain bibliographic title, at most 500 Unicode characters. Omit to preserve it; an explicit empty string clears it. Surrounding whitespace is trimmed.',
 			),
 			'author'           => array(
 				'type'        => 'string',
 				'maxLength'   => 200,
-				'description' => _x( 'Optional plain author name, at most 200 Unicode characters. Omit to preserve it; an empty string clears it. Surrounding whitespace is trimmed.', 'text', 'nelio-content' ),
+				'description' => 'Optional plain author name, at most 200 Unicode characters. Omit to preserve it; an empty string clears it. Surrounding whitespace is trimmed.',
 			),
 			'email'            => array(
 				'type'        => 'string',
 				'maxLength'   => 254,
-				'description' => _x( 'Optional valid author email address, or empty to clear it. Omit to preserve it. Stored contact data is never returned, even when another field is edited.', 'text', 'nelio-content' ),
+				'description' => 'Optional valid author email address, or empty to clear it. Omit to preserve it. Stored contact data is never returned, even when another field is edited.',
 			),
 			'twitter'          => array(
 				'type'        => 'string',
 				'maxLength'   => 100,
-				'description' => _x( 'Optional author X/Twitter handle starting with @, without spaces or another @, or empty to clear it. Omit to preserve it. At most 100 Unicode characters; no network validation occurs.', 'text', 'nelio-content' ),
+				'description' => 'Optional author X/Twitter handle starting with @, without spaces or another @, or empty to clear it. Omit to preserve it. At most 100 Unicode characters; no network validation occurs.',
 			),
 			'publication_date' => array(
 				'type'        => 'string',
 				'maxLength'   => 10,
-				'description' => _x( 'Optional real publication calendar date in YYYY-MM-DD form, or empty to clear it. Omit to preserve it. This is the source’s publication date, not a post schedule or suggestion date.', 'text', 'nelio-content' ),
+				'description' => 'Optional real publication calendar date in YYYY-MM-DD form, or empty to clear it. Omit to preserve it. This is the source’s publication date, not a post schedule or suggestion date.',
 			),
 		);
 		wp_register_ability(
 			'nelio-content/update-editorial-reference',
 			array(
 				'label'               => _x( 'Update editorial reference', 'command', 'nelio-content' ),
-				'description'         => _x( 'Partially edit an external reference’s shared bibliographic data, in Free or Premium. Requires plugin access, a readable/editable reference-enabled context post, reference read/edit access and read/edit permission for every post associated through included, suggested or discarded relationships. Administrators do not bypass these checks. At most 100 associated posts can be verified; missing, inaccessible, oversized or unverifiable associations fail without a write. Supply at least one title, author, email, X/Twitter handle or publication date; omitted fields are preserved, explicit empty strings clear them. The URL and internal WordPress content are immutable. Changes affect every use of this shared reference. Contact values and other-post identities are never returned. Uses cached bibliographic completeness rules without downloading the URL; broken/check states remain unchanged. Equal values are a no-op without refreshing status. Association and stored-data changes detected during execution stop further writes. This is not an atomic transaction or a concurrency lock; after an unconfirmed update inspect the reference before retrying. No automatic retry occurs.', 'text', 'nelio-content' ),
+				'description'         => 'Partially edit an external reference’s shared bibliographic data, in Free or Premium. Requires plugin access, a readable/editable reference-enabled context post, reference read/edit access and read/edit permission for every post associated through included, suggested or discarded relationships. Administrators do not bypass these checks. At most 100 associated posts can be verified; missing associations, posts the user cannot access, more than 100 associations or data that cannot be verified cause the request to fail before saving. Supply at least one title, author, email, X/Twitter handle or publication date; omitted fields are preserved, explicit empty strings clear them. The URL and internal WordPress content cannot be changed through this operation. Changes affect every use of this shared reference. Contact values and other-post identities are never returned. Uses cached bibliographic completeness rules without downloading the URL; broken/check states remain unchanged. If the supplied values already match, nothing is changed and the status is not refreshed. Association and stored-data changes detected during execution stop further writes. Changes are saved in separate steps, and other requests may change the reference at the same time. If the result cannot be confirmed, inspect the reference before retrying. No automatic retry occurs.',
 				'category'            => 'nelio-content-references',
-				'input_schema'        => $this->object_schema( $properties, array( 'post_id', 'reference_id' ), _x( 'One existing external reference, a known editable context post and at least one explicit bibliographic change. Omitted attributes are preserved.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $properties, array( 'post_id', 'reference_id' ), 'One existing external reference, a known editable context post and at least one explicit bibliographic change. Omitted attributes are preserved.' ),
 				'output_schema'       => $this->object_schema(
 					array(
 						'post_id'        => array(
 							'type'        => 'integer',
 							'minimum'     => 1,
-							'description' => _x( 'Authorized context post used to identify the shared reference. Changes also apply to other posts using it.', 'text', 'nelio-content' ),
+							'description' => 'Authorized context post used to identify the shared reference. Changes also apply to other posts using it.',
 						),
 						'reference_id'   => array(
 							'type'        => 'integer',
 							'minimum'     => 1,
-							'description' => _x( 'External reference whose requested fields and final status were verified.', 'text', 'nelio-content' ),
+							'description' => 'External reference whose requested fields and final status were verified.',
 						),
 						'changed'        => array(
 							'type'        => 'boolean',
-							'description' => _x( 'True when supplied fields differed and their final values were verified. False is a no-op with no write or status refresh. Not a transactional change log.', 'text', 'nelio-content' ),
+							'description' => 'True when supplied fields differed and their final values were verified. False means no changes were needed, so nothing was saved and the status was not refreshed. This summarizes verified changes; it does not list every save step.',
 						),
 						'updated_fields' => array(
 							'type'        => 'array',
@@ -83,18 +83,18 @@ class Nelio_Content_Update_Editorial_Reference_Ability extends Nelio_Content_Edi
 							'items'       => array(
 								'type'        => 'string',
 								'enum'        => self::EDITABLE_FIELDS,
-								'description' => _x( 'Name of one supplied field that required a verified update.', 'text', 'nelio-content' ),
+								'description' => 'Name of one supplied field that required a verified update.',
 							),
-							'description' => _x( 'Names of changed bibliographic fields, without their values. Empty for a no-op. Omitted fields are not included.', 'text', 'nelio-content' ),
+							'description' => 'Names of changed bibliographic fields, without their values. Empty when no changes were needed. Omitted fields are not included.',
 						),
 						'status'         => array(
 							'type'        => 'string',
 							'enum'        => array( 'pending', 'improvable', 'complete', 'broken', 'check' ),
-							'description' => _x( 'Verified cached bibliographic status. Completeness uses the native saved-field rules; this is not a live link-health check. A no-op leaves status unchanged.', 'text', 'nelio-content' ),
+							'description' => 'Verified cached bibliographic status. Completeness uses the native saved-field rules; this is not a live link-health check. When no changes are needed, the status is left unchanged.',
 						),
 					),
 					array( 'post_id', 'reference_id', 'changed', 'updated_fields', 'status' ),
-					_x( 'Verified shared-reference update identity, field names and cached status. Contact values, raw metadata and related-post identities/counts are excluded.', 'text', 'nelio-content' )
+					'Verified shared-reference update identity, field names and cached status. Contact values, raw metadata and related-post identities/counts are excluded.'
 				),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
@@ -273,16 +273,16 @@ class Nelio_Content_Update_Editorial_Reference_Ability extends Nelio_Content_Edi
 
 	/** @return WP_Error */
 	private function invalid_input() {
-		return new WP_Error( 'nelio_content_invalid_reference_update', _x( 'Supply at least one supported bibliographic field with a valid plain-text value, email, handle or calendar date. Omit fields to preserve them; use an empty string to clear them.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_reference_update', 'Supply at least one supported bibliographic field with a valid plain-text value, email, handle or calendar date. Omit fields to preserve them; use an empty string to clear them.' );
 	}
 
 	/** @return WP_Error */
 	private function denied() {
-		return new WP_Error( 'nelio_content_permission_denied', _x( 'This shared reference cannot be updated in the selected context. It must be an editable external reference associated with this post, with read and edit access to every associated post within the supported limits.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_permission_denied', 'This shared reference cannot be updated in the selected context. It must be an editable external reference associated with this post, with read and edit access to every associated post within the supported limits.' );
 	}
 
 	/** @return WP_Error */
 	private function unconfirmed() {
-		return new WP_Error( 'nelio_content_reference_update_unconfirmed', _x( 'The shared-reference update could not be confirmed. Some requested fields may have been saved. Inspect the reference and review access before retrying; no automatic retry was performed.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_reference_update_unconfirmed', 'The shared-reference update could not be confirmed. Some requested fields may have been saved. Inspect the reference and review access before retrying; no automatic retry was performed.' );
 	}
 }

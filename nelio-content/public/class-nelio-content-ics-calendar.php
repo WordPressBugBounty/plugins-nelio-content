@@ -95,13 +95,13 @@ class Nelio_Content_Ics_Calendar {
 		// Only do .ics subscriptions when the setting is active.
 		$settings = Nelio_Content_Settings::instance();
 		if ( ! $settings->get( 'use_ics_subscription' ) ) {
-			wp_die( esc_html__( 'Invalid request', 'nelio-content' ) );
+			wp_die( esc_html_x( 'Invalid request', 'text', 'nelio-content' ) );
 		}
 
 		// Confirm all of the arguments are present.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_GET['key'] ) ) {
-			wp_die( esc_html__( 'Invalid request', 'nelio-content' ) );
+			wp_die( esc_html_x( 'Invalid request', 'text', 'nelio-content' ) );
 		}
 
 		$post_query_args = array();
@@ -114,7 +114,7 @@ class Nelio_Content_Ics_Calendar {
 			if ( $user ) {
 				$post_query_args['author'] = $user->ID;
 			} else {
-				wp_die( esc_html__( 'Invalid request', 'nelio-content' ) );
+				wp_die( esc_html_x( 'Invalid request', 'text', 'nelio-content' ) );
 			}
 		} else {
 			$username = 'all';
@@ -125,7 +125,7 @@ class Nelio_Content_Ics_Calendar {
 		$key            = sanitize_user( wp_unslash( $_GET['key'] ) );
 		$ics_secret_key = get_option( 'nc_ics_key', false );
 		if ( ! $ics_secret_key || md5( $username . $ics_secret_key ) !== $key ) {
-			wp_die( esc_html__( 'Invalid request', 'nelio-content' ) );
+			wp_die( esc_html_x( 'Invalid request', 'text', 'nelio-content' ) );
 		}
 
 		/**

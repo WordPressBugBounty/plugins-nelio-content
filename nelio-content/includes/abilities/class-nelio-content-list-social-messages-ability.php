@@ -27,10 +27,10 @@ class Nelio_Content_List_Social_Messages_Ability extends Nelio_Content_Ability {
 			'nelio-content/list-social-messages',
 			array(
 				'label'               => _x( 'List social messages', 'command', 'nelio-content' ),
-				'description'         => _x( 'Retrieve one bounded page of per-profile messages in an inclusive site-local date range. Follow next_cursor even when filtering leaves an empty page. Drafts linked to unpublished posts can already have planned dates and are scheduled automatically after post publication reaches Nelio Cloud. This is expected and does not require rescheduling. Undated drafts may not appear in date queries.', 'text', 'nelio-content' ),
+				'description'         => 'Retrieve one page of messages for individual profiles in an inclusive site-local date range. Follow next_cursor even when filtering leaves an empty page. Drafts linked to unpublished posts can already have planned dates and are scheduled automatically after post publication reaches Nelio Cloud. This is expected and does not require rescheduling. Undated drafts may not appear in date queries.',
 				'category'            => 'nelio-content-messages',
-				'input_schema'        => $this->object_schema( $input_properties, $required_fields, _x( 'Date range and optional filters for one page of accessible social message instances.', 'text', 'nelio-content' ) ),
-				'output_schema'       => $this->page_schema( $this->message_schema(), _x( 'A bounded page of per-profile messages matching the query and current user permissions.', 'text', 'nelio-content' ) ),
+				'input_schema'        => $this->object_schema( $input_properties, $required_fields, 'Date range and optional filters for one page of accessible social message instances.' ),
+				'output_schema'       => $this->page_schema( $this->message_schema(), 'One page of messages for individual profiles matching the query and current user permissions.' ),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'permissions' ),
 				'meta'                => $this->get_ability_metadata(),
@@ -57,7 +57,7 @@ class Nelio_Content_List_Social_Messages_Ability extends Nelio_Content_Ability {
 	public function execute( $input ) {
 		$allowed = $this->permissions( $input );
 		if ( true !== $allowed ) {
-			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot execute this ability.', 'user', 'nelio-content' ) );
+			return is_wp_error( $allowed ) ? $allowed : new WP_Error( 'nelio_content_permission_denied', 'You cannot execute this ability.' );
 		}
 
 		return query_social_messages( $input, $this->message_schema() );

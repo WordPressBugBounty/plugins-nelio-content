@@ -63,7 +63,7 @@ return array(
 				'name' => 'analytics_post_types',
 				'help' => _x(
 					'Retrieve relevant analytics from Google Analytics, as well as social media, for the posts included in these post types. If no post types are selected, this feature will be disabled.',
-					'user',
+					'text',
 					'nelio-content'
 				),
 			)

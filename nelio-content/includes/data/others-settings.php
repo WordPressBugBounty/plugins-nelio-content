@@ -56,7 +56,7 @@ return array(
 				'name' => 'efi_post_types',
 				'help' => _x(
 					'Insert an external image as the featured image of a compatible post type just by indicating its URL.',
-					'user',
+					'text',
 					'nelio-content'
 				),
 			)
@@ -68,7 +68,7 @@ return array(
 		'type'    => 'select',
 		'name'    => 'efi_mode',
 		'label'   => esc_html_x( 'Mode', 'text', 'nelio-content' ),
-		'desc'    => _x( 'Themes can insert featured images in different ways. For example, some themes use a WordPress function named <code>(get_)the_post_thumbnail</code> whereas others use a combination of <code>wp_get_attachment_image_src</code> and <code>get_post_thumbnail_id</code>. Depending on how your theme operates, Nelio Content may or may not be compatible with it. In order to maximize the number of compatible themes, the plugin implements different <em>modes</em>.', 'html', 'nelio-content' ),
+		'desc'    => _x( 'Themes can insert featured images in different ways. For example, some themes use a WordPress function named <code>(get_)the_post_thumbnail</code> whereas others use a combination of <code>wp_get_attachment_image_src</code> and <code>get_post_thumbnail_id</code>. Depending on how your theme operates, Nelio Content may or may not be compatible with it. In order to maximize the number of compatible themes, the plugin implements different <em>modes</em>.', 'text (html)', 'nelio-content' ),
 		'default' => 'default',
 		'options' => array(
 			array(
@@ -103,17 +103,17 @@ return array(
 			),
 			array(
 				'value' => 'first',
-				'label' => esc_html_x( 'Use First Image in Post', 'text', 'nelio-content' ),
+				'label' => esc_html_x( 'Use First Image in Post', 'command', 'nelio-content' ),
 				'desc'  => esc_html_x( 'Nelio Content will use the first image included in the post.', 'text', 'nelio-content' ),
 			),
 			array(
 				'value' => 'any',
-				'label' => esc_html_x( 'Use Any Image In Post', 'text', 'nelio-content' ),
+				'label' => esc_html_x( 'Use Any Image In Post', 'command', 'nelio-content' ),
 				'desc'  => esc_html_x( 'Nelio Content will use one of the images included in the post, selecting it randomly. If there are more than two images, Nelio Content will ignore the first and the last image.', 'text', 'nelio-content' ),
 			),
 			array(
 				'value' => 'last',
-				'label' => esc_html_x( 'Use Last Image In Post', 'text', 'nelio-content' ),
+				'label' => esc_html_x( 'Use Last Image In Post', 'command', 'nelio-content' ),
 				'desc'  => esc_html_x( 'Nelio Content will use the last image included in the post.', 'text', 'nelio-content' ),
 			),
 		),

@@ -20,7 +20,7 @@ class Nelio_Content_Board_Page extends Nelio_Content_Abstract_Page {
 		parent::__construct(
 			'nelio-content',
 			'nelio-content-board',
-			_x( 'Content Board', 'menu', 'nelio-content' ),
+			_x( 'Content Board', 'text (menu)', 'nelio-content' ),
 			nelio_content_can_current_user_use_plugin()
 		);
 	}

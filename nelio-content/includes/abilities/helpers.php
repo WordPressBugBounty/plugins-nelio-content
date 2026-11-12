@@ -27,15 +27,15 @@ defined( 'ABSPATH' ) || exit;
  */
 function request_cloud( $path, $method = 'GET', $body = null, $expected_lists = array() ) {
 	if ( ! is_user_logged_in() || ! nelio_content_can_current_user_use_plugin() ) {
-		return new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot use Nelio Content.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_permission_denied', 'You cannot use Nelio Content.' );
 	}
 	$site_id = nelio_content_get_site_id();
 	if ( empty( $site_id ) ) {
-		return new WP_Error( 'nelio_content_feature_unavailable', _x( 'Nelio Content is not configured.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_feature_unavailable', 'Nelio Content is not configured.' );
 	}
 	$token = nelio_content_generate_api_auth_token( 'skip-errors' );
 	if ( empty( $token ) || 'unauthorized' === $token ) {
-		return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Unable to authenticate with Nelio Cloud.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_cloud_unavailable', 'Unable to authenticate with Nelio Cloud.' );
 	}
 	$request_args = array(
 		'method'              => $method,
@@ -50,30 +50,30 @@ function request_cloud( $path, $method = 'GET', $body = null, $expected_lists = 
 	if ( null !== $body ) {
 		$encoded = wp_json_encode( $body );
 		if ( false === $encoded ) {
-			return new WP_Error( 'nelio_content_invalid_input', _x( 'Unable to encode the Cloud request.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_input', 'Unable to encode the Cloud request.' );
 		}
 		$request_args['body'] = $encoded;
 	}
 	$response = wp_remote_request( nelio_content_get_api_url( '/site/' . rawurlencode( $site_id ) . $path, 'wp' ), $request_args );
 	if ( ! is_wp_error( $response ) && strlen( wp_remote_retrieve_body( $response ) ) > 2 * MB_IN_BYTES ) {
-		return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'The Cloud response exceeds the supported size limit.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_cloud_unavailable', 'The Cloud response exceeds the supported size limit.' );
 	}
 	$result = nelio_content_extract_response_body( $response );
 	if ( ! is_wp_error( $response ) ) {
 		$decoded = json_decode( wp_remote_retrieve_body( $response ) );
 		if ( JSON_ERROR_NONE !== json_last_error() ) {
-			return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Nelio Cloud returned an invalid response.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_cloud_unavailable', 'Nelio Cloud returned an invalid response.' );
 		}
 		foreach ( $expected_lists as $field ) {
 			$collection = '' === $field ? $decoded : ( $decoded instanceof \stdClass ? ( $decoded->{$field} ?? null ) : null );
 			if ( ! is_array( $collection ) ) {
-				return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'The complete Cloud collection response could not be verified.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_cloud_unavailable', 'The complete Cloud collection response could not be verified.' );
 			}
 		}
 	}
 	if ( is_wp_error( $result ) || ! is_array( $result ) ) {
 		// Do not forward upstream bodies, headers, or arbitrary error descriptions.
-		return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Nelio Cloud could not complete the operation.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_cloud_unavailable', 'Nelio Cloud could not complete the operation.' );
 	}
 	return $result;
 }
@@ -107,35 +107,35 @@ function get_accessible_social_profiles( $include_publishing_settings = false, $
 	}
 	if ( $strict_response ) {
 		if ( array_values( $profiles ) !== $profiles ) {
-			return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'The complete profile response could not be verified.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_cloud_unavailable', 'The complete profile response could not be verified.' );
 		}
 		$seen_profiles = array();
 		foreach ( $profiles as $profile ) {
 			if ( ! is_array( $profile ) || ! is_string( $profile['id'] ?? null ) || ! wp_is_uuid( $profile['id'] ) ||
 				( array_key_exists( 'creatorId', $profile ) && ! is_int( $profile['creatorId'] ) ) ) {
-				return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'The complete profile response could not be verified.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_cloud_unavailable', 'The complete profile response could not be verified.' );
 			}
 			if ( isset( $seen_profiles[ $profile['id'] ] ) ) {
-				return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'The complete profile response could not be verified.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_cloud_unavailable', 'The complete profile response could not be verified.' );
 			}
 			$seen_profiles[ $profile['id'] ] = true;
 			$permissions                     = array_key_exists( 'permissions', $profile ) ? $profile['permissions'] : 'all-roles';
 			if ( ! in_array( $permissions, array( 'all-roles', 'creator-only' ), true ) && ( ! is_array( $permissions ) || count( array_filter( $permissions, 'is_string' ) ) !== count( $permissions ) ) ) {
-				return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'The complete profile permissions could not be verified.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_cloud_unavailable', 'The complete profile permissions could not be verified.' );
 			}
 		}
 	}
 	$result = array();
 	foreach ( $profiles as $profile ) {
 		if ( $require_all && ( ! is_array( $profile ) || ! can_use_profile( $profile ) ) ) {
-			return new WP_Error( 'nelio_content_permission_denied', _x( 'This site-wide automation operation requires access to every connected social profile.', 'user', 'nelio-content' ), array( 'status' => 403 ) );
+			return new WP_Error( 'nelio_content_permission_denied', 'This site-wide automation operation requires access to every connected social profile.', array( 'status' => 403 ) );
 		}
 		if ( ! is_array( $profile ) || ! can_use_profile( $profile ) ) {
 			continue;
 		}
 		if ( ! isset( $profile['id'], $profile['displayName'], $profile['network'], $profile['username'], $profile['status'] ) ||
 			! is_string( $profile['id'] ) || ! is_string( $profile['displayName'] ) || ! is_string( $profile['network'] ) || ! is_string( $profile['username'] ) || ! is_string( $profile['status'] ) ) {
-			return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Unexpected Cloud profile response.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_cloud_unavailable', 'Unexpected Cloud profile response.' );
 		}
 		$safe = array(
 			'id'          => $profile['id'],
@@ -160,7 +160,7 @@ function get_accessible_social_profiles( $include_publishing_settings = false, $
 		}
 		if ( $profile['id'] === $shortener_profile_id && array_key_exists( 'linkShortenerSettings', $profile ) ) {
 			if ( ! is_array( $profile['linkShortenerSettings'] ) ) {
-				return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'The saved profile settings could not be safely preserved.', 'user', 'nelio-content' ) );
+				return new WP_Error( 'nelio_content_cloud_unavailable', 'The saved profile settings could not be safely preserved.' );
 			}
 			$safe['linkShortenerSettings'] = $profile['linkShortenerSettings'];
 		}
@@ -200,7 +200,7 @@ function get_cloud_calendar_page( $kind, $input ) {
 		return $response;
 	}
 	if ( ! isset( $response[ $kind ] ) || ! is_array( $response[ $kind ] ) || ( isset( $response['page'] ) && ! is_string( $response['page'] ) ) ) {
-		return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Unexpected Cloud calendar response.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_cloud_unavailable', 'Unexpected Cloud calendar response.' );
 	}
 	return paginate_items( array_values( array_filter( $response[ $kind ], 'is_array' ) ), $input, $response['page'] ?? '' );
 }
@@ -216,13 +216,13 @@ function validate_date_range( $input ) {
 		$value = $input[ $key ] ?? '';
 		$date  = DateTimeImmutable::createFromFormat( '!Y-m-d', $value, wp_timezone() );
 		if ( ! $date || $date->format( 'Y-m-d' ) !== $value ) {
-			return new WP_Error( 'nelio_content_invalid_date', _x( 'Use real calendar dates in YYYY-MM-DD format.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_date', 'Use real calendar dates in YYYY-MM-DD format.' );
 		}
 	}
 	$start = new DateTimeImmutable( $input['start_date'] ?? '', wp_timezone() );
 	$end   = new DateTimeImmutable( $input['end_date'] ?? '', wp_timezone() );
 	if ( $end < $start || $start->diff( $end )->days > 31 ) {
-		return new WP_Error( 'nelio_content_invalid_date_range', _x( 'The date range must be ordered and span at most 31 days.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_date_range', 'The date range must be ordered and span at most 31 days.' );
 	}
 	return true;
 }
@@ -243,7 +243,7 @@ function decode_cursor( $input ) {
 	$decoded = base64_decode( $input['cursor'], true );
 	$cursor  = false === $decoded ? null : json_decode( $decoded, true );
 	if ( ! is_array( $cursor ) || ! isset( $cursor['page'], $cursor['offset'] ) || ! is_string( $cursor['page'] ) || ! is_int( $cursor['offset'] ) || $cursor['offset'] < 0 || $cursor['offset'] > 100000 ) {
-		return new WP_Error( 'nelio_content_invalid_cursor', _x( 'Invalid pagination cursor.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_cursor', 'The cursor value is invalid.' );
 	}
 	return $cursor;
 }
@@ -277,7 +277,7 @@ function paginate_items( $items, $input, $next_page = '' ) {
 	$more    = $offset + $limit < count( $items ) || '' !== $next_page;
 	$encoded = wp_json_encode( $next );
 	if ( false === $encoded ) {
-		return new WP_Error( 'nelio_content_invalid_cursor', _x( 'Unable to encode the pagination cursor.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_cursor', 'Unable to create the cursor value for the next page.' );
 	}
 	return array(
 		'items'       => array_slice( $items, $offset, $limit ),
@@ -395,29 +395,29 @@ function query_social_profiles( $input, $schema ) {
 function get_message_media( $attachment_id ) {
 	$attachment = get_post( $attachment_id );
 	if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
-		return new WP_Error( 'nelio_content_invalid_media', _x( 'Select an existing image or video from the WordPress media library.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_media', 'Select an existing image or video from the WordPress media library.' );
 	}
 	if ( ! current_user_can( 'upload_files' ) || ! current_user_can( 'read_post', $attachment_id ) ) {
-		return new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot use this media attachment.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_permission_denied', 'You cannot use this media attachment.' );
 	}
 	$mime = get_post_mime_type( $attachment );
 	$type = is_string( $mime ) && 0 === strpos( $mime, 'image/' ) ? 'image' : 'video';
 	if ( ! is_string( $mime ) || ( 0 !== strpos( $mime, 'image/' ) && 0 !== strpos( $mime, 'video/' ) ) ) {
-		return new WP_Error( 'nelio_content_invalid_media', _x( 'The attachment must be an image or video.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_media', 'The attachment must be an image or video.' );
 	}
 	$url = wp_get_attachment_url( $attachment_id );
 	if ( ! $url || ! in_array( wp_parse_url( $url, PHP_URL_SCHEME ), array( 'http', 'https' ), true ) ) {
-		return new WP_Error( 'nelio_content_invalid_media', _x( 'The attachment must have an HTTP or HTTPS URL accessible to Nelio Cloud.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_media', 'The attachment must have an HTTP or HTTPS URL accessible to Nelio Cloud.' );
 	}
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 	$metadata = is_array( $metadata ) ? $metadata : array();
 	$file     = get_attached_file( $attachment_id );
 	$size     = $file && is_file( $file ) ? filesize( $file ) : ( $metadata['filesize'] ?? 0 );
 	if ( ! is_numeric( $size ) || $size <= 0 ) {
-		return new WP_Error( 'nelio_content_invalid_media', _x( 'The attachment file size is unavailable. Regenerate its metadata before scheduling.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_media', 'The attachment file size is unavailable. Regenerate its metadata before scheduling.' );
 	}
 	if ( 'image' === $type && ( empty( $metadata['width'] ) || empty( $metadata['height'] ) ) ) {
-		return new WP_Error( 'nelio_content_invalid_media', _x( 'Image dimensions are unavailable. Regenerate the attachment metadata before scheduling.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_media', 'Image dimensions are unavailable. Regenerate the attachment metadata before scheduling.' );
 	}
 	$media = array(
 		'id'              => $attachment_id,
@@ -465,25 +465,25 @@ function prepare_scheduled_social_message( $input ) {
 function prepare_social_message_batch( $input ) {
 	$text = trim( $input['content'] );
 	if ( preg_match( '/[<>]/u', $text ) ) {
-		return new WP_Error( 'nelio_content_invalid_content', _x( 'Provide plain message text without HTML.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_content', 'Provide plain message text without HTML.' );
 	}
 	try {
 		$date   = new DateTimeImmutable( $input['scheduled_at'] );
 		$errors = DateTimeImmutable::getLastErrors();
 		if ( false !== $errors && ( $errors['warning_count'] || $errors['error_count'] ) ) {
-			return new WP_Error( 'nelio_content_invalid_date', _x( 'Invalid publication date.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_date', 'Invalid publication date.' );
 		}
 		// The existing editor and Cloud contract schedule with minute precision.
 		$date = $date->setTime( (int) $date->format( 'H' ), (int) $date->format( 'i' ), 0 );
 	} catch ( Exception $e ) {
-		return new WP_Error( 'nelio_content_invalid_date', _x( 'Invalid publication date.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_date', 'Invalid publication date.' );
 	}
 	if ( $date->getTimestamp() < time() + 5 * MINUTE_IN_SECONDS ) {
-		return new WP_Error( 'nelio_content_invalid_date', _x( 'Schedule publication at least five minutes in the future.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_date', 'Schedule publication at least five minutes in the future.' );
 	}
 	$post = ! empty( $input['post_id'] ) ? get_post( $input['post_id'] ) : null;
 	if ( $post && ! in_array( $post->post_status, array( 'publish', 'future' ), true ) ) {
-		return new WP_Error( 'nelio_content_invalid_post', _x( 'Related posts must be published or scheduled.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_post', 'Related posts must be published or scheduled.' );
 	}
 	if ( ! $post ) {
 		$computed = \Nelio_Content_Social_Message_Text::compute( $text, false, 0 );
@@ -510,7 +510,7 @@ function prepare_social_message_batch( $input ) {
 	$options = array();
 	foreach ( $input['profile_options'] ?? array() as $option ) {
 		if ( isset( $options[ $option['profile_id'] ] ) || ! in_array( $option['profile_id'], $input['profile_ids'], true ) ) {
-			return new WP_Error( 'nelio_content_invalid_network_options', _x( 'Provide at most one options object for each selected profile, without unselected profile IDs.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_invalid_network_options', 'Provide at most one options object for each selected profile, without unselected profile IDs.' );
 		}
 		$options[ $option['profile_id'] ] = $option;
 	}
@@ -521,7 +521,7 @@ function prepare_social_message_batch( $input ) {
 	foreach ( $input['profile_ids'] as $profile_id ) {
 		$profile = $profiles[ $profile_id ] ?? null;
 		if ( ! $profile || 'valid' !== $profile['status'] || empty( $requirements[ $profile['network'] ]['abilitySupported'] ) ) {
-			$error    = new WP_Error( 'nelio_content_invalid_profile', _x( 'Select an accessible, connected profile from a supported Nelio Content network.', 'user', 'nelio-content' ) );
+			$error    = new WP_Error( 'nelio_content_invalid_profile', 'Select an accessible, connected profile from a supported Nelio Content network.' );
 			$errors[] = social_message_creation_error( $profile_id, $error );
 			continue;
 		}
@@ -577,7 +577,7 @@ function prepare_social_message_batch( $input ) {
  */
 function prepare_social_message_slot( $profile, $rules, $options, $post_data, $media, $text ) {
 	if ( $media && ! in_array( $media['type'], $rules['supports'], true ) ) {
-		return new WP_Error( 'nelio_content_invalid_media', _x( 'A selected social network does not support this media format. Use separate requests for incompatible networks.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_media', 'A selected social network does not support this media format. Use separate requests for incompatible networks.' );
 	}
 	$slot_options = \Nelio_Content_Social_Message_Options::prepare( $profile, $options, $post_data );
 	if ( is_wp_error( $slot_options ) ) {
@@ -596,7 +596,7 @@ function prepare_social_message_slot( $profile, $rules, $options, $post_data, $m
 		return $length;
 	}
 	if ( '' === $resolved && in_array( 'text', $rules['supports'], true ) && 'tiktok' !== $profile['network'] ) {
-		return new WP_Error( 'nelio_content_invalid_content', _x( 'This social network requires non-empty message text after expanding placeholders.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_content', 'This social network requires non-empty message text after expanding placeholders.' );
 	}
 	$details = array(
 		'profile_id' => $profile['id'],
@@ -605,7 +605,7 @@ function prepare_social_message_slot( $profile, $rules, $options, $post_data, $m
 	if ( $length > $rules['limit'] ) {
 		return new WP_Error(
 			'nelio_content_content_too_long',
-			_x( 'The message exceeds the text limit for a selected social network. Shorten it or schedule separate messages.', 'user', 'nelio-content' ),
+			'The message exceeds the text limit for a selected social network. Shorten it or schedule separate messages.',
 			array_merge(
 				$details,
 				array(
@@ -616,13 +616,13 @@ function prepare_social_message_slot( $profile, $rules, $options, $post_data, $m
 		);
 	}
 	if ( ! $media && network_requires_media( $rules ) ) {
-		return new WP_Error( 'nelio_content_media_required', _x( 'A selected social network requires an image or video. Provide a media_id from the WordPress media library.', 'user', 'nelio-content' ), $details );
+		return new WP_Error( 'nelio_content_media_required', 'A selected social network requires an image or video. Provide a media_id from the WordPress media library.', $details );
 	}
 	if ( $media ) {
 		$media_rules = $rules['media'][ $media['type'] ] ?? null;
 		$error       = $media_rules ? get_media_rule_error( $media_rules, $media ) : 'unsupported_media';
 		if ( '' !== $error ) {
-			return new WP_Error( 'nelio_content_invalid_media', _x( 'The attachment does not meet the requirements of a selected social network. Check get-social-network-requirements for its media constraints.', 'user', 'nelio-content' ), array_merge( $details, array( 'rule' => $error ) ) );
+			return new WP_Error( 'nelio_content_invalid_media', 'The attachment does not meet the requirements of a selected social network. Check get-social-network-requirements for its media constraints.', array_merge( $details, array( 'rule' => $error ) ) );
 		}
 	}
 	return array_merge(
@@ -651,7 +651,7 @@ function get_social_profile_targets( $profile_id ) {
 	}
 	$profiles = array_column( $profiles, null, 'id' );
 	if ( ! isset( $profiles[ $profile_id ] ) ) {
-		return new WP_Error( 'nelio_content_permission_denied', _x( 'You cannot access this social profile.', 'user', 'nelio-content' ), array( 'status' => 403 ) );
+		return new WP_Error( 'nelio_content_permission_denied', 'You cannot access this social profile.', array( 'status' => 403 ) );
 	}
 	if ( 'pinterest' !== $profiles[ $profile_id ]['network'] ) {
 		return array();
@@ -663,7 +663,7 @@ function get_social_profile_targets( $profile_id ) {
 	$result = array();
 	foreach ( $targets as $target ) {
 		if ( ! is_array( $target ) || ! is_string( $target['name'] ?? null ) || ! is_string( $target['displayName'] ?? null ) ) {
-			return new WP_Error( 'nelio_content_cloud_unavailable', _x( 'Unexpected Cloud profile target response.', 'user', 'nelio-content' ) );
+			return new WP_Error( 'nelio_content_cloud_unavailable', 'Unexpected Cloud profile target response.' );
 		}
 		$result[] = array(
 			'name'        => $target['name'],
@@ -742,7 +742,7 @@ function local_post_page( $items, $next_offset, $has_more ) {
 		)
 	);
 	if ( false === $encoded ) {
-		return new WP_Error( 'nelio_content_invalid_cursor', _x( 'Unable to encode the pagination cursor.', 'user', 'nelio-content' ) );
+		return new WP_Error( 'nelio_content_invalid_cursor', 'Unable to create the cursor value for the next page.' );
 	}
 	return array(
 		'items'       => $items,

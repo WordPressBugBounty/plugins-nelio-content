@@ -116,6 +116,18 @@ class Nelio_Content_Task_Preset_Post_Type_Register {
 	 */
 	public function set_user_capabilities( $capabilities, $caps, $args, $user ) {
 
+		// Access checks call current_user_can() again; only handle our own capabilities.
+		$has_own_cap = false;
+		foreach ( $caps as $cap ) {
+			if ( false !== strpos( $cap, 'nc_task_preset' ) ) {
+				$has_own_cap = true;
+				break;
+			}
+		}
+		if ( ! $has_own_cap ) {
+			return $capabilities;
+		}
+
 		$capabilities = array_filter(
 			$capabilities,
 			function ( $cap ) {

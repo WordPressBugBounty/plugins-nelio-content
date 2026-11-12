@@ -32,9 +32,9 @@ abstract class Nelio_Content_Automation_Ability extends Nelio_Content_Premium_Ab
 	protected function automation_query_schema() {
 		$properties = $this->query_properties();
 		unset( $properties['start_date'], $properties['end_date'] );
-		$properties['post_id']['description'] = _x( 'Optional editable WordPress post. Restricts group and template selection by post type, author and taxonomy; does not render placeholders or predict scheduling.', 'text', 'nelio-content' );
-		$properties['profile_id']             = $this->uuid_schema( _x( 'One social profile accessible to the current user. Other profiles and their configuration are never included.', 'text', 'nelio-content' ) );
-		return $this->object_schema( $properties, array( 'profile_id' ), _x( 'Profile-scoped automation discovery with optional editable post context and bounded pagination.', 'text', 'nelio-content' ) );
+		$properties['post_id']['description'] = 'Optional editable WordPress post. Restricts group and template selection by post type, author and taxonomy; does not render placeholders or predict scheduling.';
+		$properties['profile_id']             = $this->uuid_schema( 'One social profile accessible to the current user. Other profiles and their configuration are never included.' );
+		return $this->object_schema( $properties, array( 'profile_id' ), 'Automation settings for one profile, optionally filtered for a post the current user can edit. Results are returned one page at a time, with limits on page size.' );
 	}
 
 	/**
@@ -45,9 +45,9 @@ abstract class Nelio_Content_Automation_Ability extends Nelio_Content_Premium_Ab
 	protected function automation_settings_schema() {
 		$properties = $this->automation_record_properties();
 		foreach ( array(
-			'enabled'             => _x( 'Whether automation is enabled for this profile in this group. A positive group weight and the relevant publication or reshare setting must also be enabled.', 'text', 'nelio-content' ),
-			'publication_enabled' => _x( 'Whether publication promotion is enabled for this profile in this group. Eligible templates and content are still required to generate messages.', 'text', 'nelio-content' ),
-			'reshare_enabled'     => _x( 'Whether republication is enabled for this profile in this group. Content must still meet the eligibility requirements for republication.', 'text', 'nelio-content' ),
+			'enabled'             => 'Whether automation is enabled for this profile in this group. A positive group weight and the relevant publication or reshare setting must also be enabled.',
+			'publication_enabled' => 'Whether publication promotion is enabled for this profile in this group. Eligible templates and content are still required to generate messages.',
+			'reshare_enabled'     => 'Whether republication is enabled for this profile in this group. Content must still meet the eligibility requirements for republication.',
 		) as $key => $description ) {
 			$properties[ $key ] = array(
 				'type'        => 'boolean',
@@ -55,7 +55,7 @@ abstract class Nelio_Content_Automation_Ability extends Nelio_Content_Premium_Ab
 			);
 		}
 		$properties['publication_rule'] = $this->publication_rule_schema();
-		return $this->object_schema( $properties, array_keys( $properties ), _x( 'Settings from one automation group for the requested profile. Group weights and enabled settings describe configuration, not a guarantee of publication.', 'text', 'nelio-content' ) );
+		return $this->object_schema( $properties, array_keys( $properties ), 'Settings from one automation group for the requested profile. Group weights and enabled settings describe configuration, not a guarantee of publication.' );
 	}
 
 	/** @return array<string,mixed> */
@@ -65,16 +65,16 @@ abstract class Nelio_Content_Automation_Ability extends Nelio_Content_Premium_Ab
 				'type' => array(
 					'type'        => 'string',
 					'enum'        => array( 'always', 'max-age' ),
-					'description' => _x( 'Whether the group can apply regardless of post age or only within its configured age limit.', 'text', 'nelio-content' ),
+					'description' => 'Whether the group can apply regardless of post age or only within its configured age limit.',
 				),
 				'days' => array(
 					'type'        => 'number',
 					'minimum'     => 0,
-					'description' => _x( 'Maximum published post age in days when type is max-age.', 'text', 'nelio-content' ),
+					'description' => 'Maximum published post age in days when type is max-age.',
 				),
 			),
 			array( 'type' ),
-			_x( 'Group-level published post age rule used by Cloud when selecting automation groups.', 'text', 'nelio-content' )
+			'Group-level published post age rule used by Cloud when selecting automation groups.'
 		);
 	}
 
@@ -85,33 +85,33 @@ abstract class Nelio_Content_Automation_Ability extends Nelio_Content_Premium_Ab
 	 */
 	protected function social_template_schema() {
 		$properties                 = $this->automation_record_properties();
-		$properties['template_id']  = $this->uuid_schema( _x( 'Stable identifier of the configured template.', 'text', 'nelio-content' ) );
+		$properties['template_id']  = $this->uuid_schema( 'Stable identifier of the configured template.' );
 		$properties['kind']         = array(
 			'type'        => 'string',
 			'enum'        => array( 'publication', 'reshare' ),
-			'description' => _x( 'Whether this template belongs to publication promotion or ongoing republication.', 'text', 'nelio-content' ),
+			'description' => 'Whether this template belongs to publication promotion or ongoing republication.',
 		);
 		$properties['source']       = array(
 			'type'        => 'string',
 			'enum'        => array( 'profile', 'network' ),
-			'description' => _x( 'Whether the template is configured directly on the profile or inherited from its network in this group.', 'text', 'nelio-content' ),
+			'description' => 'Whether the template is configured directly on the profile or inherited from its network in this group.',
 		);
 		$properties['text']         = array(
 			'type'        => 'string',
-			'description' => _x( 'Configured template text, including literal placeholders. This is not rendered message content.', 'text', 'nelio-content' ),
+			'description' => 'Configured template text, including literal placeholders. This is not rendered message content.',
 		);
 		$required                   = array_keys( $properties );
 		$properties['target_name']  = array(
 			'type'        => 'string',
-			'description' => _x( 'Configured publication destination, such as a Pinterest board, when specified.', 'text', 'nelio-content' ),
+			'description' => 'Configured publication destination, such as a Pinterest board, when specified.',
 		);
 		$properties['attachment']   = array(
 			'type'        => 'string',
 			'enum'        => array( 'none', 'image', 'video' ),
-			'description' => _x( 'Configured attachment preference. Actual media availability and network requirements are evaluated during generation.', 'text', 'nelio-content' ),
+			'description' => 'Configured attachment preference. Actual media availability and network requirements are evaluated during generation.',
 		);
 		$properties['availability'] = $this->availability_schema();
-		return $this->object_schema( $properties, $required, _x( 'One enabled template with its source group, profile, promotion kind and optional timing configuration. Multiple groups can contribute templates.', 'text', 'nelio-content' ) );
+		return $this->object_schema( $properties, $required, 'One enabled template with its source group, profile, promotion kind and optional timing configuration. Multiple groups can contribute templates.' );
 	}
 
 	/**
@@ -123,20 +123,20 @@ abstract class Nelio_Content_Automation_Ability extends Nelio_Content_Premium_Ab
 		return array(
 			'group_id'   => array(
 				'type'        => 'string',
-				'description' => _x( 'Automation group UUID or universal for the universal group.', 'text', 'nelio-content' ),
+				'description' => 'Automation group UUID or universal for the universal group.',
 			),
 			'group_name' => array(
 				'type'        => 'string',
-				'description' => _x( 'Configured group name, or an empty string for the universal group.', 'text', 'nelio-content' ),
+				'description' => 'Configured group name, or an empty string for the universal group.',
 			),
 			'priority'   => array(
 				'type'        => 'number',
-				'description' => _x( 'Configured group weight. Zero disables the group; positive weights allow several applicable groups to contribute.', 'text', 'nelio-content' ),
+				'description' => 'Configured group weight. Zero disables the group; positive weights allow several applicable groups to contribute.',
 			),
-			'profile_id' => $this->uuid_schema( _x( 'Accessible profile to which this record applies.', 'text', 'nelio-content' ) ),
+			'profile_id' => $this->uuid_schema( 'Accessible profile to which this record applies.' ),
 			'network'    => array(
 				'type'        => 'string',
-				'description' => _x( 'Network of the requested accessible profile.', 'text', 'nelio-content' ),
+				'description' => 'Network of the requested accessible profile.',
 			),
 		);
 	}
@@ -151,17 +151,17 @@ abstract class Nelio_Content_Automation_Ability extends Nelio_Content_Premium_Ab
 			'type' => array(
 				'type'        => 'string',
 				'enum'        => array( 'publication-day-offset', 'publication-day-period', 'after-publication', 'reshare' ),
-				'description' => _x( 'Timing rule relative to post publication or the weekly republication schedule.', 'text', 'nelio-content' ),
+				'description' => 'Timing rule relative to post publication or the weekly republication schedule.',
 			),
 			'time' => array(
 				'type'        => 'string',
-				'description' => _x( 'Site-local HH:MM or named period: morning, noon, afternoon or night.', 'text', 'nelio-content' ),
+				'description' => 'Site-local HH:MM or named period: morning, noon, afternoon or night.',
 			),
 		);
 		foreach ( array(
-			'hoursAfterPublication' => _x( 'Hours after post publication for a publication-day-offset rule.', 'text', 'nelio-content' ),
-			'daysAfterPublication'  => _x( 'Days after post publication for an after-publication rule.', 'text', 'nelio-content' ),
-			'randomize'             => _x( 'Configured scheduling variation preference. Exact publication times are determined when messages are generated.', 'text', 'nelio-content' ),
+			'hoursAfterPublication' => 'Hours after post publication for a publication-day-offset rule.',
+			'daysAfterPublication'  => 'Days after post publication for an after-publication rule.',
+			'randomize'             => 'Configured scheduling variation preference. Exact publication times are determined when messages are generated.',
 		) as $key => $description ) {
 			$properties[ $key ] = array(
 				'type'        => 'number',
@@ -173,26 +173,26 @@ abstract class Nelio_Content_Automation_Ability extends Nelio_Content_Premium_Ab
 		foreach ( array( 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun' ) as $day ) {
 			$days[ $day ] = array(
 				'type'        => 'boolean',
-				'description' => _x( 'Whether this weekday is selected for republication.', 'text', 'nelio-content' ),
+				'description' => 'Whether this weekday is selected for republication.',
 			);
 		}
-		$properties['weekday']    = $this->object_schema( $days, array_keys( $days ), _x( 'Selected weekdays for a reshare template.', 'text', 'nelio-content' ) );
+		$properties['weekday']    = $this->object_schema( $days, array_keys( $days ), 'Selected weekdays for a reshare template.' );
 		$properties['recurrency'] = $this->object_schema(
 			array(
 				'instanceCount'  => array(
 					'type'        => 'number',
 					'minimum'     => 0,
-					'description' => _x( 'Configured number of recurring instances.', 'text', 'nelio-content' ),
+					'description' => 'Configured number of recurring instances.',
 				),
 				'intervalInDays' => array(
 					'type'        => 'number',
 					'minimum'     => 1,
-					'description' => _x( 'Days between recurring instances.', 'text', 'nelio-content' ),
+					'description' => 'Days between recurring instances.',
 				),
 			),
 			array( 'instanceCount', 'intervalInDays' ),
-			_x( 'Recurrence requested by the configured template; generated series remain managed by Cloud.', 'text', 'nelio-content' )
+			'Recurrence requested by the configured template; generated series remain managed by Cloud.'
 		);
-		return $this->object_schema( $properties, array( 'type' ), _x( 'Configured template timing. Eligibility and exact dates are determined by Cloud, not by this read-only ability.', 'text', 'nelio-content' ) );
+		return $this->object_schema( $properties, array( 'type' ), 'Configured template timing. Eligibility and exact dates are determined by Cloud, not by this read-only ability.' );
 	}
 }
