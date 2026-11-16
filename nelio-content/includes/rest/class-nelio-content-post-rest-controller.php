@@ -312,7 +312,8 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 							'sanitize_callback' => 'absint',
 						),
 						'values' => array(
-							'required' => false,
+							'required'          => false,
+							'sanitize_callback' => array( $this, 'sanitize_post_items' ),
 						),
 					),
 				),
@@ -656,6 +657,28 @@ class Nelio_Content_Post_REST_Controller extends WP_REST_Controller {
 			? $post_type->cap->delete_published_posts
 			: $post_type->cap->delete_posts;
 		return is_string( $capability ) && current_user_can( $capability, $post_id );
+	}
+
+	/**
+	 * Sanitizes external featured image fields while preserving other post items.
+	 *
+	 * @param mixed $values Post items supplied by the request.
+	 *
+	 * @return array<mixed>
+	 */
+	public function sanitize_post_items( $values ) {
+		if ( ! is_array( $values ) ) {
+			return array();
+		}
+
+		if ( array_key_exists( 'efiUrl', $values ) ) {
+			$values['efiUrl'] = is_string( $values['efiUrl'] ) ? esc_url_raw( $values['efiUrl'], array( 'http', 'https' ) ) : '';
+		}
+		if ( array_key_exists( 'efiAlt', $values ) ) {
+			$values['efiAlt'] = is_string( $values['efiAlt'] ) ? sanitize_text_field( $values['efiAlt'] ) : '';
+		}
+
+		return $values;
 	}
 
 	/**

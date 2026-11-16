@@ -40,7 +40,7 @@ class Nelio_Content_External_Featured_Image_Helper {
 	 * This function sets the external featured image of a certain post.
 	 *
 	 * @param int    $post_id The ID of the post.
-	 * @param string $url     The URL of an external featured image.
+	 * @param mixed  $url     The URL of an external featured image. Non-string values are discarded.
 	 * @param string $alt     Alternative text for the image.
 	 *
 	 * @return void
@@ -48,6 +48,8 @@ class Nelio_Content_External_Featured_Image_Helper {
 	 * @since  2.0.0
 	 */
 	public function set_nelio_featured_image( $post_id, $url, $alt ) {
+
+		$url = is_string( $url ) ? esc_url_raw( $url, array( 'http', 'https' ) ) : '';
 
 		if ( empty( $url ) ) {
 			delete_post_meta( $post_id, '_nelioefi_url' );

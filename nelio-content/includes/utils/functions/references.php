@@ -36,11 +36,7 @@ function nelio_content_get_reference_by_url( $url ) {
 	if ( ! $post || is_wp_error( $post ) ) {
 		return false;
 	}
-	$result = new Nelio_Content_Reference( $post );
-	if ( ! $result->is_external() ) {
-		$result->set_url( $url );
-	}
-	return $result;
+	return new Nelio_Content_Reference( $post );
 }
 
 /**
@@ -100,6 +96,9 @@ function nelio_content_get_internal_reference_post_by_url( $url ) {
 		if ( '' !== $wpdb->last_error ) {
 			return new WP_Error( 'nelio_content_references_unavailable', _x( 'Internal reference content could not be retrieved.', 'text', 'nelio-content' ) );
 		}
+		if ( $post && ! is_post_publicly_viewable( $post ) && ! current_user_can( 'read_post', $post->ID ) ) {
+			return new WP_Error( 'nelio_content_reference_forbidden', _x( 'You cannot read this reference with your current permissions.', 'text', 'nelio-content' ), array( 'status' => 403 ) );
+		}
 		return $post ? $post : false;
 	} finally {
 		$wpdb->suppress_errors( $previous );
@@ -122,14 +121,16 @@ function nelio_content_get_internal_reference_post_by_url( $url ) {
  */
 function nelio_content_create_reference( $url ) {
 
-	$reference = nelio_content_get_reference_by_url( $url );
-
-	if ( empty( $reference ) ) {
-		$post      = nelio_content_insert_reference_post( $url );
-		$reference = is_wp_error( $post ) ? false : new Nelio_Content_Reference( $post );
+	$post = nelio_content_get_reference_post_by_url( $url );
+	if ( is_wp_error( $post ) ) {
+		return false;
 	}
 
-	return $reference;
+	if ( ! $post ) {
+		$post = nelio_content_insert_reference_post( $url );
+	}
+
+	return is_wp_error( $post ) ? false : new Nelio_Content_Reference( $post );
 }
 
 /**

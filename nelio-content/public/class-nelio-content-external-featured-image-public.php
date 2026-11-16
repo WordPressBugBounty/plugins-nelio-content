@@ -313,13 +313,18 @@ class Nelio_Content_External_Featured_Image_Public {
 	 */
 	private function generate_style_tag( $image_url, $quote = 'double-quotes' ) {
 
+		$image_url = esc_url( $image_url, array( 'http', 'https' ) );
+		// Keep URL parentheses from closing the CSS url() value.
+		$image_url = str_replace( array( '(', ')' ), array( '%28', '%29' ), $image_url );
+		$style     = "background:url( {$image_url} ) no-repeat center center;-webkit-background-size:cover;-moz-background-size:cover;-o-background-size:cover;background-size: cover;";
+
 		if ( 'single-quotes' === $quote ) {
 			$quote = '\'';
 		} else {
 			$quote = '"';
 		}
 
-		return "style={$quote}background:url( {$image_url} ) no-repeat center center;-webkit-background-size:cover;-moz-background-size:cover;-o-background-size:cover;background-size: cover;{$quote}";
+		return 'style=' . $quote . esc_attr( $style ) . $quote;
 	}
 
 	/**

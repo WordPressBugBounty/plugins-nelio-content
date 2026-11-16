@@ -5,7 +5,7 @@ Tags: editorial calendar, social media, social media scheduler, auto post, conte
 Requires PHP: 7.4
 Requires at least: 6.7
 Tested up to: 7.1
-Stable tag: 5.0.1
+Stable tag: 5.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,7 +26,7 @@ Whether you publish your own blog or coordinate a multi-author WordPress site, N
 * **Keep posts and social messages in sync.** Adjust your content schedule without manually rebuilding every related social message.
 * **Improve your editorial workflow.** Use content checklists and, with Premium, editorial tasks, comments, a content board, and other collaboration features.
 * **Review content performance.** Bring supported Google Analytics and social engagement metrics into your WordPress workflow.
-* **Connect compatible AI assistants.** Review your editorial calendar and social activity, and use Premium to schedule supported social messages through WordPress abilities and MCP.
+* **Put your AI assistant to work.** Explore your calendar, find content worth promoting, and manage your publishing workflow through a compatible AI assistant.
 
 **Built for bloggers, WordPress publishers, marketing teams, and agencies** who want to manage editorial planning and social distribution in one place.
 
@@ -78,29 +78,30 @@ Connect supported social networks directly through Nelio Content or use integrat
 **Start with Nelio Content Free** to organize your WordPress editorial calendar and share posts to supported social networks, subject to the free plan's profile and automation limits. Choose [Nelio Content Premium](https://neliosoftware.com/content/pricing/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content) when you need more social profiles, advanced social automation, and collaboration tools.
 
 
-= Connect AI Assistants to Your Editorial Workflow =
+= Your Content Workflow, Now Connected to AI =
 
-Nelio Content 5.0.0 adds support for the **WordPress Abilities API** and **Model Context Protocol (MCP)**, so compatible AI assistants and automation tools can work with your editorial calendar and social publishing workflow.
+**Turn a conversation into your next editorial action.** Connect a compatible AI assistant to Nelio Content and get help planning your calendar, finding content worth sharing, and keeping your publishing workflow moving.
 
-With **Nelio Content Free**, connected tools can:
+Ask things like *“What's on my calendar this week?”* or *“Which posts have the most engagement?”* Your assistant works with your site's content and available analytics, so you can move from questions to decisions faster.
 
-* Read your WordPress post calendar and scheduled social messages.
-* Change a post’s publication date using normal WordPress saving and Cloud synchronization for related items.
-* Find readable posts without a publication date, with title, post ID or local URL search.
-* Find accessible social profiles, their labels, accounts that need reauthentication, and publishing destinations such as Pinterest boards.
-* Inspect social messages, identify failed publications and summarize a post’s visible promotion, with previews counted separately.
-* Update supported existing messages, delete unpublished non-recurring messages, and explicitly retry failed publications.
-* Read cached engagement and pageview metrics for a WordPress post.
-* List, suggest, discard and edit editorial references, with shared-record permissions and separate relationship and bibliographic status.
-* Inspect local feature availability and user permissions, with administrative diagnostics limited to plugin managers.
-* Rank published posts by cached accumulated engagement or pageviews, with author, type and publication-date filters. Publication dates do not select a period of visits or interactions.
-* Discover network text limits and the attachment requirements for supported scheduling networks.
+**Start with Nelio Content Free:**
 
-With **Nelio Content Premium**, connected tools can also duplicate editable content as drafts, summarize a post’s editorial status and visible pending, completed and overdue tasks, list, retrieve, create, update and complete editorial tasks, read and add internal editorial comments, find posts eligible for republication, inspect automation settings and configured social templates for accessible profiles, and schedule future social messages for every supported network. Generation tools can also regenerate a saved post’s promotion using the editor’s existing Cloud operation or fill the remaining reshare calendar using the cron scheduler. Both require explicit confirmation, plugin management, full social editing and access to every connected profile because native automation can adjust site-wide reshare quotas. Reshare responses confirm queueing; messages are generated asynchronously. Automation queries can be restricted to groups and templates matching an editable WordPress post; they return configuration without generating or replacing messages. The scheduling ability accepts literal text and one optional image or video from your WordPress media library; Instagram, Pinterest and TikTok require media. Per-profile options select Pinterest boards, TikTok privacy and disclosure, Medium tags, Plurk qualifiers and literal webhook configuration. Medium and Blogger require a related WordPress post. Buffer and Hootsuite connections are supported. Creation uses best effort: valid profiles are scheduled independently, while unsuccessful profiles are returned with a reason. Responses contain confirmed messages in items and per-profile errors in errors. A Cloud timeout may leave an unknown outcome; inspect the calendar before retrying that profile.
+* **See what's coming next.** Review upcoming posts and social messages, find unscheduled ideas, and move posts to a new publication date.
+* **Find content worth another look.** Discover your top-performing posts using available engagement and pageview data.
+* **Keep your social queue on track.** Review promotion plans, update existing messages, and spot failed publications that need attention.
+* **Bring your research together.** Find, suggest, and organize editorial references for your posts.
 
-Premium abilities are discoverable in Free and explain how to subscribe, activate Premium, or update incompatible plugin versions when needed. Execution requires an active subscription and the matching Nelio Content Premium plugin.
+**Do more with Nelio Content Premium:**
 
-The integration respects the authenticated user's existing Nelio Content permissions, including access to posts and social profiles. It requires WordPress 6.9 or later. To connect an MCP client, install and activate WordPress MCP Adapter 0.7.1 or later; see the connection details in the FAQ below.
+* **Plan your next social campaign.** Schedule new messages across your connected profiles, with images or videos from your WordPress media library.
+* **Give great content a longer life.** Generate a post's promotion timeline or queue automatic resharing with your confirmation.
+* **Keep your team moving.** Create and complete editorial tasks, add internal comments, and check what's ready to publish.
+* **Build your next content series.** Create draft copies, organize posts into series, and manage their order.
+* **Shape your publishing routine.** Manage automation groups, adjust sharing frequencies, and schedule future actions for your posts.
+
+**Your assistant works within your WordPress permissions.** It can only access the posts, social profiles, and tools available to the connected user. Premium actions require an active subscription and the matching Premium plugin.
+
+Ready to connect? The integration uses the **WordPress Abilities API** and **Model Context Protocol (MCP)**. You'll need WordPress 6.9 or later and, for MCP connections, WordPress MCP Adapter 0.7.1 or later. Follow our [step-by-step guide to connecting your AI assistant](https://neliosoftware.com/content/help/connect-nelio-content-to-ai-assistants/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content) to get started.
 
 
 = What You Can Do with Nelio Content =
@@ -288,21 +289,23 @@ Yes. The editorial calendar supports multi-author planning. Premium adds editori
 
 = How do I connect an AI assistant to Nelio Content? =
 
-Use WordPress 6.9 or later with Nelio Content configured on your site. For an MCP-compatible assistant, also install and activate WordPress MCP Adapter 0.7.1 or later, then connect your client to your site's `/wp-json/nelio-content/v1/mcp` endpoint. Authenticate as a WordPress user with access to Nelio Content, for example using a WordPress Application Password over HTTPS. Your client must support the adapter's HTTP transport and authentication method.
+Our [AI assistant setup guide](https://neliosoftware.com/content/help/connect-nelio-content-to-ai-assistants/?utm_source=wordpressorg&utm_medium=referral&utm_campaign=nelio-content) walks you through the connection process.
 
-The server exposes fifty-six abilities in both editions. Fifteen provide calendar, unscheduled post, social profile, publishing target, message, network requirement, cached analytics, editorial references, post promotion summaries, and local status information. Three suggest or discard editorial references and edit shared bibliography with permission checks for every associated post. Three update supported existing messages, delete unpublished non-recurring messages, and explicitly retry failed publications. One changes a WordPress post’s publication date and leaves related-item scheduling to normal Cloud synchronization. Thirty-four require Premium to create draft copies, list, create and edit content series, manage their posts and part order, inspect, schedule, edit and cancel saved future actions, summarize editorial status, list, retrieve, create, update and complete editorial tasks, read and add internal editorial comments, find posts eligible for republication, manage automation groups and shared profile frequencies, inspect profile-scoped automation settings and social templates, schedule new social messages, generate a saved post’s promotion timeline, and run the site-wide reshare scheduler. Free users can discover those Premium abilities and receive subscription or activation guidance when attempting to use them.
+Use WordPress 6.9 or later and install WordPress MCP Adapter 0.7.1 or later. Connect your compatible assistant to your site's `/wp-json/nelio-content/v1/mcp` endpoint and authenticate with a WordPress user who has access to Nelio Content, for example using an Application Password over HTTPS. Your assistant must support the adapter's HTTP transport and authentication method.
 
-Nelio Content's existing features continue to work on WordPress 6.7 or later; WordPress 6.9 is required for the abilities integration.
+You can start exploring your calendar, social messages, references, and available analytics with Free. Add Premium to schedule new social messages, coordinate editorial work, and manage more of your content workflow from the same conversation.
 
 = Can an AI assistant schedule social messages? =
 
-Yes, with an active subscription and the matching Nelio Content Premium plugin installed and activated. The scheduling ability supports connected profiles on all 23 supported networks, including Buffer and Hootsuite connections. Provide literal text, target profiles, and an explicit publication time at least five minutes in the future. You can attach one existing WordPress image or video where the network supports it; Instagram, Pinterest and TikTok require media. Pinterest needs a board, TikTok needs explicit publishing settings, and Medium and Blogger need a related WordPress post. PHP's `intl` and `mbstring` extensions are required for server-side text validation.
+Yes! With an active Nelio Content Premium subscription and the matching Premium plugin, you can ask a compatible assistant to schedule messages across your connected profiles, including Buffer and Hootsuite connections.
 
-Each profile is validated independently. A network-specific failure does not block compatible profiles; inspect both items and errors in the response. The ability supports future scheduled publication; immediate publication, recurring messages, templates and multiple attachments are outside its supported options. Buffer connections use the explicit requested time instead of a managed queue. Use the regular social message editor for additional formats, templates and recurring messages.
+Choose your message, profiles, and a publication time at least five minutes ahead. Add an image or video from your WordPress media library where supported; Instagram, Pinterest, and TikTok require media. Your assistant checks each profile's requirements and reports which messages were scheduled and which need attention.
+
+For recurring messages and additional publishing formats, use Nelio Content's social message editor.
 
 = What permissions does an AI assistant have? =
 
-Requests run as the authenticated WordPress user and follow the same plugin, post, social profile, and social editing permissions used by Nelio Content. Premium availability is checked on every paid operation. The 5.0.0 abilities read editorial and social information, update supported existing messages, delete unpublished non-recurring messages, and retry failed publications. Retrying can publish immediately and requires an explicit publication request. With Premium, they can also create future scheduled social messages. Updates support manual, exact-date messages on every supported network, including validated network-specific options and one WordPress image or video where supported. They preserve the profile and publishing target. Recurring messages are unsupported by these mutation abilities.
+Your assistant works as the WordPress user you connect. It follows the same access rules for posts, social profiles, and editorial tools as Nelio Content itself. Connecting an assistant does not grant extra permissions, and Premium actions require an active subscription and the matching Premium plugin.
 
 = How fast is your support? =
 
@@ -338,6 +341,10 @@ If you have more questions, visit our [Knowledge Base](https://neliosoftware.com
 
 
 == Changelog ==
+
+= 5.0.2 (November 16, 2026) =
+* Fix stored XSS in external featured images.
+* Fix unauthorized access to unpublished post details and unintended metadata changes through reference searches.
 
 = 5.0.1 (November 12, 2026) =
 * Fix a performance regression introduced in 5.0.0 that could cause very slow page loads for logged-in users and PHP execution timeouts. Limit internal capability filters to their own permissions to prevent cascading access checks while preserving authorization checks.
@@ -774,5 +781,5 @@ If you have more questions, visit our [Knowledge Base](https://neliosoftware.com
 
 == Upgrade Notice ==
 
-= 5.0.1 (November 12, 2026) =
-Fixes a 5.0.0 performance regression that could cause very slow page loads for logged-in users and PHP execution timeouts. Update both Nelio Content and Nelio Content Premium to 5.0.1 if you use Premium.
+= 5.0.2 (November 16, 2026) =
+Security improvements.

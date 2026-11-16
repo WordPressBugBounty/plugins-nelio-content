@@ -114,7 +114,7 @@ class Nelio_Content_Reference_REST_Controller extends WP_REST_Controller {
 					'args'                => array(
 						'url' => array(
 							'required'          => true,
-							'type'              => 'URL',
+							'type'              => 'string',
 							'validate_callback' => 'nelio_content_is_url',
 						),
 					),
